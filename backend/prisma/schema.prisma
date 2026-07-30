@@ -66,6 +66,7 @@ model Product {
 
   @@unique([userId, name])
   @@index([userId, categoryId])
+  @@index([userId, quantity])
   @@map("products")
 }
 
