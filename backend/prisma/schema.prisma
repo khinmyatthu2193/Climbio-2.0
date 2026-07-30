@@ -58,8 +58,7 @@ model Product {
   costPrice   Decimal   @map("cost_price") @db.Decimal(14, 2)
   quantity    Int       @default(0)
   categoryId  String?   @map("category_id") @db.Uuid
-  images      String[]  @default([])
-  isDeleted   Boolean   @default(false) @map("is_deleted")
+  image       String?
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
