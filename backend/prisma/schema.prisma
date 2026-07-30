@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum Currency {
+  MMK
+  USD
+  THB
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique @db.VarChar(255)
+  password      String
+  name          String         @db.VarChar(100)
+  shopName      String         @map("shop_name") @db.VarChar(100)
+  shopLogo      String?        @map("shop_logo")
+  shopAddress   String?        @map("shop_address")
+  phone         String?        @db.VarChar(30)
+  role          Role           @default(ADMIN)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  products      Product[]
+  categories    Category[]
+  invoices      Invoice[]
+  customers     Customer[]
+  setting       Setting?
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model Product {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  name        String    @db.VarChar(100)
+  description String?
+  price       Decimal   @db.Decimal(14, 2)
+  costPrice   Decimal   @map("cost_price") @db.Decimal(14, 2)
+  quantity    Int       @default(0)
+  categoryId  String?   @map("category_id") @db.Uuid
+  images      String[]  @default([])
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, name])
+  @@index([userId, categoryId])
+  @@map("products")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  name      String    @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products  Product[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+model Invoice {
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @map("user_id") @db.Uuid
+  invoiceNumber   String        @map("invoice_number") @db.VarChar(30)
+  customerName    String        @map("customer_name") @db.VarChar(100)
+  customerPhone   String?       @map("customer_phone") @db.VarChar(30)
+  customerAddress String?       @map("customer_address")
+  items           Json
+  subtotal        Decimal       @db.Decimal(14, 2)
+  tax             Decimal       @default(0) @db.Decimal(14, 2)
+  discount        Decimal       @default(0) @db.Decimal(14, 2)
+  total           Decimal       @db.Decimal(14, 2)
+  status          InvoiceStatus @default(DRAFT)
+  issueDate       DateTime      @default(now()) @map("issue_date")
+  dueDate         DateTime?     @map("due_date")
+  notes           String?
+  createdAt       DateTime      @default(now()) @map("created_at")
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, invoiceNumber])
+  @@index([userId, status, issueDate])
+  @@map("invoices")
+}
+
+model Customer {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  name         String    @db.VarChar(100)
+  phone        String?   @db.VarChar(30)
+  email        String?   @db.VarChar(255)
+  address      String?
+  totalSpent   Decimal   @default(0) @map("total_spent") @db.Decimal(14, 2)
+  lastPurchase DateTime? @map("last_purchase")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, name])
+  @@map("customers")
+}
+
+model Setting {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  currency      Currency @default(MMK)
+  invoiceFooter String?  @map("invoice_footer")
+  companyName   String?  @map("company_name") @db.VarChar(100)
+  companyLogo   String?  @map("company_logo")
+  theme         String   @default("system") @db.VarChar(30)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("settings")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
