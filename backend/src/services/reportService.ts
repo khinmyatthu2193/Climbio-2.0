@@ -44,15 +44,15 @@ export const reportService = {
         take: 10,
       }),
       prisma.invoice.findMany({
-        where: { userId, status: 'PAID', issueDate: { gte: salesStart } },
-        select: { issueDate: true, total: true },
-        orderBy: { issueDate: 'asc' },
+        where: { userId, status: 'PAID', createdAt: { gte: salesStart } },
+        select: { createdAt: true, total: true },
+        orderBy: { createdAt: 'asc' },
       }),
     ]);
 
     const salesByMonth = new Map(months.map((month) => [monthKey(month), 0]));
     for (const invoice of recentSales) {
-      const key = monthKey(invoice.issueDate);
+      const key = monthKey(invoice.createdAt);
       salesByMonth.set(key, (salesByMonth.get(key) ?? 0) + invoice.total.toNumber());
     }
 
