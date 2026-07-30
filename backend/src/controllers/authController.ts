@@ -5,10 +5,11 @@ import { AppError } from '../utils/AppError.js';
 import { storageService } from '../services/storageService.js';
 
 const cookieName = 'climbio_refresh';
+const isProduction = env.NODE_ENV === 'production';
 const cookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  secure: isProduction,
+  sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: '/api/auth',
 };
