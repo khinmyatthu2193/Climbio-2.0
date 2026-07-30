@@ -11,6 +11,7 @@ export function DashboardPage() {
         <nav className="flex items-center justify-between">
           <span className="text-xl font-black text-primary">Climbio</span>
           <div className="flex items-center gap-3">
+            <a className="font-medium text-primary" href="/products">Inventory</a>
             <a className="font-medium text-primary" href="/profile">Profile</a>
             <Button onClick={logout}>Log out</Button>
           </div>

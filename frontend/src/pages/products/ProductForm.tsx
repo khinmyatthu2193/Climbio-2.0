@@ -1,0 +1,195 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { Card } from '@/components/common/Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { inventoryService } from '@/services/inventoryService';
+import type { ProductInput } from '@/types/inventory';
+
+const emptyForm: ProductInput = {
+  name: '',
+  description: '',
+  price: '',
+  costPrice: '',
+  quantity: '0',
+  categoryId: '',
+};
+
+function errorMessage(error: unknown) {
+  if (axios.isAxiosError<{ error?: string }>(error)) {
+    return error.response?.data?.error ?? 'Could not reach the inventory service.';
+  }
+  return 'Could not save the product. Check all fields and try again.';
+}
+
+export function ProductForm({ productId }: { productId?: string }) {
+  const editing = Boolean(productId);
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState<ProductInput>(emptyForm);
+  const [categoryName, setCategoryName] = useState('');
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const product = useQuery({
+    queryKey: ['products', productId],
+    queryFn: () => inventoryService.getProduct(productId!),
+    enabled: editing,
+  });
+  const categories = useQuery({ queryKey: ['categories'], queryFn: inventoryService.listCategories });
+
+  useEffect(() => {
+    if (!product.data) return;
+    setForm({
+      name: product.data.name,
+      description: product.data.description ?? '',
+      price: product.data.price,
+      costPrice: product.data.costPrice,
+      quantity: String(product.data.quantity),
+      categoryId: product.data.categoryId ?? '',
+    });
+    setPreview(product.data.image);
+  }, [product.data]);
+
+  useEffect(() => () => {
+    if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  const save = useMutation({
+    mutationFn: (input: ProductInput) =>
+      editing ? inventoryService.updateProduct(productId!, input) : inventoryService.createProduct(input),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      window.location.assign('/products');
+    },
+  });
+  const addCategory = useMutation({
+    mutationFn: inventoryService.createCategory,
+    onSuccess: async (created) => {
+      setCategoryName('');
+      setForm((current) => ({ ...current, categoryId: created.id }));
+      await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+
+  const update = (field: keyof ProductInput, value: string | File) =>
+    setForm((current) => ({ ...current, [field]: value }));
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    save.mutate(form);
+  };
+
+  if (editing && product.isLoading) {
+    return <main className="grid min-h-screen place-items-center"><p>Loading product…</p></main>;
+  }
+
+  return (
+    <main className="min-h-screen p-4 md:p-8">
+      <div className="mx-auto max-w-3xl">
+        <a className="text-sm font-semibold text-primary hover:underline" href="/products">← Inventory</a>
+        <h1 className="mt-2 text-3xl font-bold">{editing ? 'Edit product' : 'Add product'}</h1>
+        <p className="mt-1 text-slate-600">{editing ? 'Update product details and stock.' : 'Add an item to your inventory.'}</p>
+
+        {product.isError ? (
+          <Card className="mt-8 text-red-600">Product could not be loaded.</Card>
+        ) : (
+          <form className="mt-8 space-y-6" onSubmit={submit}>
+            <Card>
+              <h2 className="mb-4 text-lg font-bold">Product details</h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="md:col-span-2">
+                  <span className="mb-1 block text-sm font-medium">Name</span>
+                  <Input value={form.name} onChange={(event) => update('name', event.target.value)} maxLength={100} required />
+                </label>
+                <label className="md:col-span-2">
+                  <span className="mb-1 block text-sm font-medium">Description</span>
+                  <textarea
+                    className="min-h-28 w-full rounded-lg border bg-white px-3 py-2 outline-none ring-primary focus:ring-2"
+                    value={form.description}
+                    onChange={(event) => update('description', event.target.value)}
+                    maxLength={2000}
+                  />
+                </label>
+                <label>
+                  <span className="mb-1 block text-sm font-medium">Selling price</span>
+                  <Input type="number" min="0" step="0.01" value={form.price} onChange={(event) => update('price', event.target.value)} required />
+                </label>
+                <label>
+                  <span className="mb-1 block text-sm font-medium">Cost price</span>
+                  <Input type="number" min="0" step="0.01" value={form.costPrice} onChange={(event) => update('costPrice', event.target.value)} required />
+                </label>
+                <label>
+                  <span className="mb-1 block text-sm font-medium">Stock quantity</span>
+                  <Input type="number" min="0" step="1" value={form.quantity} onChange={(event) => update('quantity', event.target.value)} required />
+                </label>
+                <label>
+                  <span className="mb-1 block text-sm font-medium">Category</span>
+                  <select
+                    className="w-full rounded-lg border bg-white px-3 py-2 outline-none ring-primary focus:ring-2"
+                    value={form.categoryId}
+                    onChange={(event) => update('categoryId', event.target.value)}
+                  >
+                    <option value="">Uncategorized</option>
+                    {categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                  </select>
+                </label>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Input
+                  placeholder="New category name"
+                  value={categoryName}
+                  onChange={(event) => setCategoryName(event.target.value)}
+                  maxLength={100}
+                />
+                <Button
+                  type="button"
+                  className="shrink-0"
+                  disabled={!categoryName.trim() || addCategory.isPending}
+                  onClick={() => addCategory.mutate(categoryName)}
+                >
+                  Add category
+                </Button>
+              </div>
+              {addCategory.isError && <p className="mt-2 text-sm text-red-600">Could not add category. The name may already exist.</p>}
+            </Card>
+
+            <Card>
+              <h2 className="mb-4 text-lg font-bold">Product image</h2>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                {preview ? (
+                  <img className="h-28 w-28 rounded-2xl border object-cover" src={preview} alt="Product preview" />
+                ) : (
+                  <div className="grid h-28 w-28 place-items-center rounded-2xl border bg-emerald-50 text-sm text-slate-500">No image</div>
+                )}
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 2 * 1024 * 1024) {
+                        event.target.value = '';
+                        window.alert('Image must be 2 MB or smaller.');
+                        return;
+                      }
+                      update('image', file);
+                      setPreview(URL.createObjectURL(file));
+                    }}
+                  />
+                  <p className="mt-2 text-xs text-slate-500">JPG, PNG, or WebP. Maximum 2 MB.</p>
+                </div>
+              </div>
+            </Card>
+
+            {save.isError && <p className="text-sm text-red-600">{errorMessage(save.error)}</p>}
+            <div className="flex justify-end gap-3">
+              <a className="rounded-lg border px-4 py-2 font-medium hover:bg-white" href="/products">Cancel</a>
+              <Button disabled={save.isPending}>{save.isPending ? 'Saving…' : editing ? 'Save changes' : 'Add product'}</Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </main>
+  );
+}
