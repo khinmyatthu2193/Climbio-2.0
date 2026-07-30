@@ -8,12 +8,15 @@ import { ProductList } from '@/pages/products/ProductList';
 import { CreateInvoice } from '@/pages/invoices/CreateInvoice';
 import { InvoiceDetail } from '@/pages/invoices/InvoiceDetail';
 import { InvoiceList } from '@/pages/invoices/InvoiceList';
+import { PublicShop } from '@/pages/public/PublicShop';
 
 export default function App() {
   useAuthBootstrap();
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
   if (path === '/login') return <AuthPage register={false} />;
   if (path === '/register') return <AuthPage register />;
+  const publicShop = path.match(/^\/shop\/([a-z0-9-]+)$/i);
+  if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
   if (path === '/profile') return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
   if (path === '/products') return <ProtectedRoute><ProductList /></ProtectedRoute>;
   if (path === '/products/new') return <ProtectedRoute><ProductForm /></ProtectedRoute>;

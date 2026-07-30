@@ -1,0 +1,155 @@
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { MapPin, PackageOpen, Phone, Search, ShoppingBag, X } from 'lucide-react';
+import { publicShopService } from '@/services/publicShopService';
+import type { PublicShopProduct } from '@/types/publicShop';
+
+export function PublicShop({ slug }: { slug: string }) {
+  const catalog = useQuery({ queryKey: ['public-shop', slug], queryFn: () => publicShopService.get(slug), retry: 1 });
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all');
+  const [selected, setSelected] = useState<PublicShopProduct | null>(null);
+
+  const products = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return catalog.data?.products.filter((product) => {
+      const matchesSearch = !term
+        || product.name.toLowerCase().includes(term)
+        || product.description?.toLowerCase().includes(term);
+      const matchesCategory = category === 'all' || product.category?.id === category;
+      return matchesSearch && matchesCategory;
+    }) ?? [];
+  }, [catalog.data?.products, category, search]);
+
+  if (catalog.isLoading) {
+    return <main className="grid min-h-screen place-items-center bg-[#f7faf8]"><p className="text-slate-600">Opening shop…</p></main>;
+  }
+  if (catalog.isError || !catalog.data) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#f7faf8] p-6 text-center">
+        <div><PackageOpen className="mx-auto text-slate-400" size={44} /><h1 className="mt-4 text-2xl font-bold">Shop not found</h1><p className="mt-2 text-slate-500">This catalog may have moved or is unavailable.</p></div>
+      </main>
+    );
+  }
+
+  const { shop } = catalog.data;
+  const money = new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: shop.currency,
+    maximumFractionDigits: shop.currency === 'MMK' ? 0 : 2,
+  });
+
+  return (
+    <main className="min-h-screen bg-[#f7faf8]">
+      <header className="border-b bg-[radial-gradient(circle_at_top_left,#d7f3e4,transparent_55%)]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:flex-row sm:items-center sm:justify-between md:px-8 md:py-12">
+          <div className="flex items-center gap-4">
+            {shop.shopLogo ? (
+              <img className="h-20 w-20 rounded-3xl border-4 border-white object-cover shadow-md" src={shop.shopLogo} alt={`${shop.shopName} logo`} />
+            ) : (
+              <div className="grid h-20 w-20 place-items-center rounded-3xl bg-primary text-3xl font-black text-white shadow-md">
+                {shop.shopName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Climbio Shop</p>
+              <h1 className="mt-1 text-3xl font-black md:text-4xl">{shop.shopName}</h1>
+              {shop.shopAddress && <p className="mt-2 flex items-center gap-1 text-sm text-slate-600"><MapPin size={15} />{shop.shopAddress}</p>}
+            </div>
+          </div>
+          {shop.phone && (
+            <a className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" href={`tel:${shop.phone}`}>
+              <Phone size={18} /> Contact seller
+            </a>
+          )}
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+        <section className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm sm:flex-row">
+          <label className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              className="w-full rounded-xl border bg-slate-50 py-3 pl-10 pr-4 outline-none ring-primary focus:ring-2"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search products"
+            />
+          </label>
+          <select className="rounded-xl border bg-slate-50 px-4 py-3 outline-none ring-primary focus:ring-2 sm:min-w-52" value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="all">All categories</option>
+            {catalog.data.categories.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
+          </select>
+        </section>
+
+        <div className="mt-8 flex items-end justify-between">
+          <div><h2 className="text-2xl font-bold">Products</h2><p className="mt-1 text-sm text-slate-500">{products.length} item{products.length === 1 ? '' : 's'} available</p></div>
+        </div>
+
+        {products.length === 0 ? (
+          <div className="mt-8 grid min-h-72 place-items-center rounded-3xl border border-dashed bg-white text-center">
+            <div><ShoppingBag className="mx-auto text-slate-300" size={42} /><p className="mt-3 font-semibold">No products found</p><p className="mt-1 text-sm text-slate-500">Try a different search or category.</p></div>
+          </div>
+        ) : (
+          <section className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => (
+              <button className="group overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg" key={product.id} onClick={() => setSelected(product)}>
+                <div className="relative aspect-square overflow-hidden bg-emerald-50">
+                  {product.image ? (
+                    <img className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={product.image} alt={product.name} loading="lazy" />
+                  ) : (
+                    <div className="grid h-full place-items-center text-primary/40"><ShoppingBag size={52} /></div>
+                  )}
+                  {product.quantity === 0 && <span className="absolute left-3 top-3 rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">Out of Stock</span>}
+                </div>
+                <div className="p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">{product.category?.name ?? 'Uncategorized'}</p>
+                  <h3 className="mt-1 line-clamp-2 min-h-12 text-lg font-bold">{product.name}</h3>
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <span className="font-black text-primary">{money.format(Number(product.price))}</span>
+                    <span className={`text-xs font-semibold ${product.quantity === 0 ? 'text-red-600' : 'text-slate-500'}`}>
+                      {product.quantity === 0 ? 'Unavailable' : `${product.quantity} in stock`}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </section>
+        )}
+      </div>
+
+      <footer className="mt-10 border-t bg-white py-6 text-center text-sm text-slate-500">
+        {shop.shopName} · Powered by <span className="font-bold text-primary">Climbio</span>
+      </footer>
+
+      {selected && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && setSelected(null)}>
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
+            <div className="grid md:grid-cols-2">
+              <div className="aspect-square bg-emerald-50">
+                {selected.image ? <img className="h-full w-full object-cover md:rounded-l-3xl" src={selected.image} alt={selected.name} /> : <div className="grid h-full place-items-center text-primary/40"><ShoppingBag size={64} /></div>}
+              </div>
+              <div className="relative p-6 md:p-8">
+                <button className="absolute right-4 top-4 rounded-full bg-slate-100 p-2 hover:bg-slate-200" onClick={() => setSelected(null)} aria-label="Close product details"><X size={18} /></button>
+                <p className="text-xs font-bold uppercase tracking-wide text-primary">{selected.category?.name ?? 'Uncategorized'}</p>
+                <h2 className="mt-2 pr-8 text-2xl font-black">{selected.name}</h2>
+                <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">{selected.description || 'No product description available.'}</p>
+                <p className="mt-6 text-2xl font-black text-primary">{money.format(Number(selected.price))}</p>
+                <p className={`mt-2 text-sm font-semibold ${selected.quantity === 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                  {selected.quantity === 0 ? 'Out of Stock' : `${selected.quantity} available`}
+                </p>
+                {shop.phone ? (
+                  <a className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white hover:opacity-90" href={`tel:${shop.phone}`}>
+                    <Phone size={18} /> Contact seller
+                  </a>
+                ) : (
+                  <p className="mt-7 rounded-xl bg-slate-100 p-3 text-center text-sm text-slate-500">Seller contact is unavailable.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
