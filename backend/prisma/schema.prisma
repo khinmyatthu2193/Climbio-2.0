@@ -63,6 +63,7 @@ model Product {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  invoiceItems InvoiceItem[]
 
   @@unique([userId, name])
   @@index([userId, categoryId])
@@ -83,27 +84,37 @@ model Category {
 }
 
 model Invoice {
-  id              String        @id @default(uuid()) @db.Uuid
-  userId          String        @map("user_id") @db.Uuid
-  invoiceNumber   String        @map("invoice_number") @db.VarChar(30)
-  customerName    String        @map("customer_name") @db.VarChar(100)
-  customerPhone   String?       @map("customer_phone") @db.VarChar(30)
-  customerAddress String?       @map("customer_address")
-  items           Json
-  subtotal        Decimal       @db.Decimal(14, 2)
-  tax             Decimal       @default(0) @db.Decimal(14, 2)
-  discount        Decimal       @default(0) @db.Decimal(14, 2)
-  total           Decimal       @db.Decimal(14, 2)
-  status          InvoiceStatus @default(DRAFT)
-  issueDate       DateTime      @default(now()) @map("issue_date")
-  dueDate         DateTime?     @map("due_date")
-  notes           String?
-  createdAt       DateTime      @default(now()) @map("created_at")
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  invoiceNumber String        @map("invoice_number") @db.VarChar(30)
+  customerName  String        @map("customer_name") @db.VarChar(100)
+  customerPhone String?       @map("customer_phone") @db.VarChar(30)
+  subtotal      Decimal       @db.Decimal(14, 2)
+  discount      Decimal       @default(0) @db.Decimal(14, 2)
+  total         Decimal       @db.Decimal(14, 2)
+  status        InvoiceStatus @default(DRAFT)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         InvoiceItem[]
 
   @@unique([userId, invoiceNumber])
-  @@index([userId, status, issueDate])
+  @@index([userId, status, createdAt])
   @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  invoiceId   String   @map("invoice_id") @db.Uuid
+  productId   String?  @map("product_id") @db.Uuid
+  productName String   @map("product_name") @db.VarChar(100)
+  quantity    Int
+  price       Decimal  @db.Decimal(14, 2)
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@map("invoice_items")
 }
 
 model Customer {
