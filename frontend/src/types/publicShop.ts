@@ -20,3 +20,24 @@ export interface PublicShopResponse {
   categories: Array<{ id: string; name: string }>;
   products: PublicShopProduct[];
 }
+
+export interface MyPublicStore {
+  slug: string;
+  publicUrl: string;
+  publicEnabled: boolean;
+  productCount: number;
+  shopInfo: {
+    shopName: string;
+    shopLogo: string | null;
+    shopAddress: string | null;
+    phone: string | null;
+    createdAt: string;
+  };
+}
+
+export interface UpdatePublicStoreInput {
+  slug: string;
+  shopName: string;
+  phone: string | null;
+  shopAddress: string | null;
+}

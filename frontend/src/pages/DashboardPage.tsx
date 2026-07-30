@@ -54,6 +54,7 @@ export function DashboardPage() {
           <div className="flex flex-wrap items-center gap-3">
             <a className="font-medium text-primary" href="/products">Inventory</a>
             <a className="font-medium text-primary" href="/invoices">Invoices</a>
+            <a className="font-medium text-primary" href="/my-store">My Store</a>
             <a className="font-medium text-primary" href="/profile">Profile</a>
             <Button onClick={logout}>Log out</Button>
           </div>
