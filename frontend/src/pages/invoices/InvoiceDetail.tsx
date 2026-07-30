@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Download } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { StatusBadge } from '@/components/invoices/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -11,10 +12,13 @@ const statuses: InvoiceStatus[] = ['DRAFT', 'SENT', 'PAID', 'OVERDUE', 'CANCELLE
 
 export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
   const queryClient = useQueryClient();
-  const currency = useAuthStore((state) => state.user?.setting?.currency ?? 'MMK');
+  const user = useAuthStore((state) => state.user);
+  const currency = user?.setting?.currency ?? 'MMK';
   const money = new Intl.NumberFormat(undefined, { style: 'currency', currency });
   const invoice = useQuery({ queryKey: ['invoices', invoiceId], queryFn: () => invoiceService.get(invoiceId) });
   const [status, setStatus] = useState<InvoiceStatus | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(false);
   const updateStatus = useMutation({
     mutationFn: (nextStatus: InvoiceStatus) => invoiceService.updateStatus(invoiceId, nextStatus),
     onSuccess: async () => {
@@ -25,6 +29,31 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
     },
   });
   const selectedStatus = status ?? invoice.data?.status ?? 'DRAFT';
+
+  const downloadPdf = async () => {
+    if (!invoice.data || !user) return;
+    setDownloading(true);
+    setDownloadError(false);
+    try {
+      const [{ pdf }, { InvoicePdfDocument }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('@/components/invoices/InvoicePdfDocument'),
+      ]);
+      const blob = await pdf(<InvoicePdfDocument invoice={invoice.data} shop={user} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${invoice.data.invoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setDownloadError(true);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (invoice.isLoading) return <main className="grid min-h-screen place-items-center"><p>Loading invoice…</p></main>;
   if (invoice.isError || !invoice.data) return <main className="grid min-h-screen place-items-center text-red-600"><p>Invoice could not be loaded.</p></main>;
@@ -42,6 +71,10 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
             <p className="mt-1 text-sm text-slate-500">{new Date(invoice.data.createdAt).toLocaleString()}</p>
           </div>
           <div className="flex gap-2">
+            <Button type="button" className="flex items-center gap-2 bg-slate-700" disabled={downloading} onClick={downloadPdf}>
+              <Download size={16} aria-hidden="true" />
+              {downloading ? 'Preparing…' : 'Download PDF'}
+            </Button>
             <select className="rounded-lg border bg-white px-3 py-2" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
               {statuses.map((option) => <option key={option}>{option}</option>)}
             </select>
@@ -85,6 +118,7 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
           </div>
         </Card>
         {updateStatus.isError && <p className="mt-3 text-right text-sm text-red-600">Status could not be updated.</p>}
+        {downloadError && <p className="mt-3 text-right text-sm text-red-600">PDF could not be generated. Check the shop logo URL and try again.</p>}
       </div>
     </main>
   );
