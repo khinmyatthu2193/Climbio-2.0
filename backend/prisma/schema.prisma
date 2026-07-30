@@ -34,6 +34,7 @@ model User {
   name          String         @db.VarChar(100)
   shopName      String         @map("shop_name") @db.VarChar(100)
   slug          String         @unique @default(dbgenerated("'shop-' || substr(replace(gen_random_uuid()::text, '-'::text, ''::text), 1, 10)")) @db.VarChar(120)
+  publicEnabled Boolean        @default(true) @map("public_enabled")
   shopLogo      String?        @map("shop_logo")
   shopAddress   String?        @map("shop_address")
   phone         String?        @db.VarChar(30)
