@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert } from '@/components/ui/Alert';
+import { PageHeader } from '@/components/common/PageHeader';
 import { inventoryService } from '@/services/inventoryService';
 import type { ProductInput } from '@/types/inventory';
 
@@ -80,20 +82,18 @@ export function ProductForm({ productId }: { productId?: string }) {
   };
 
   if (editing && product.isLoading) {
-    return <main className="grid min-h-screen place-items-center"><p>Loading product…</p></main>;
+    return <main className="page-container"><Card className="animate-pulse text-slate-500">Loading product…</Card></main>;
   }
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-3xl">
-        <a className="text-sm font-semibold text-primary hover:underline" href="/products">← Inventory</a>
-        <h1 className="mt-2 text-3xl font-bold">{editing ? 'Edit product' : 'Add product'}</h1>
-        <p className="mt-1 text-slate-600">{editing ? 'Update product details and stock.' : 'Add an item to your inventory.'}</p>
+    <main className="page-container">
+      <div className="max-w-3xl">
+        <PageHeader eyebrow="Inventory" title={editing ? 'Edit product' : 'Add product'} description={editing ? 'Update product details, pricing, and stock.' : 'Add a new item to your inventory and public catalog.'} />
 
         {product.isError ? (
-          <Card className="mt-8 text-red-600">Product could not be loaded.</Card>
+          <Alert className="mt-6" tone="error">Product could not be loaded.</Alert>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={submit}>
+          <form className="mt-6 space-y-6" onSubmit={submit}>
             <Card>
               <h2 className="mb-4 text-lg font-bold">Product details</h2>
               <div className="grid gap-4 md:grid-cols-2">
@@ -104,7 +104,7 @@ export function ProductForm({ productId }: { productId?: string }) {
                 <label className="md:col-span-2">
                   <span className="mb-1 block text-sm font-medium">Description</span>
                   <textarea
-                    className="min-h-28 w-full rounded-lg border bg-white px-3 py-2 outline-none ring-primary focus:ring-2"
+                    className="control min-h-28 resize-y"
                     value={form.description}
                     onChange={(event) => update('description', event.target.value)}
                     maxLength={2000}
@@ -125,7 +125,7 @@ export function ProductForm({ productId }: { productId?: string }) {
                 <label>
                   <span className="mb-1 block text-sm font-medium">Category</span>
                   <select
-                    className="w-full rounded-lg border bg-white px-3 py-2 outline-none ring-primary focus:ring-2"
+                    className="control"
                     value={form.categoryId}
                     onChange={(event) => update('categoryId', event.target.value)}
                   >
@@ -159,7 +159,7 @@ export function ProductForm({ productId }: { productId?: string }) {
                 {preview ? (
                   <img className="h-28 w-28 rounded-2xl border object-cover" src={preview} alt="Product preview" />
                 ) : (
-                  <div className="grid h-28 w-28 place-items-center rounded-2xl border bg-emerald-50 text-sm text-slate-500">No image</div>
+                  <div className="grid h-28 w-28 place-items-center rounded-2xl border bg-violet-50 text-sm text-slate-500 dark:border-slate-700 dark:bg-violet-500/10 dark:text-slate-400">No image</div>
                 )}
                 <div className="flex-1">
                   <Input
@@ -182,9 +182,9 @@ export function ProductForm({ productId }: { productId?: string }) {
               </div>
             </Card>
 
-            {save.isError && <p className="text-sm text-red-600">{errorMessage(save.error)}</p>}
+            {save.isError && <Alert tone="error">{errorMessage(save.error)}</Alert>}
             <div className="flex justify-end gap-3">
-              <a className="rounded-lg border px-4 py-2 font-medium hover:bg-white" href="/products">Cancel</a>
+              <a className="rounded-xl border px-4 py-2 font-medium hover:bg-white dark:border-slate-700 dark:hover:bg-slate-800" href="/products">Cancel</a>
               <Button disabled={save.isPending}>{save.isPending ? 'Saving…' : editing ? 'Save changes' : 'Add product'}</Button>
             </div>
           </form>
