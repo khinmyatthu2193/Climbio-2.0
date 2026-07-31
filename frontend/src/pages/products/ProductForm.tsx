@@ -9,14 +9,33 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { inventoryService } from '@/services/inventoryService';
 import type { ProductInput } from '@/types/inventory';
 
-const emptyForm: ProductInput = {
+type PricingMethod = 'fixed' | 'markup';
+
+interface ProductFormState extends Omit<ProductInput, 'price'> {
+  pricingMethod: PricingMethod;
+  markupPercentage: number | null;
+  sellingPrice: number;
+}
+
+const emptyForm: ProductFormState = {
   name: '',
   description: '',
-  price: '',
   costPrice: '',
   quantity: '0',
   categoryId: '',
+  pricingMethod: 'fixed',
+  markupPercentage: null,
+  sellingPrice: 0,
 };
+
+const calculateSellingPrice = (costPrice: string, markupPercentage: number | null) => {
+  const cost = Number(costPrice);
+  const markup = markupPercentage ?? 0;
+  if (!Number.isFinite(cost) || !Number.isFinite(markup)) return 0;
+  return Math.round((cost + (cost * markup) / 100 + Number.EPSILON) * 100) / 100;
+};
+
+const formatMmk = (value: number) => `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)} MMK`;
 
 function errorMessage(error: unknown) {
   if (axios.isAxiosError<{ error?: string }>(error)) {
@@ -28,7 +47,7 @@ function errorMessage(error: unknown) {
 export function ProductForm({ productId }: { productId?: string }) {
   const editing = Boolean(productId);
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<ProductInput>(emptyForm);
+  const [form, setForm] = useState<ProductFormState>(emptyForm);
   const [categoryName, setCategoryName] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -44,10 +63,12 @@ export function ProductForm({ productId }: { productId?: string }) {
     setForm({
       name: product.data.name,
       description: product.data.description ?? '',
-      price: product.data.price,
       costPrice: product.data.costPrice,
       quantity: String(product.data.quantity),
       categoryId: product.data.categoryId ?? '',
+      pricingMethod: 'fixed',
+      markupPercentage: null,
+      sellingPrice: Number(product.data.price),
     });
     setPreview(product.data.image);
   }, [product.data]);
@@ -73,12 +94,21 @@ export function ProductForm({ productId }: { productId?: string }) {
     },
   });
 
-  const update = (field: keyof ProductInput, value: string | File) =>
+  const update = (field: keyof ProductFormState, value: string | File) =>
     setForm((current) => ({ ...current, [field]: value }));
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    save.mutate(form);
+    const input: ProductInput = {
+      name: form.name,
+      description: form.description,
+      price: String(form.sellingPrice),
+      costPrice: form.costPrice,
+      quantity: form.quantity,
+      categoryId: form.categoryId,
+      image: form.image,
+    };
+    save.mutate(input);
   };
 
   if (editing && product.isLoading) {
@@ -111,12 +141,21 @@ export function ProductForm({ productId }: { productId?: string }) {
                   />
                 </label>
                 <label>
-                  <span className="mb-1 block text-sm font-medium">Selling price</span>
-                  <Input type="number" min="0" step="0.01" value={form.price} onChange={(event) => update('price', event.target.value)} required />
-                </label>
-                <label>
                   <span className="mb-1 block text-sm font-medium">Cost price</span>
-                  <Input type="number" min="0" step="0.01" value={form.costPrice} onChange={(event) => update('costPrice', event.target.value)} required />
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.costPrice}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      costPrice: event.target.value,
+                      sellingPrice: current.pricingMethod === 'markup'
+                        ? calculateSellingPrice(event.target.value, current.markupPercentage)
+                        : current.sellingPrice,
+                    }))}
+                    required
+                  />
                 </label>
                 <label>
                   <span className="mb-1 block text-sm font-medium">Stock quantity</span>
@@ -133,6 +172,86 @@ export function ProductForm({ productId }: { productId?: string }) {
                     {categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                   </select>
                 </label>
+                <fieldset className="md:col-span-2">
+                  <legend className="mb-2 text-sm font-medium">Selling price method</legend>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {([
+                      { value: 'fixed', label: 'Fixed Price', helper: 'Enter the final selling price manually.' },
+                      { value: 'markup', label: 'Markup Percentage', helper: 'Automatically calculate selling price based on cost price.' },
+                    ] as const).map((option) => (
+                      <label
+                        key={option.value}
+                        className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition ${form.pricingMethod === option.value ? 'border-violet-500 bg-violet-50 ring-1 ring-violet-500/20 dark:bg-violet-500/10' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700 dark:hover:border-violet-500'}`}
+                      >
+                        <input
+                          className="mt-0.5 size-4 accent-violet-600"
+                          type="radio"
+                          name="pricingMethod"
+                          value={option.value}
+                          checked={form.pricingMethod === option.value}
+                          onChange={() => setForm((current) => ({
+                            ...current,
+                            pricingMethod: option.value,
+                            markupPercentage: option.value === 'markup' ? (current.markupPercentage ?? 0) : current.markupPercentage,
+                            sellingPrice: option.value === 'markup'
+                              ? calculateSellingPrice(current.costPrice, current.markupPercentage ?? 0)
+                              : current.sellingPrice,
+                          }))}
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold text-slate-900 dark:text-white">{option.label}</span>
+                          <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">{option.helper}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                {form.pricingMethod === 'fixed' ? (
+                  <label>
+                    <span className="mb-1 block text-sm font-medium">Selling price</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.sellingPrice}
+                      onChange={(event) => setForm((current) => ({ ...current, sellingPrice: Number(event.target.value) }))}
+                      required
+                    />
+                    <span className="mt-1.5 block text-xs text-slate-500 dark:text-slate-400">Enter the final selling price manually.</span>
+                  </label>
+                ) : (
+                  <>
+                    <label>
+                      <span className="mb-1 block text-sm font-medium">Markup percentage</span>
+                      <div className="relative">
+                        <Input
+                          className="pr-10"
+                          type="number"
+                          min="0"
+                          max="1000"
+                          step="0.01"
+                          value={form.markupPercentage ?? ''}
+                          onChange={(event) => {
+                            const markup = event.target.value === '' ? null : Number(event.target.value);
+                            setForm((current) => ({
+                              ...current,
+                              markupPercentage: markup,
+                              sellingPrice: calculateSellingPrice(current.costPrice, markup),
+                            }));
+                          }}
+                          required
+                        />
+                        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-semibold text-slate-500">%</span>
+                      </div>
+                      <span className="mt-1.5 block text-xs text-slate-500 dark:text-slate-400">Enter a percentage from 0 to 1000.</span>
+                    </label>
+                    <label>
+                      <span className="mb-1 block text-sm font-medium">Calculated selling price</span>
+                      <Input value={form.sellingPrice} readOnly aria-readonly="true" />
+                      <span className="mt-1.5 block text-xs font-medium text-violet-600 dark:text-violet-400">{formatMmk(form.sellingPrice)}</span>
+                    </label>
+                  </>
+                )}
               </div>
               <div className="mt-4 flex gap-2">
                 <Input
