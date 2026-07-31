@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert } from '@/components/ui/Alert';
+import { PageHeader } from '@/components/common/PageHeader';
 import { invoiceService } from '@/services/invoiceService';
 import { inventoryService } from '@/services/inventoryService';
 import { useAuthStore } from '@/store/authStore';
@@ -59,11 +61,9 @@ export function CreateInvoice() {
   };
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <form className="mx-auto max-w-4xl" onSubmit={submit}>
-        <a className="text-sm font-semibold text-primary hover:underline" href="/invoices">← Invoices</a>
-        <h1 className="mt-2 text-3xl font-bold">Create invoice</h1>
-        <p className="mt-1 text-slate-600">Select products and record a new customer sale.</p>
+    <main className="page-container">
+      <form className="max-w-5xl" onSubmit={submit}>
+        <PageHeader eyebrow="Invoices" title="Create invoice" description="Select products and record a new customer sale." />
 
         <Card className="mt-8">
           <h2 className="mb-4 text-lg font-bold">Customer information</h2>
@@ -92,11 +92,11 @@ export function CreateInvoice() {
               const product = productsById.get(item.productId);
               const selectedElsewhere = new Set(items.filter((_, itemIndex) => itemIndex !== index).map((line) => line.productId));
               return (
-                <div className="grid gap-3 rounded-xl border bg-slate-50 p-3 sm:grid-cols-[1fr_120px_130px_auto] sm:items-end" key={index}>
+                <div className="grid gap-3 rounded-xl border bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60 sm:grid-cols-[1fr_120px_130px_auto] sm:items-end" key={index}>
                   <label>
-                    <span className="mb-1 block text-xs font-medium text-slate-600">Product</span>
+                    <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Product</span>
                     <select
-                      className="w-full rounded-lg border bg-white px-3 py-2 outline-none ring-primary focus:ring-2"
+                      className="control"
                       value={item.productId}
                       onChange={(event) => updateItem(index, { productId: event.target.value, quantity: 1 })}
                       required
@@ -110,7 +110,7 @@ export function CreateInvoice() {
                     </select>
                   </label>
                   <label>
-                    <span className="mb-1 block text-xs font-medium text-slate-600">Quantity</span>
+                    <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Quantity</span>
                     <Input
                       type="number"
                       min="1"
@@ -150,11 +150,11 @@ export function CreateInvoice() {
         </Card>
 
         {createInvoice.isError && (
-          <p className="mt-4 text-sm text-red-600">{apiError(createInvoice.error) ?? 'Invoice could not be created.'}</p>
+          <Alert className="mt-4" tone="error">{apiError(createInvoice.error) ?? 'Invoice could not be created.'}</Alert>
         )}
         <div className="mt-6 flex justify-end gap-3">
-          <a className="rounded-lg border px-4 py-2 font-medium hover:bg-white" href="/invoices">Cancel</a>
-          <Button disabled={createInvoice.isPending || products.isLoading}>
+          <a className="rounded-xl border px-4 py-2 font-medium hover:bg-white dark:border-slate-700 dark:hover:bg-slate-800" href="/invoices">Cancel</a>
+          <Button type="submit" disabled={createInvoice.isPending || products.isLoading}>
             {createInvoice.isPending ? 'Creating…' : 'Create invoice'}
           </Button>
         </div>

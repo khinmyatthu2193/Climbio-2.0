@@ -4,6 +4,7 @@ import { Download } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { StatusBadge } from '@/components/invoices/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/Alert';
 import { invoiceService } from '@/services/invoiceService';
 import { useAuthStore } from '@/store/authStore';
 import type { InvoiceStatus } from '@/types/invoice';
@@ -55,27 +56,27 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
     }
   };
 
-  if (invoice.isLoading) return <main className="grid min-h-screen place-items-center"><p>Loading invoice…</p></main>;
-  if (invoice.isError || !invoice.data) return <main className="grid min-h-screen place-items-center text-red-600"><p>Invoice could not be loaded.</p></main>;
+  if (invoice.isLoading) return <main className="page-container"><Card className="animate-pulse text-slate-500">Loading invoice…</Card></main>;
+  if (invoice.isError || !invoice.data) return <main className="page-container"><Alert tone="error">Invoice could not be loaded.</Alert></main>;
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-4xl">
+    <main className="page-container">
+      <div className="max-w-5xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <a className="text-sm font-semibold text-primary hover:underline" href="/invoices">← Invoices</a>
+            <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">Invoice details</p>
             <div className="mt-2 flex items-center gap-3">
               <h1 className="text-3xl font-bold">{invoice.data.invoiceNumber}</h1>
               <StatusBadge status={invoice.data.status} />
             </div>
-            <p className="mt-1 text-sm text-slate-500">{new Date(invoice.data.createdAt).toLocaleString()}</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{new Date(invoice.data.createdAt).toLocaleString()}</p>
           </div>
-          <div className="flex gap-2">
-            <Button type="button" className="flex items-center gap-2 bg-slate-700" disabled={downloading} onClick={downloadPdf}>
+          <div className="grid gap-2 sm:flex">
+            <Button type="button" variant="outline" disabled={downloading} onClick={downloadPdf}>
               <Download size={16} aria-hidden="true" />
               {downloading ? 'Preparing…' : 'Download PDF'}
             </Button>
-            <select className="rounded-lg border bg-white px-3 py-2" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
+            <select className="control min-w-36" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
               {statuses.map((option) => <option key={option}>{option}</option>)}
             </select>
             <Button disabled={updateStatus.isPending || selectedStatus === invoice.data.status} onClick={() => updateStatus.mutate(selectedStatus)}>
@@ -93,7 +94,7 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
         <Card className="mt-6 overflow-hidden p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] text-left">
-              <thead className="border-b bg-emerald-50/60 text-xs uppercase text-slate-500">
+              <thead className="border-b bg-violet-50/60 text-xs uppercase text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-400">
                 <tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4 text-right">Total</th></tr>
               </thead>
               <tbody className="divide-y">
@@ -117,8 +118,9 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
             <div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Total</span><span>{money.format(Number(invoice.data.total))}</span></div>
           </div>
         </Card>
-        {updateStatus.isError && <p className="mt-3 text-right text-sm text-red-600">Status could not be updated.</p>}
-        {downloadError && <p className="mt-3 text-right text-sm text-red-600">PDF could not be generated. Check the shop logo URL and try again.</p>}
+        {updateStatus.isSuccess && <Alert className="mt-3" tone="success">Invoice status updated.</Alert>}
+        {updateStatus.isError && <Alert className="mt-3" tone="error">Status could not be updated.</Alert>}
+        {downloadError && <Alert className="mt-3" tone="error">PDF could not be generated. Check the shop logo URL and try again.</Alert>}
       </div>
     </main>
   );
