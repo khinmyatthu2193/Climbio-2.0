@@ -31,6 +31,7 @@ function ensureCompleteResponse(content: string, headings: string[], minimumLeng
 export const aiController = {
   analyze: async (req: Request, res: Response) => {
     const shopId = req.user!.id;
+    console.info('[ai] analyze endpoint reached', { openRouterKeyConfigured: Boolean(process.env.OPENROUTER_API_KEY) });
     const overview = await collectBusinessAnalysis(shopId);
     const rawContent = await askAI(createBusinessAdvisorPrompt(overview));
     const content = normalizeResponse(rawContent, 'FINAL_REPORT_START', '## Business Performance Summary');
@@ -51,6 +52,7 @@ export const aiController = {
 
   chat: async (req: Request, res: Response) => {
     const shopId = req.user!.id;
+    console.info('[ai] chat endpoint reached', { openRouterKeyConfigured: Boolean(process.env.OPENROUTER_API_KEY) });
     const question = req.body.question as string;
     const context = await collectBusinessAnalysis(shopId);
     const rawAnswer = await askAI(createBusinessConsultantPrompt(context, question));

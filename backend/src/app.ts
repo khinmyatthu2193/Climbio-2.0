@@ -8,11 +8,21 @@ import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { apiRoutes } from './routes/index.js';
+import { AppError } from './utils/AppError.js';
 
 export const app = express();
+const allowedOrigins = env.FRONTEND_URL.split(',').map((origin) => origin.trim().replace(/\/$/, ''));
 app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors({ origin: env.FRONTEND_URL, credentials: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) return callback(null, true);
+    console.warn('[cors] rejected origin', { origin });
+    return callback(new AppError('Origin not allowed by CORS', 403));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+}));
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());

@@ -8,10 +8,12 @@ interface OpenRouterResponse {
 
 export async function askAI(prompt: string) {
   if (!env.OPENROUTER_API_KEY) {
+    console.error('[openrouter] request skipped: API key is not configured');
     throw new AppError('AI analysis is not configured', 503);
   }
 
   try {
+    console.info('[openrouter] request started', { model: env.OPENROUTER_MODEL });
     const { data } = await axios.post<OpenRouterResponse>(
       'https://openrouter.ai/api/v1/chat/completions',
       {
@@ -34,6 +36,7 @@ export async function askAI(prompt: string) {
 
     const content = data.choices?.[0]?.message?.content?.trim();
     if (!content) throw new AppError('AI provider returned an empty analysis', 502);
+    console.info('[openrouter] request completed', { model: env.OPENROUTER_MODEL });
     return content;
   } catch (error) {
     if (error instanceof AppError) throw error;

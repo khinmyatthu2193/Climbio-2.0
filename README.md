@@ -62,7 +62,7 @@ Supabase Storage credentials are server-only. Product upload implementation belo
 
 ## Deployment notes
 
-- Build the frontend with `npm run build` and set `VITE_API_URL` to the public API URL.
+- In Vercel, set `VITE_API_URL` to the deployed backend API URL including `/api` (for example, `https://your-backend.example.com/api`) for Production and Preview, then redeploy so Vite can embed it in the bundle.
 - Build the backend with `npm run build`, run `npm run prisma:deploy`, and start with `npm start`.
-- Set `NODE_ENV=production`, HTTPS URLs, strong JWT secrets, the Supabase pooled PostgreSQL connection URL, and Supabase Storage credentials in the deployment provider.
+- On the backend host, set `NODE_ENV=production`, `DATABASE_URL`, `OPENROUTER_API_KEY`, HTTPS `FRONTEND_URL`, strong JWT secrets, and Supabase Storage credentials. `FRONTEND_URL` accepts comma-separated HTTPS origins when both the production and preview frontend must be allowed.
 - The PRD mentions both Supabase and Railway for backend hosting. The API is provider-neutral and can run on either; Supabase provides PostgreSQL and Storage.
