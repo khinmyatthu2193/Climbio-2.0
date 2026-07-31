@@ -4,12 +4,32 @@
 
 @layer base {
   :root {
-    --background: 150 33% 98%;
-    --foreground: 158 38% 12%;
-    --border: 150 18% 86%;
-    --primary: 158 64% 30%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --border: 214 32% 91%;
+    --primary: 258 90% 66%;
     --primary-foreground: 0 0% 100%;
+    --secondary: 160 84% 39%;
+    --accent: 25 95% 53%;
+    --muted: 215 16% 47%;
+  }
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --border: 215 25% 27%;
+    --primary: 258 90% 66%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 215 20% 65%;
   }
   * { @apply border-border; }
-  body { @apply m-0 min-w-80 bg-background text-foreground antialiased; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+  html { @apply scroll-smooth; }
+  body { @apply m-0 min-w-80 bg-background text-foreground antialiased transition-colors; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+  button, a, input, select, textarea { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2; }
+  ::selection { @apply bg-violet-200 text-violet-950; }
+}
+
+@layer components {
+  .page-container { @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8; }
+  .field-label { @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200; }
+  .control { @apply min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/20 dark:disabled:bg-slate-800; }
 }
