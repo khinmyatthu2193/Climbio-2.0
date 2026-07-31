@@ -35,7 +35,7 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
   const sevenDaysAgo = new Date(now.getTime() - 6 * DAY_MS);
   sevenDaysAgo.setHours(0, 0, 0, 0);
 
-  const [shop, paidInvoices, recentInvoices, previousInvoices, topProductGroups, slowProducts, inventoryProducts, customerRecords, customerInvoices] = await Promise.all([
+  const [shop, paidInvoices, recentInvoices, previousInvoices, topProductGroups, slowProducts, inventoryProducts, customerRecords, customerInvoices] = await prisma.$transaction([
     prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { shopName: true, setting: { select: { currency: true } } } }),
     prisma.invoice.findMany({ where: { userId, status: 'PAID' }, select: { total: true } }),
     prisma.invoice.findMany({ where: { userId, status: 'PAID', createdAt: { gte: thirtyDaysAgo } }, select: { total: true, createdAt: true } }),
@@ -86,7 +86,7 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
       revenueTrendPercent: previousRevenue > 0 ? round(((currentRevenue - previousRevenue) / previousRevenue) * 100) : null,
       recentDailyTrend: [...dailyRevenue].map(([date, dailyTotal]) => ({ date, revenue: round(dailyTotal) })),
     },
-    topProducts: topProductGroups.map((product) => ({ name: product.productName, unitsSold: product._sum.quantity ?? 0 })),
+    topProducts: topProductGroups.map((product) => ({ name: product.productName, unitsSold: product._sum?.quantity ?? 0 })),
     slowProducts: slowProducts.map((product) => ({ name: product.name, stock: product.quantity, sellingPrice: product.price.toNumber() })),
     inventory: {
       totalProducts: inventoryProducts.length,
@@ -102,19 +102,40 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
 }
 
 export function createBusinessAdvisorPrompt(data: BusinessAnalysisData) {
-  return `You are Climbio Business Advisor, an expert retail business analyst helping small shop owners.
+  const asciiData = JSON.parse(JSON.stringify(data, (_key, value: unknown) => {
+    if (typeof value !== 'string') return value;
+    const cleaned = value
+      .normalize('NFKD')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/[^\x20-\x7E]/g, '')
+      .trim();
+    return cleaned || 'Non-English name';
+  })) as BusinessAnalysisData;
 
-Analyze the shop data below. Respond entirely in Myanmar language using simple, practical business terms that a small shop owner can understand. Do not invent facts or numbers. If data is limited, say so clearly. Use the shop currency (${data.shop.currency}) for money.
+  return `You are Climbio AI Advisor, an expert retail business analyst.
+
+Always respond in English.
+Use clear, professional business English.
+Do not use Myanmar language or any non-English characters.
+If a shop or product name contains non-English characters, transliterate it into English characters.
+Do not invent facts or numbers. If data is limited, say so clearly. Use the shop currency (${data.shop.currency}) for money.
 
 SHOP DATA:
-${JSON.stringify(data, null, 2)}
+${JSON.stringify(asciiData, null, 2)}
 
-Begin the final answer with the exact marker FINAL_REPORT_START on its own line. Do not write anything before that marker. Then return a concise report with exactly these five headings:
-1. Business Performance Summary
-2. Important Problems
-3. Inventory Recommendations
-4. Sales Improvement Suggestions
-5. Action Plan
+Begin the final answer with the exact marker FINAL_REPORT_START on its own line. Do not write anything before that marker. After the marker, structure the response exactly with these Markdown headings:
+
+## Business Performance Summary
+
+## Important Problems
+
+## Inventory Recommendations
+
+## Sales Improvement Suggestions
+
+## Action Plan
 
 Under each heading, use short bullet points. Prioritize concrete observations from the data and specific actions the owner can take this week.`;
 }
