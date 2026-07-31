@@ -100,4 +100,10 @@ export const invoiceService = {
     if (!invoice) throw new AppError('Invoice not found', 404);
     return prisma.invoice.update({ where: { id }, data: { status }, include: detailInclude });
   },
+
+  async remove(userId: string, id: string) {
+    const invoice = await prisma.invoice.findFirst({ where: { id, userId }, select: { id: true } });
+    if (!invoice) throw new AppError('Invoice not found', 404);
+    await prisma.invoice.delete({ where: { id } });
+  },
 };

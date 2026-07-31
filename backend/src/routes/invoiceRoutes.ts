@@ -33,3 +33,4 @@ invoiceRoutes.get('/', invoiceController.list);
 invoiceRoutes.get('/:id', validateParams(idParams), invoiceController.get);
 invoiceRoutes.post('/', validateBody(createInvoiceSchema), invoiceController.create);
 invoiceRoutes.put('/:id/status', validateParams(idParams), validateBody(statusSchema), invoiceController.updateStatus);
+invoiceRoutes.delete('/:id', validateParams(idParams), invoiceController.remove);

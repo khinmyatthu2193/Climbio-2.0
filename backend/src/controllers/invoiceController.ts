@@ -17,4 +17,9 @@ export const invoiceController = {
       req.params.id as string,
       req.body.status as InvoiceStatus,
     )),
+
+  remove: async (req: Request, res: Response) => {
+    await invoiceService.remove(req.user!.id, req.params.id as string);
+    res.status(204).send();
+  },
 };

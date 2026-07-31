@@ -8,4 +8,5 @@ export const invoiceService = {
     api.post<Invoice>('/invoices', input).then((response) => response.data),
   updateStatus: (id: string, status: InvoiceStatus) =>
     api.put<Invoice>(`/invoices/${id}/status`, { status }).then((response) => response.data),
+  remove: (id: string) => api.delete(`/invoices/${id}`),
 };
