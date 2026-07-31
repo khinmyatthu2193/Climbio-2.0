@@ -10,14 +10,29 @@ export interface BusinessAnalysisOverview {
   };
   topProducts: Array<{ name: string; unitsSold: number }>;
   slowProducts: Array<{ name: string; stock: number; sellingPrice: number }>;
+  products: Array<{ name: string; category: string; sellingPrice: number; costPrice: number; stock: number }>;
   inventory: {
     totalProducts: number;
     totalStock: number;
     lowStockProducts: Array<{ name: string; stock: number }>;
     outOfStockProducts: Array<{ name: string; stock: number }>;
   };
-  customers: { customerCount: number; repeatCustomers: number };
+  customers: {
+    customerCount: number;
+    repeatCustomers: number;
+    purchaseHistory: Array<{ customer: string; transactions: number; totalSpent: number; lastPurchase: string }>;
+  };
 }
+
+export interface AIChatMessage {
+  id: string;
+  question: string;
+  answer: string;
+  createdAt: string;
+}
+
+export interface AIChatResponse { message: AIChatMessage }
+export interface AIChatHistoryResponse { messages: AIChatMessage[] }
 
 export interface AIAnalysisResponse {
   insight: {

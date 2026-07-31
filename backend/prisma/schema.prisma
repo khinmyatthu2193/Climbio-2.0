@@ -54,6 +54,7 @@ model User {
   setting       Setting?
   refreshTokens RefreshToken[]
   aiInsights    AIInsight[]
+  aiChatHistory AIChatHistory[]
 
   @@map("users")
 }
@@ -180,4 +181,16 @@ model AIInsight {
 
   @@index([shopId, type, createdAt])
   @@map("ai_insights")
+}
+
+model AIChatHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  question  String
+  answer    String
+  createdAt DateTime @default(now()) @map("created_at")
+  shop      User     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, createdAt])
+  @@map("ai_chat_history")
 }

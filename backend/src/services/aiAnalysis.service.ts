@@ -15,13 +15,18 @@ export interface BusinessAnalysisData {
   };
   topProducts: Array<{ name: string; unitsSold: number }>;
   slowProducts: Array<{ name: string; stock: number; sellingPrice: number }>;
+  products: Array<{ name: string; category: string; sellingPrice: number; costPrice: number; stock: number }>;
   inventory: {
     totalProducts: number;
     totalStock: number;
     lowStockProducts: Array<{ name: string; stock: number }>;
     outOfStockProducts: Array<{ name: string; stock: number }>;
   };
-  customers: { customerCount: number; repeatCustomers: number };
+  customers: {
+    customerCount: number;
+    repeatCustomers: number;
+    purchaseHistory: Array<{ customer: string; transactions: number; totalSpent: number; lastPurchase: string }>;
+  };
 }
 
 function round(value: number) {
@@ -53,9 +58,9 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
       orderBy: [{ quantity: 'desc' }, { name: 'asc' }],
       take: 5,
     }),
-    prisma.product.findMany({ where: { userId, isActive: true }, select: { name: true, quantity: true } }),
+    prisma.product.findMany({ where: { userId, isActive: true }, select: { name: true, quantity: true, price: true, costPrice: true, category: { select: { name: true } } }, take: 100 }),
     prisma.customer.count({ where: { userId } }),
-    prisma.invoice.findMany({ where: { userId, status: 'PAID' }, select: { customerName: true, customerPhone: true } }),
+    prisma.invoice.findMany({ where: { userId, status: 'PAID' }, select: { customerName: true, customerPhone: true, total: true, createdAt: true } }),
   ]);
 
   const revenue = paidInvoices.reduce((sum, invoice) => sum + invoice.total.toNumber(), 0);
@@ -71,9 +76,17 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
     if (dailyRevenue.has(key)) dailyRevenue.set(key, (dailyRevenue.get(key) ?? 0) + invoice.total.toNumber());
   }
   const customerFrequency = new Map<string, number>();
+  const customerHistory = new Map<string, { customer: string; transactions: number; totalSpent: number; lastPurchase: Date }>();
   for (const invoice of customerInvoices) {
     const key = invoice.customerPhone?.trim() || invoice.customerName.trim().toLowerCase();
     customerFrequency.set(key, (customerFrequency.get(key) ?? 0) + 1);
+    const current = customerHistory.get(key);
+    customerHistory.set(key, {
+      customer: invoice.customerName,
+      transactions: (current?.transactions ?? 0) + 1,
+      totalSpent: (current?.totalSpent ?? 0) + invoice.total.toNumber(),
+      lastPurchase: !current || invoice.createdAt > current.lastPurchase ? invoice.createdAt : current.lastPurchase,
+    });
   }
 
   return {
@@ -88,6 +101,13 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
     },
     topProducts: topProductGroups.map((product) => ({ name: product.productName, unitsSold: product._sum?.quantity ?? 0 })),
     slowProducts: slowProducts.map((product) => ({ name: product.name, stock: product.quantity, sellingPrice: product.price.toNumber() })),
+    products: inventoryProducts.map((product) => ({
+      name: product.name,
+      category: product.category?.name ?? 'Uncategorized',
+      sellingPrice: product.price.toNumber(),
+      costPrice: product.costPrice.toNumber(),
+      stock: product.quantity,
+    })),
     inventory: {
       totalProducts: inventoryProducts.length,
       totalStock: inventoryProducts.reduce((sum, product) => sum + product.quantity, 0),
@@ -97,12 +117,16 @@ export async function collectBusinessAnalysis(userId: string): Promise<BusinessA
     customers: {
       customerCount: Math.max(customerRecords, customerFrequency.size),
       repeatCustomers: [...customerFrequency.values()].filter((count) => count > 1).length,
+      purchaseHistory: [...customerHistory.values()]
+        .sort((left, right) => right.totalSpent - left.totalSpent)
+        .slice(0, 10)
+        .map((customer) => ({ ...customer, totalSpent: round(customer.totalSpent), lastPurchase: customer.lastPurchase.toISOString() })),
     },
   };
 }
 
-export function createBusinessAdvisorPrompt(data: BusinessAnalysisData) {
-  const asciiData = JSON.parse(JSON.stringify(data, (_key, value: unknown) => {
+function makeAsciiSafe<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data, (_key, value: unknown) => {
     if (typeof value !== 'string') return value;
     const cleaned = value
       .normalize('NFKD')
@@ -112,7 +136,11 @@ export function createBusinessAdvisorPrompt(data: BusinessAnalysisData) {
       .replace(/[^\x20-\x7E]/g, '')
       .trim();
     return cleaned || 'Non-English name';
-  })) as BusinessAnalysisData;
+  })) as T;
+}
+
+export function createBusinessAdvisorPrompt(data: BusinessAnalysisData) {
+  const asciiData = makeAsciiSafe(data);
 
   return `You are Climbio AI Advisor, an expert retail business analyst.
 
@@ -138,4 +166,38 @@ Begin the final answer with the exact marker FINAL_REPORT_START on its own line.
 ## Action Plan
 
 Under each heading, use short bullet points. Prioritize concrete observations from the data and specific actions the owner can take this week.`;
+}
+
+export function createBusinessConsultantPrompt(data: BusinessAnalysisData, question: string) {
+  const context = makeAsciiSafe(data);
+  const safeQuestion = makeAsciiSafe(question);
+  return `You are Climbio AI Business Consultant.
+
+You help small and medium shop owners make better business decisions.
+You have access to the shop's real business data.
+
+Always:
+- Analyze the provided business context.
+- Give practical recommendations.
+- Explain reasons clearly.
+- Mention risks when necessary.
+- Avoid making unrealistic assumptions.
+- Answer only the owner's business question. Do not behave as a general chatbot.
+- Always answer in English using ASCII characters only.
+
+BUSINESS CONTEXT:
+${JSON.stringify(context, null, 2)}
+
+OWNER QUESTION:
+${safeQuestion}
+
+Begin the final answer with CHAT_RESPONSE_START on its own line. Do not write anything before it. Then use exactly these Markdown headings with concise bullet points:
+
+## Recommendation
+
+## Analysis
+
+## Risks / Considerations
+
+## Suggested Next Steps`;
 }
