@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingBag, X } from 'lucide-react';
+import { ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, PanelLeftClose, Settings, ShoppingBag, X } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { publicShopService } from '@/services/publicShopService';
 import { useAuthStore } from '@/store/authStore';
@@ -57,8 +57,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const sidebar = (compact = false) => (
     <>
-      <div className={cn('flex h-[72px] items-center border-b border-slate-200 transition-all dark:border-slate-800/80', compact ? 'justify-center gap-1 px-2' : 'justify-between gap-3 px-4')}>
-        <a className={cn('flex min-w-0 items-center overflow-hidden rounded-xl transition-all', compact ? 'w-9' : 'w-[184px]')} href="/" aria-label="Climbio dashboard" title={compact ? 'Climbio dashboard' : undefined}>
+      <div className={cn('flex h-[76px] items-center border-b border-slate-200 pt-4 transition-all dark:border-slate-800/80', compact ? 'justify-center px-2' : 'justify-between gap-3 px-4')}>
+        {compact ? (
+          <button className="flex w-9 min-w-0 items-center overflow-hidden rounded-xl transition-all" onClick={toggleCollapsed} aria-label="Expand sidebar" title="Expand sidebar">
+            <span className="relative block size-9 overflow-hidden transition-all">
+              <img src={climbioSidebarLogo} alt="" className="absolute -left-3 -top-[23px] w-[135px] max-w-none transition-all dark:brightness-0 dark:invert" />
+            </span>
+          </button>
+        ) : (
+        <a className="flex w-[184px] min-w-0 items-center overflow-hidden rounded-xl transition-all" href="/" aria-label="Climbio dashboard">
           <span className={cn('relative block overflow-hidden transition-all', compact ? 'size-9' : 'h-[52px] w-[184px]')}>
             <img
               src={climbioSidebarLogo}
@@ -70,9 +77,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
           </span>
         </a>
-        <button className="hidden shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white lg:block" onClick={toggleCollapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-          <Menu className="size-5" />
-        </button>
+        )}
+        {!compact && (
+          <button className="hidden shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white lg:block" onClick={toggleCollapsed} aria-label="Collapse sidebar" title="Collapse sidebar">
+            <PanelLeftClose className="size-5" />
+          </button>
+        )}
         <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation">
           <X className="size-5" />
         </button>
