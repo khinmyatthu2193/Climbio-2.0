@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
 import { BarChart3, Bot, Boxes, CircleDollarSign, Lightbulb, LoaderCircle, RefreshCw, Sparkles, TrendingUp, Users } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -8,15 +9,21 @@ import { aiService } from '@/services/aiService';
 
 function InsightContent({ content }: { content: string }) {
   return (
-    <div className="space-y-2 text-sm leading-7 text-slate-700 dark:text-slate-300">
-      {content.split('\n').map((line, index) => {
-        const text = line.trim();
-        if (!text) return <div className="h-2" key={index} />;
-        if (/^(#{1,3}\s*)?\d[.)]\s/.test(text)) return <h3 className="pt-3 text-base font-bold text-slate-950 dark:text-white" key={index}>{text.replace(/^#{1,3}\s*/, '')}</h3>;
-        if (/^#{1,3}\s+/.test(text)) return <h3 className="pt-3 text-base font-bold text-slate-950 dark:text-white" key={index}>{text.replace(/^#{1,3}\s+/, '')}</h3>;
-        if (/^[-*•]\s+/.test(text)) return <p className="flex gap-2" key={index}><span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-violet-500" /><span>{text.replace(/^[-*•]\s+/, '')}</span></p>;
-        return <p key={index}>{text}</p>;
-      })}
+    <div className="text-sm leading-7 text-slate-700 dark:text-slate-300">
+      <ReactMarkdown
+        components={{
+          h1: ({ children }) => <h2 className="mb-2 mt-6 text-lg font-bold text-slate-950 first:mt-0 dark:text-white">{children}</h2>,
+          h2: ({ children }) => <h3 className="mb-2 mt-6 text-base font-bold text-slate-950 first:mt-0 dark:text-white">{children}</h3>,
+          h3: ({ children }) => <h4 className="mb-2 mt-5 font-bold text-slate-950 dark:text-white">{children}</h4>,
+          p: ({ children }) => <p className="my-2">{children}</p>,
+          ul: ({ children }) => <ul className="my-2 space-y-1.5 pl-5 marker:text-violet-500">{children}</ul>,
+          ol: ({ children }) => <ol className="my-2 list-decimal space-y-1.5 pl-5 marker:font-semibold marker:text-violet-500">{children}</ol>,
+          li: ({ children }) => <li className="pl-1">{children}</li>,
+          strong: ({ children }) => <strong className="font-bold text-slate-950 dark:text-white">{children}</strong>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
