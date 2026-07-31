@@ -201,24 +201,54 @@ export function InvoiceList() {
       )}
 
       <Card className="mt-6 p-4">
-        <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_180px_180px]">
-          <label className="relative">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <label className="relative w-full min-w-0 flex-1">
             <span className="sr-only">Search invoices</span>
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <input className="control pl-10" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search invoices or customers..." />
           </label>
-          <select className="control" value={status} onChange={(event) => setStatus(event.target.value as 'ALL' | InvoiceStatus)} aria-label="Filter by status">
-            {statusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-          </select>
-          <select className="control" value={dateFilter} onChange={(event) => setDateFilter(event.target.value as DateFilter)} aria-label="Filter by date">
-            <option value="all">All time</option><option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="custom">Custom date range</option>
-          </select>
-          <select className="control" value={sort} onChange={(event) => setSort(event.target.value as SortOption)} aria-label="Sort invoices">
-            <option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="highest">Highest amount</option><option value="lowest">Lowest amount</option>
-          </select>
+          <div className="w-full shrink-0 sm:w-48">
+            <select className="control" value={sort} onChange={(event) => setSort(event.target.value as SortOption)} aria-label="Sort invoices">
+              <option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="highest">Highest amount</option><option value="lowest">Lowest amount</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 dark:border-slate-700 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="mr-1 text-xs font-bold uppercase tracking-wide text-slate-400">Status</span>
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setStatus(option.value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${status === option.value ? 'bg-violet-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}
+              >
+                {option.value === 'ALL' ? 'All' : option.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="mr-1 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><CalendarDays className="size-3.5" /> Date</span>
+            {([
+              { value: 'all', label: 'All time' },
+              { value: 'today', label: 'Today' },
+              { value: 'week', label: 'This week' },
+              { value: 'month', label: 'This month' },
+              { value: 'custom', label: 'Custom' },
+            ] as const).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setDateFilter(option.value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${dateFilter === option.value ? 'bg-violet-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
         {dateFilter === 'custom' && (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:max-w-xl">
+          <div className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2 lg:max-w-xl dark:bg-slate-800/60">
             <label><span className="mb-1 block text-xs font-medium text-slate-500">From</span><input className="control" type="date" value={customFrom} max={customTo || undefined} onChange={(event) => setCustomFrom(event.target.value)} /></label>
             <label><span className="mb-1 block text-xs font-medium text-slate-500">To</span><input className="control" type="date" value={customTo} min={customFrom || undefined} onChange={(event) => setCustomTo(event.target.value)} /></label>
           </div>
