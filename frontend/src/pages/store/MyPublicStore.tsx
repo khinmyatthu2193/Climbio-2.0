@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Copy, ExternalLink, Facebook, Package, Store, Upload } from 'lucide-react';
+import { Check, Copy, ExternalLink, Facebook, Package, Power, Store, Upload } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,10 @@ export function MyPublicStore() {
     });
   }, [store.data]);
 
+  const statusMutation = useMutation({
+    mutationFn: publicShopService.updateStatus,
+    onSuccess: (data) => queryClient.setQueryData(['my-public-store'], data),
+  });
   const detailsMutation = useMutation({
     mutationFn: publicShopService.updateMyStore,
     onSuccess: (data) => {
@@ -127,6 +131,24 @@ export function MyPublicStore() {
                   Share on WhatsApp
                 </a>
               </div>
+            </Card>
+
+            <Card>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">Store availability</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Disabled stores cannot be opened by customers.</p>
+                </div>
+                <Button
+                  variant={store.data.publicEnabled ? 'danger' : 'secondary'}
+                  disabled={statusMutation.isPending}
+                  onClick={() => statusMutation.mutate(!store.data.publicEnabled)}
+                >
+                  <Power size={17} />
+                  {statusMutation.isPending ? 'Updating…' : store.data.publicEnabled ? 'Disable store' : 'Enable store'}
+                </Button>
+              </div>
+              {statusMutation.isError && <Alert className="mt-4" tone="error">Store availability could not be changed.</Alert>}
             </Card>
 
             <Card>

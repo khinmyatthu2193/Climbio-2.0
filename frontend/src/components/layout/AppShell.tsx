@@ -1,8 +1,6 @@
 import { useState, type ReactNode } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, PanelLeftClose, Settings, ShoppingBag, X } from 'lucide-react';
 import { authService } from '@/services/authService';
-import { publicShopService } from '@/services/publicShopService';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/ui/button';
@@ -28,17 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('climbio-sidebar-collapsed') === 'true');
   const { theme, toggleTheme } = useTheme();
   const { user, clearSession } = useAuthStore();
-  const queryClient = useQueryClient();
   const currentPage = navigation.find((item) => isCurrent(item.href)) ?? navigation[0];
-  const store = useQuery({
-    queryKey: ['my-public-store'],
-    queryFn: publicShopService.getMyStore,
-    enabled: user?.role === 'ADMIN',
-  });
-  const statusMutation = useMutation({
-    mutationFn: publicShopService.updateStatus,
-    onSuccess: (data) => queryClient.setQueryData(['my-public-store'], data),
-  });
 
   const toggleCollapsed = () => {
     setCollapsed((current) => {
@@ -108,32 +96,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         ))}
       </nav>
       <div className="border-t border-slate-200 p-3 dark:border-slate-800/80">
-        {user?.role === 'ADMIN' && store.data && (
-          <div className={cn('mb-2 rounded-xl bg-slate-100 dark:bg-slate-900', compact ? 'flex justify-center p-2' : 'px-3 py-3')}>
-            <div className={cn('flex items-center', compact ? 'justify-center' : 'justify-between gap-3')}>
-              {!compact && (
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Store availability</p>
-                  <p className={cn('mt-0.5 text-[11px]', store.data.publicEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500')}>
-                    {store.data.publicEnabled ? 'Store is live' : 'Store is offline'}
-                  </p>
-                </div>
-              )}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={store.data.publicEnabled}
-                aria-label={`Store availability: ${store.data.publicEnabled ? 'on' : 'off'}`}
-                title={compact ? `Store availability: ${store.data.publicEnabled ? 'on' : 'off'}` : undefined}
-                disabled={statusMutation.isPending}
-                onClick={() => statusMutation.mutate(!store.data.publicEnabled)}
-                className={cn('relative h-6 w-11 shrink-0 rounded-full transition disabled:cursor-wait disabled:opacity-60', store.data.publicEnabled ? 'bg-emerald-500' : 'bg-slate-700')}
-              >
-                <span className={cn('absolute left-1 top-1 size-4 rounded-full bg-white shadow transition-transform', store.data.publicEnabled && 'translate-x-5')} />
-              </button>
-            </div>
-          </div>
-        )}
         <div className={cn('mb-1 flex items-center rounded-xl py-2.5', compact ? 'justify-center px-1' : 'gap-3 px-3')}>
           <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30">
             {user?.name?.charAt(0).toUpperCase()}
