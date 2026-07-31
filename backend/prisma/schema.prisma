@@ -27,6 +27,12 @@ enum Role {
   STAFF
 }
 
+enum AIInsightType {
+  DAILY_REPORT
+  SALES_ANALYSIS
+  INVENTORY_ALERT
+}
+
 model User {
   id            String         @id @default(uuid()) @db.Uuid
   email         String         @unique @db.VarChar(255)
@@ -47,6 +53,7 @@ model User {
   customers     Customer[]
   setting       Setting?
   refreshTokens RefreshToken[]
+  aiInsights    AIInsight[]
 
   @@map("users")
 }
@@ -161,4 +168,16 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model AIInsight {
+  id        String        @id @default(uuid()) @db.Uuid
+  shopId    String        @map("shop_id") @db.Uuid
+  type      AIInsightType
+  content   String
+  createdAt DateTime      @default(now()) @map("created_at")
+  shop      User          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, type, createdAt])
+  @@map("ai_insights")
 }

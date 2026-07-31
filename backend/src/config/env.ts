@@ -13,6 +13,8 @@ const schema = z.object({
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20).optional(),
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default('product-images'),
+  OPENROUTER_API_KEY: z.string().min(1).optional(),
+  OPENROUTER_MODEL: z.string().min(1).default('nvidia/nemotron-3-ultra-550b-a55b:free'),
 });
 
 const parsed = schema.safeParse(process.env);
