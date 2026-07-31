@@ -13,6 +13,7 @@ import { PublicShop } from '@/pages/public/PublicShop';
 import { MyPublicStore } from '@/pages/store/MyPublicStore';
 import { AppShell } from '@/components/layout/AppShell';
 import { useTheme } from '@/hooks/useTheme';
+import { AIAdvisorPage } from '@/pages/AIAdvisorPage';
 
 export default function App() {
   useTheme();
@@ -56,6 +57,7 @@ export default function App() {
   );
   if (path === '/profile') return protectedPage(<ProfilePage />);
   if (path === '/my-store') return protectedPage(<MyPublicStore />, ['ADMIN']);
+  if (path === '/ai-advisor') return protectedPage(<AIAdvisorPage />);
   if (path === '/products') return protectedPage(<ProductList />);
   if (path === '/products/new') return protectedPage(<ProductForm />);
   if (path === '/invoices') return protectedPage(<InvoiceList />);
