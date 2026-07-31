@@ -14,7 +14,7 @@ export const authService = {
   login: (input: { email: string; password: string }) =>
     api.post<AuthResponse>('/auth/login', input).then((r) => r.data),
   logout: () => api.post('/auth/logout'),
-  refresh: () => api.post<AuthResponse>('/auth/refresh').then((r) => r.data),
+  refresh: () => api.post<AuthResponse>('/auth/refresh', undefined, { timeout: 8_000 }).then((r) => r.data),
   me: () => api.get<AuthResponse['user']>('/auth/me').then((r) => r.data),
   updateProfile: (input: UpdateProfileInput) => api.put<User>('/auth/profile', input).then((r) => r.data),
   changePassword: (input: ChangePasswordInput) => api.put('/auth/change-password', input),
