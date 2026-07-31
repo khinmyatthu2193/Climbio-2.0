@@ -22,11 +22,11 @@ export function PublicShop({ slug }: { slug: string }) {
   }, [catalog.data?.products, category, search]);
 
   if (catalog.isLoading) {
-    return <main className="grid min-h-screen place-items-center bg-[#f7faf8]"><p className="text-slate-600">Opening shop…</p></main>;
+    return <main className="grid min-h-screen place-items-center bg-slate-50 dark:bg-slate-950"><div className="text-center"><div className="mx-auto size-10 animate-spin rounded-full border-4 border-violet-100 border-t-violet-600 dark:border-slate-800 dark:border-t-violet-400" /><p className="mt-4 text-sm text-slate-600 dark:text-slate-400">Opening shop…</p></div></main>;
   }
   if (catalog.isError || !catalog.data) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#f7faf8] p-6 text-center">
+      <main className="grid min-h-screen place-items-center bg-slate-50 p-6 text-center dark:bg-slate-950">
         <div><PackageOpen className="mx-auto text-slate-400" size={44} /><h1 className="mt-4 text-2xl font-bold">Shop not found</h1><p className="mt-2 text-slate-500">This catalog may have moved or is unavailable.</p></div>
       </main>
     );
@@ -40,8 +40,8 @@ export function PublicShop({ slug }: { slug: string }) {
   });
 
   return (
-    <main className="min-h-screen bg-[#f7faf8]">
-      <header className="border-b bg-[radial-gradient(circle_at_top_left,#d7f3e4,transparent_55%)]">
+    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <header className="border-b bg-[radial-gradient(circle_at_top_left,#ede9fe,transparent_55%)] dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_left,rgba(109,40,217,0.22),transparent_55%)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:flex-row sm:items-center sm:justify-between md:px-8 md:py-12">
           <div className="flex items-center gap-4">
             {shop.shopLogo ? (
@@ -66,17 +66,17 @@ export function PublicShop({ slug }: { slug: string }) {
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
-        <section className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm sm:flex-row">
+        <section className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:flex-row">
           <label className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
-              className="w-full rounded-xl border bg-slate-50 py-3 pl-10 pr-4 outline-none ring-primary focus:ring-2"
+              className="control bg-slate-50 py-3 pl-10"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products"
             />
           </label>
-          <select className="rounded-xl border bg-slate-50 px-4 py-3 outline-none ring-primary focus:ring-2 sm:min-w-52" value={category} onChange={(event) => setCategory(event.target.value)}>
+          <select className="control bg-slate-50 sm:min-w-52" value={category} onChange={(event) => setCategory(event.target.value)}>
             <option value="all">All categories</option>
             {catalog.data.categories.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
           </select>
@@ -87,14 +87,14 @@ export function PublicShop({ slug }: { slug: string }) {
         </div>
 
         {products.length === 0 ? (
-          <div className="mt-8 grid min-h-72 place-items-center rounded-3xl border border-dashed bg-white text-center">
+          <div className="mt-8 grid min-h-72 place-items-center rounded-3xl border border-dashed bg-white text-center dark:border-slate-700 dark:bg-slate-900">
             <div><ShoppingBag className="mx-auto text-slate-300" size={42} /><p className="mt-3 font-semibold">No products found</p><p className="mt-1 text-sm text-slate-500">Try a different search or category.</p></div>
           </div>
         ) : (
           <section className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
-              <button className="group overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg" key={product.id} onClick={() => setSelected(product)}>
-                <div className="relative aspect-square overflow-hidden bg-emerald-50">
+              <button className="group overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900 dark:hover:border-violet-500" key={product.id} onClick={() => setSelected(product)}>
+                <div className="relative aspect-square overflow-hidden bg-violet-50 dark:bg-violet-500/10">
                   {product.image ? (
                     <img className="h-full w-full object-cover transition duration-300 group-hover:scale-105" src={product.image} alt={product.name} loading="lazy" />
                   ) : (
@@ -118,19 +118,19 @@ export function PublicShop({ slug }: { slug: string }) {
         )}
       </div>
 
-      <footer className="mt-10 border-t bg-white py-6 text-center text-sm text-slate-500">
+      <footer className="mt-10 border-t bg-white py-6 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
         {shop.shopName} · Powered by <span className="font-bold text-primary">Climbio</span>
       </footer>
 
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && setSelected(null)}>
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
             <div className="grid md:grid-cols-2">
-              <div className="aspect-square bg-emerald-50">
+              <div className="aspect-square bg-violet-50 dark:bg-violet-500/10">
                 {selected.image ? <img className="h-full w-full object-cover md:rounded-l-3xl" src={selected.image} alt={selected.name} /> : <div className="grid h-full place-items-center text-primary/40"><ShoppingBag size={64} /></div>}
               </div>
               <div className="relative p-6 md:p-8">
-                <button className="absolute right-4 top-4 rounded-full bg-slate-100 p-2 hover:bg-slate-200" onClick={() => setSelected(null)} aria-label="Close product details"><X size={18} /></button>
+                <button className="absolute right-4 top-4 rounded-full bg-slate-100 p-2 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" onClick={() => setSelected(null)} aria-label="Close product details"><X size={18} /></button>
                 <p className="text-xs font-bold uppercase tracking-wide text-primary">{selected.category?.name ?? 'Uncategorized'}</p>
                 <h2 className="mt-2 pr-8 text-2xl font-black">{selected.name}</h2>
                 <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-600">{selected.description || 'No product description available.'}</p>

@@ -1,10 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Copy, ExternalLink, Facebook, Package, Power, Store, Upload } from 'lucide-react';
+import { Check, Copy, ExternalLink, Facebook, Package, Store, Upload } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
+import { PageHeader } from '@/components/common/PageHeader';
 import { authService } from '@/services/authService';
 import { publicShopService } from '@/services/publicShopService';
 import { useAuthStore } from '@/store/authStore';
@@ -27,10 +30,6 @@ export function MyPublicStore() {
     });
   }, [store.data]);
 
-  const statusMutation = useMutation({
-    mutationFn: publicShopService.updateStatus,
-    onSuccess: (data) => queryClient.setQueryData(['my-public-store'], data),
-  });
   const detailsMutation = useMutation({
     mutationFn: publicShopService.updateMyStore,
     onSuccess: (data) => {
@@ -63,26 +62,21 @@ export function MyPublicStore() {
     });
   };
 
-  if (store.isLoading) return <main className="grid min-h-screen place-items-center"><p>Loading public store…</p></main>;
-  if (store.isError || !store.data) return <main className="grid min-h-screen place-items-center text-red-600"><p>Public store settings could not be loaded.</p></main>;
+  if (store.isLoading) return <main className="page-container"><Card className="animate-pulse text-slate-500">Loading public store…</Card></main>;
+  if (store.isError || !store.data) return <main className="page-container"><Alert tone="error">Public store settings could not be loaded.</Alert></main>;
 
   const shareText = encodeURIComponent(`Visit ${store.data.shopInfo.shopName}: ${store.data.publicUrl}`);
   const shareUrl = encodeURIComponent(store.data.publicUrl);
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-5xl">
-        <a className="text-sm font-semibold text-primary hover:underline" href="/">← Dashboard</a>
-        <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">My Public Store</h1>
-            <p className="mt-1 text-slate-600">Manage, preview, and share your customer catalog.</p>
-          </div>
-          <span className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold ${store.data.publicEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>
+    <main className="page-container">
+      <div className="max-w-6xl">
+        <PageHeader eyebrow="Sales channel" title="My public store" description="Manage, preview, and share your customer catalog." actions={
+          <Badge className={`gap-2 px-3 py-2 text-sm ${store.data.publicEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}`}>
             <span className={`h-2 w-2 rounded-full ${store.data.publicEnabled ? 'bg-emerald-500' : 'bg-slate-500'}`} />
             {store.data.publicEnabled ? 'Active' : 'Inactive'}
-          </span>
-        </div>
+          </Badge>
+        } />
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_310px]">
           <div className="space-y-6">
@@ -98,7 +92,7 @@ export function MyPublicStore() {
                   <p className="mt-1 text-sm text-slate-500">{store.data.shopInfo.shopAddress || 'No shop address'}</p>
                   <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-primary"><Package size={17} />{store.data.productCount} visible products</div>
                 </div>
-                <label className="cursor-pointer rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-slate-50">
+                <label className="cursor-pointer rounded-xl border px-3 py-2 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
                   <span className="flex items-center gap-2"><Upload size={16} /> Change logo</span>
                   <input className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => {
                     const file = event.target.files?.[0];
@@ -112,7 +106,7 @@ export function MyPublicStore() {
             <Card>
               <h2 className="text-lg font-bold">Catalog link</h2>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                <div className="min-w-0 flex-1 truncate rounded-xl border bg-slate-50 px-4 py-3 text-sm text-slate-700">{store.data.publicUrl}</div>
+                <div className="min-w-0 flex-1 truncate rounded-xl border bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">{store.data.publicUrl}</div>
                 <Button className="flex items-center justify-center gap-2" onClick={copyLink}>
                   {copied ? <Check size={17} /> : <Copy size={17} />}{copied ? 'Copied' : 'Copy Link'}
                 </Button>
@@ -136,23 +130,6 @@ export function MyPublicStore() {
             </Card>
 
             <Card>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Store availability</h2>
-                  <p className="mt-1 text-sm text-slate-500">Disabled stores cannot be opened by customers.</p>
-                </div>
-                <Button
-                  className={`flex items-center justify-center gap-2 ${store.data.publicEnabled ? 'bg-red-600' : ''}`}
-                  disabled={statusMutation.isPending}
-                  onClick={() => statusMutation.mutate(!store.data.publicEnabled)}
-                >
-                  <Power size={17} /> {store.data.publicEnabled ? 'Disable Store' : 'Enable Store'}
-                </Button>
-              </div>
-              {statusMutation.isError && <p className="mt-3 text-sm text-red-600">Store status could not be changed.</p>}
-            </Card>
-
-            <Card>
               <h2 className="text-lg font-bold">Store information</h2>
               <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={saveDetails}>
                 <label className="sm:col-span-2">
@@ -172,9 +149,9 @@ export function MyPublicStore() {
                   <Input value={form.shopAddress} maxLength={500} onChange={(event) => setForm({ ...form, shopAddress: event.target.value })} />
                 </label>
                 <div className="sm:col-span-2">
-                  {detailsMutation.isSuccess && <p className="mb-3 text-sm text-emerald-700">Store information saved.</p>}
-                  {detailsMutation.isError && <p className="mb-3 text-sm text-red-600">Could not save store information. The slug may already be in use.</p>}
-                  <Button disabled={detailsMutation.isPending}>{detailsMutation.isPending ? 'Saving…' : 'Save Store Information'}</Button>
+                  {detailsMutation.isSuccess && <Alert className="mb-3" tone="success">Store information saved.</Alert>}
+                  {detailsMutation.isError && <Alert className="mb-3" tone="error">Could not save store information. The slug may already be in use.</Alert>}
+                  <Button type="submit" disabled={detailsMutation.isPending}>{detailsMutation.isPending ? 'Saving…' : 'Save store information'}</Button>
                 </div>
               </form>
             </Card>

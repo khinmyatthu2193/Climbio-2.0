@@ -3,6 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert } from '@/components/ui/Alert';
+import { Badge } from '@/components/ui/Badge';
+import { PageHeader } from '@/components/common/PageHeader';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import type { Currency } from '@/types/auth';
@@ -39,13 +42,10 @@ export function ProfilePage() {
     });
   };
   return (
-    <main className="min-h-screen p-6 md:p-10">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div><a className="text-sm font-medium text-primary" href="/">← Dashboard</a><h1 className="mt-2 text-3xl font-bold">Profile & shop settings</h1></div>
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-primary">{user.role}</span>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2">
+    <main className="page-container">
+      <div className="max-w-5xl">
+        <PageHeader eyebrow="Account" title="Profile & shop settings" description="Manage your business identity, preferences, and account security." actions={<Badge className="bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">{user.role}</Badge>} />
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
           <Card>
             <h2 className="mb-4 text-lg font-bold">Business profile</h2>
             <form className="space-y-3" onSubmit={saveProfile}>
@@ -53,13 +53,13 @@ export function ProfilePage() {
               <Input aria-label="Shop name" value={profile.shopName} onChange={(e) => setProfile({ ...profile, shopName: e.target.value })} required />
               <Input aria-label="Phone" placeholder="Phone" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
               <Input aria-label="Shop address" placeholder="Shop address" value={profile.shopAddress} onChange={(e) => setProfile({ ...profile, shopAddress: e.target.value })} />
-              <select className="w-full rounded-lg border bg-white px-3 py-2" value={profile.currency} onChange={(e) => setProfile({ ...profile, currency: e.target.value as Currency })}>
+              <select className="control" value={profile.currency} onChange={(e) => setProfile({ ...profile, currency: e.target.value as Currency })}>
                 <option value="MMK">MMK</option><option value="USD">USD</option><option value="THB">THB</option>
               </select>
-              <textarea className="min-h-24 w-full rounded-lg border px-3 py-2" placeholder="Invoice footer" value={profile.invoiceFooter} onChange={(e) => setProfile({ ...profile, invoiceFooter: e.target.value })} />
-              {profileMutation.isSuccess && <p className="text-sm text-green-700">Profile saved.</p>}
-              {profileMutation.isError && <p className="text-sm text-red-600">Could not save your profile.</p>}
-              <Button disabled={profileMutation.isPending}>{profileMutation.isPending ? 'Saving…' : 'Save changes'}</Button>
+              <textarea className="control min-h-24 resize-y" placeholder="Invoice footer" value={profile.invoiceFooter} onChange={(e) => setProfile({ ...profile, invoiceFooter: e.target.value })} />
+              {profileMutation.isSuccess && <Alert tone="success">Profile saved.</Alert>}
+              {profileMutation.isError && <Alert tone="error">Could not save your profile.</Alert>}
+              <Button type="submit" disabled={profileMutation.isPending}>{profileMutation.isPending ? 'Saving…' : 'Save changes'}</Button>
             </form>
           </Card>
           <div className="space-y-6">
@@ -80,7 +80,7 @@ export function ProfilePage() {
                 <Input type="password" autoComplete="current-password" placeholder="Current password" value={passwords.currentPassword} onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })} required />
                 <Input type="password" autoComplete="new-password" placeholder="New password" value={passwords.newPassword} onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })} required />
                 {passwordMutation.isError && <p className="text-sm text-red-600">Password change failed. Check your current password and requirements.</p>}
-                <Button disabled={passwordMutation.isPending}>{passwordMutation.isPending ? 'Updating…' : 'Change password'}</Button>
+                <Button type="submit" disabled={passwordMutation.isPending}>{passwordMutation.isPending ? 'Updating…' : 'Change password'}</Button>
               </form>
             </Card>
           </div>
