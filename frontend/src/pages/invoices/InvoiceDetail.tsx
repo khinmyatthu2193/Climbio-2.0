@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download } from 'lucide-react';
 import { Card } from '@/components/common/Card';
+import { InvoiceSummary } from '@/components/invoices/InvoiceSummary';
 import { StatusBadge } from '@/components/invoices/StatusBadge';
-import { Button } from '@/components/ui/button';
+import { StatusUpdateToast } from '@/components/invoices/StatusUpdateToast';
 import { Alert } from '@/components/ui/Alert';
+import { Button } from '@/components/ui/button';
 import { invoiceService } from '@/services/invoiceService';
 import { useAuthStore } from '@/store/authStore';
 import type { InvoiceStatus } from '@/types/invoice';
 
 const statuses: InvoiceStatus[] = ['DRAFT', 'SENT', 'PAID', 'OVERDUE', 'CANCELLED'];
+
+interface ToastState {
+  tone: 'success' | 'error';
+  title: string;
+  description: string;
+}
 
 export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
   const queryClient = useQueryClient();
@@ -20,16 +28,36 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
   const [status, setStatus] = useState<InvoiceStatus | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<InvoiceStatus | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
   const updateStatus = useMutation({
     mutationFn: (nextStatus: InvoiceStatus) => invoiceService.updateStatus(invoiceId, nextStatus),
-    onSuccess: async () => {
+    onSuccess: async (_, nextStatus) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['invoices'] }),
         queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       ]);
+      setStatus(nextStatus);
+      setToast({ tone: 'success', title: 'Invoice status updated', description: `Invoice is now marked as ${nextStatus}` });
     },
+    onError: () => setToast({ tone: 'error', title: 'Status could not be updated', description: 'Please try again.' }),
   });
   const selectedStatus = status ?? invoice.data?.status ?? 'DRAFT';
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 3500);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  const requestStatusUpdate = () => {
+    if (selectedStatus === invoice.data?.status) return;
+    if (selectedStatus === 'CANCELLED' && invoice.data?.status !== 'CANCELLED') {
+      setPendingStatus(selectedStatus);
+      return;
+    }
+    updateStatus.mutate(selectedStatus);
+  };
 
   const downloadPdf = async () => {
     if (!invoice.data || !user) return;
@@ -56,54 +84,56 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
     }
   };
 
-  if (invoice.isLoading) return <main className="page-container"><Card className="animate-pulse text-slate-500">Loading invoice…</Card></main>;
+  if (invoice.isLoading) return <main className="page-container"><Card className="animate-pulse text-slate-500">Loading invoice...</Card></main>;
   if (invoice.isError || !invoice.data) return <main className="page-container"><Alert tone="error">Invoice could not be loaded.</Alert></main>;
 
   return (
     <main className="page-container">
-      <div className="max-w-5xl">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">Invoice details</p>
-            <div className="mt-2 flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{invoice.data.invoiceNumber}</h1>
-              <StatusBadge status={invoice.data.status} />
-            </div>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{new Date(invoice.data.createdAt).toLocaleString()}</p>
+            <p className="text-sm font-semibold text-violet-300">Invoice</p>
+            <h1 className="mt-2 break-all text-2xl font-bold text-white sm:text-3xl">{invoice.data.invoiceNumber}</h1>
+            <p className="mt-1.5 text-sm text-slate-400">Created {new Date(invoice.data.createdAt).toLocaleString()}</p>
           </div>
-          <div className="grid gap-2 sm:flex">
+          <div className="grid gap-2 sm:flex sm:items-end">
+            <label className="min-w-40">
+              <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-400">
+                Status <StatusBadge status={invoice.data.status} />
+              </span>
+              <select className="control min-w-40" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
+                {statuses.map((option) => <option key={option}>{option}</option>)}
+              </select>
+            </label>
+            <Button disabled={updateStatus.isPending || selectedStatus === invoice.data.status} onClick={requestStatusUpdate}>
+              {updateStatus.isPending ? 'Updating...' : 'Update status'}
+            </Button>
             <Button type="button" variant="outline" disabled={downloading} onClick={downloadPdf}>
               <Download size={16} aria-hidden="true" />
-              {downloading ? 'Preparing…' : 'Download PDF'}
-            </Button>
-            <select className="control min-w-36" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
-              {statuses.map((option) => <option key={option}>{option}</option>)}
-            </select>
-            <Button disabled={updateStatus.isPending || selectedStatus === invoice.data.status} onClick={() => updateStatus.mutate(selectedStatus)}>
-              Update status
+              {downloading ? 'Preparing...' : 'Download PDF'}
             </Button>
           </div>
         </div>
 
-        <Card className="mt-8">
-          <h2 className="text-lg font-bold">Customer</h2>
-          <p className="mt-3 font-semibold">{invoice.data.customerName}</p>
-          <p className="text-sm text-slate-500">{invoice.data.customerPhone || 'No phone number'}</p>
+        <Card className="mt-6 border-slate-800 bg-slate-900/80 p-4 sm:p-5">
+          <h2 className="text-sm font-semibold uppercase text-slate-400">Customer</h2>
+          <p className="mt-3 font-semibold text-slate-100">{invoice.data.customerName}</p>
+          <p className="mt-0.5 text-sm text-slate-400">{invoice.data.customerPhone || 'No phone number'}</p>
         </Card>
 
-        <Card className="mt-6 overflow-hidden p-0">
+        <Card className="mt-4 overflow-hidden border-slate-800 bg-slate-900/80 p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] text-left">
-              <thead className="border-b bg-violet-50/60 text-xs uppercase text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-400">
+              <thead className="border-b border-slate-800 bg-slate-800/60 text-xs uppercase text-slate-400">
                 <tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4 text-right">Total</th></tr>
               </thead>
-              <tbody className="divide-y">
-                {invoice.data.items?.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-5 py-4 font-medium">{item.productName}</td>
-                    <td className="px-5 py-4">{money.format(Number(item.price))}</td>
-                    <td className="px-5 py-4">{item.quantity}</td>
-                    <td className="px-5 py-4 text-right font-semibold">{money.format(Number(item.price) * item.quantity)}</td>
+              <tbody className="divide-y divide-slate-800">
+                {invoice.data.items?.map((item, index) => (
+                  <tr className={index % 2 ? 'bg-slate-800/20' : undefined} key={item.id}>
+                    <td className="px-5 py-4 font-medium text-slate-100">{item.productName}</td>
+                    <td className="px-5 py-4 text-slate-300">{money.format(Number(item.price))}</td>
+                    <td className="px-5 py-4 text-slate-300">{item.quantity}</td>
+                    <td className="px-5 py-4 text-right font-semibold text-white">{money.format(Number(item.price) * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -111,17 +141,30 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
           </div>
         </Card>
 
-        <Card className="mt-6 ml-auto max-w-sm">
-          <div className="space-y-3">
-            <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span>{money.format(Number(invoice.data.subtotal))}</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Discount</span><span>− {money.format(Number(invoice.data.discount))}</span></div>
-            <div className="flex justify-between border-t pt-3 text-lg font-bold"><span>Total</span><span>{money.format(Number(invoice.data.total))}</span></div>
-          </div>
-        </Card>
-        {updateStatus.isSuccess && <Alert className="mt-3" tone="success">Invoice status updated.</Alert>}
-        {updateStatus.isError && <Alert className="mt-3" tone="error">Status could not be updated.</Alert>}
+        <div className="mt-4 ml-auto w-full max-w-md">
+          <InvoiceSummary
+            subtotal={Number(invoice.data.subtotal)}
+            discount={Number(invoice.data.discount)}
+            total={Number(invoice.data.total)}
+            money={money}
+          />
+        </div>
         {downloadError && <Alert className="mt-3" tone="error">PDF could not be generated. Check the shop logo URL and try again.</Alert>}
       </div>
+
+      {toast && <StatusUpdateToast {...toast} />}
+      {pendingStatus && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-2xl" role="alertdialog" aria-modal="true" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description">
+            <h2 id="status-dialog-title" className="text-lg font-semibold text-white">Change invoice status?</h2>
+            <p id="status-dialog-description" className="mt-2 text-sm leading-6 text-slate-400">Are you sure you want to change this invoice status?</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={() => setPendingStatus(null)}>Cancel</Button>
+              <Button type="button" className="bg-red-600 hover:bg-red-500" onClick={() => { updateStatus.mutate(pendingStatus); setPendingStatus(null); }}>Confirm</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
