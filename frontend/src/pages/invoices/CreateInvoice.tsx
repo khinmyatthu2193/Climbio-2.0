@@ -30,7 +30,7 @@ export function CreateInvoice() {
   const products = useQuery({ queryKey: ['products'], queryFn: inventoryService.listProducts });
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [discount, setDiscount] = useState(0);
+  const [discountPercentage, setDiscountPercentage] = useState(0);
   const [items, setItems] = useState<LineItem[]>([{ productId: '', quantity: 1 }]);
 
   const productsById = useMemo(
@@ -41,6 +41,7 @@ export function CreateInvoice() {
     const product = productsById.get(item.productId);
     return sum + (product ? Number(product.price) * item.quantity : 0);
   }, 0);
+  const discount = Number((subtotal * discountPercentage / 100).toFixed(2));
   const total = Math.max(0, subtotal - discount);
 
   const createInvoice = useMutation({
@@ -68,25 +69,25 @@ export function CreateInvoice() {
       <form className="mx-auto max-w-6xl" onSubmit={submit}>
         <PageHeader eyebrow="Invoices" title="Create invoice" description="Select products and record a new customer sale." />
 
-        <Card className="mt-6 border-slate-800 bg-slate-900/80 p-4 sm:p-5">
-          <h2 className="mb-4 text-base font-semibold text-slate-100">Customer information</h2>
+        <Card className="mt-6 p-4 sm:p-5">
+          <h2 className="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">Customer information</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label>
-              <span className="mb-1.5 block text-sm font-medium text-slate-300">Customer name</span>
+              <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Customer name</span>
               <Input value={customerName} onChange={(event) => setCustomerName(event.target.value)} maxLength={100} required />
             </label>
             <label>
-              <span className="mb-1.5 block text-sm font-medium text-slate-300">Phone</span>
+              <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</span>
               <Input value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} maxLength={30} />
             </label>
           </div>
         </Card>
 
-        <Card className="mt-4 border-slate-800 bg-slate-900/80 p-4 sm:p-5">
+        <Card className="mt-4 p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-base font-semibold text-slate-100">Invoice items</h2>
-              <p className="mt-0.5 text-sm text-slate-400">Add products and set their quantities.</p>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Invoice items</h2>
+              <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Add products and set their quantities.</p>
             </div>
             <Button type="button" variant="outline" onClick={() => setItems((current) => [...current, { productId: '', quantity: 1 }])}>
               <Plus size={16} aria-hidden="true" />
@@ -120,17 +121,18 @@ export function CreateInvoice() {
             discount={discount}
             total={total}
             money={money}
+            discountPercentage={discountPercentage}
             editableDiscount
             embedded
-            onDiscountChange={setDiscount}
+            onDiscountPercentageChange={setDiscountPercentage}
           />
         </Card>
 
         {createInvoice.isError && (
           <Alert className="mt-4" tone="error">{apiError(createInvoice.error) ?? 'Invoice could not be created.'}</Alert>
         )}
-        <div className="sticky bottom-0 z-20 mt-6 flex items-center justify-between gap-3 border-t border-slate-800 bg-slate-950/90 py-4 backdrop-blur">
-          <a className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white" href="/invoices">Cancel</a>
+        <div className="sticky bottom-0 z-20 mt-6 flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50/90 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+          <a className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" href="/invoices">Cancel</a>
           <Button type="submit" disabled={createInvoice.isPending || products.isLoading}>
             {createInvoice.isPending ? 'Creating...' : 'Create invoice'}
           </Button>

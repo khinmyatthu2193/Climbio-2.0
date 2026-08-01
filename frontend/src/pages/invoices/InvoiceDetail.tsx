@@ -92,13 +92,13 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-violet-300">Invoice</p>
-            <h1 className="mt-2 break-all text-2xl font-bold text-white sm:text-3xl">{invoice.data.invoiceNumber}</h1>
-            <p className="mt-1.5 text-sm text-slate-400">Created {new Date(invoice.data.createdAt).toLocaleString()}</p>
+            <p className="text-sm font-semibold text-violet-600 dark:text-violet-300">Invoice</p>
+            <h1 className="mt-2 break-all text-2xl font-bold text-slate-950 dark:text-white sm:text-3xl">{invoice.data.invoiceNumber}</h1>
+            <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">Created {new Date(invoice.data.createdAt).toLocaleString()}</p>
           </div>
           <div className="grid gap-2 sm:flex sm:items-end">
             <label className="min-w-40">
-              <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-400">
+              <span className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                 Status <StatusBadge status={invoice.data.status} />
               </span>
               <select className="control min-w-40" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
@@ -115,25 +115,25 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
           </div>
         </div>
 
-        <Card className="mt-6 border-slate-800 bg-slate-900/80 p-4 sm:p-5">
-          <h2 className="text-sm font-semibold uppercase text-slate-400">Customer</h2>
-          <p className="mt-3 font-semibold text-slate-100">{invoice.data.customerName}</p>
-          <p className="mt-0.5 text-sm text-slate-400">{invoice.data.customerPhone || 'No phone number'}</p>
+        <Card className="mt-6 p-4 sm:p-5">
+          <h2 className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Customer</h2>
+          <p className="mt-3 font-semibold text-slate-900 dark:text-slate-100">{invoice.data.customerName}</p>
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{invoice.data.customerPhone || 'No phone number'}</p>
         </Card>
 
-        <Card className="mt-4 overflow-hidden border-slate-800 bg-slate-900/80 p-0">
+        <Card className="mt-4 overflow-hidden p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] text-left">
-              <thead className="border-b border-slate-800 bg-slate-800/60 text-xs uppercase text-slate-400">
+              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400">
                 <tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4 text-right">Total</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {invoice.data.items?.map((item, index) => (
-                  <tr className={index % 2 ? 'bg-slate-800/20' : undefined} key={item.id}>
-                    <td className="px-5 py-4 font-medium text-slate-100">{item.productName}</td>
-                    <td className="px-5 py-4 text-slate-300">{money.format(Number(item.price))}</td>
-                    <td className="px-5 py-4 text-slate-300">{item.quantity}</td>
-                    <td className="px-5 py-4 text-right font-semibold text-white">{money.format(Number(item.price) * item.quantity)}</td>
+                  <tr className={index % 2 ? 'bg-slate-50/70 dark:bg-slate-800/20' : undefined} key={item.id}>
+                    <td className="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">{item.productName}</td>
+                    <td className="px-5 py-4 text-slate-600 dark:text-slate-300">{money.format(Number(item.price))}</td>
+                    <td className="px-5 py-4 text-slate-600 dark:text-slate-300">{item.quantity}</td>
+                    <td className="px-5 py-4 text-right font-semibold text-slate-950 dark:text-white">{money.format(Number(item.price) * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -147,6 +147,7 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
             discount={Number(invoice.data.discount)}
             total={Number(invoice.data.total)}
             money={money}
+            discountPercentage={Number(invoice.data.subtotal) > 0 ? Number(invoice.data.discount) / Number(invoice.data.subtotal) * 100 : 0}
           />
         </div>
         {downloadError && <Alert className="mt-3" tone="error">PDF could not be generated. Check the shop logo URL and try again.</Alert>}
@@ -155,9 +156,9 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
       {toast && <StatusUpdateToast {...toast} />}
       {pendingStatus && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/75 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-6 shadow-2xl" role="alertdialog" aria-modal="true" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description">
-            <h2 id="status-dialog-title" className="text-lg font-semibold text-white">Change invoice status?</h2>
-            <p id="status-dialog-description" className="mt-2 text-sm leading-6 text-slate-400">Are you sure you want to change this invoice status?</p>
+          <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900" role="alertdialog" aria-modal="true" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description">
+            <h2 id="status-dialog-title" className="text-lg font-semibold text-slate-950 dark:text-white">Change invoice status?</h2>
+            <p id="status-dialog-description" className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Are you sure you want to change this invoice status?</p>
             <div className="mt-6 flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setPendingStatus(null)}>Cancel</Button>
               <Button type="button" className="bg-red-600 hover:bg-red-500" onClick={() => { updateStatus.mutate(pendingStatus); setPendingStatus(null); }}>Confirm</Button>
