@@ -7,35 +7,39 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
 <table>
   <tr>
     <td width="50%">
+      <img src="docs/screenshots/login.png" alt="Climbio login screen" />
+      <strong>Login</strong>
+    </td>
+    <td width="50%">
       <img src="docs/screenshots/home.png" alt="Climbio home screen" />
       <strong>Home</strong>
     </td>
+  </tr>
+  <tr>
     <td width="50%">
       <img src="docs/screenshots/dashboard.png" alt="Climbio dashboard" />
       <strong>Dashboard</strong>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
       <img src="docs/screenshots/Inventory.png" alt="Climbio inventory management" />
       <strong>Inventory Management</strong>
     </td>
+  </tr>
+  <tr>
     <td width="50%">
       <img src="docs/screenshots/Invoice.png" alt="Climbio invoice management" />
       <strong>Invoice Management</strong>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
       <img src="docs/screenshots/Public_Store.png" alt="Climbio public store management" />
       <strong>Public Store Management</strong>
     </td>
+  </tr>
+  <tr>
     <td width="50%">
       <img src="docs/screenshots/storeview_fromcustomer.png" alt="Climbio customer store view" />
       <strong>Customer Store View</strong>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
       <img src="docs/screenshots/AI_advisor1.png" alt="Climbio AI advisor overview" />
       <strong>AI Advisor Overview</strong>
