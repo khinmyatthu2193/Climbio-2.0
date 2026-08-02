@@ -4,8 +4,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -24,6 +22,11 @@ const chartTooltip = {
   color: 'hsl(var(--foreground))',
   fontSize: '12px',
 };
+
+function shortLabel(value: unknown, maxLength = 18) {
+  const label = String(value ?? '');
+  return label.length > maxLength ? `${label.slice(0, maxLength - 1)}...` : label;
+}
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -129,16 +132,16 @@ export function DashboardPage() {
           ) : (
             <div className="h-80 px-2 pb-4 pt-6 sm:px-4">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 4, right: 16, top: 8 }}>
+                <BarChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
                   <defs>
-                    <linearGradient id="salesLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#C084FC" /></linearGradient>
+                    <linearGradient id="salesBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} />
-                  <YAxis width={66} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
+                  <YAxis width={82} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
                   <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
-                  <Line type="monotone" dataKey="revenue" stroke="url(#salesLine)" strokeWidth={3} dot={{ fill: '#8B5CF6', strokeWidth: 0, r: 3 }} activeDot={{ fill: '#8B5CF6', stroke: '#ede9fe', strokeWidth: 5, r: 5 }} />
-                </LineChart>
+                  <Bar dataKey="revenue" name="Revenue" fill="url(#salesBar)" radius={[7, 7, 2, 2]} maxBarSize={42} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           )}
@@ -159,15 +162,15 @@ export function DashboardPage() {
           ) : (
             <div className="h-80 px-2 pb-4 pt-6 sm:px-4">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dashboard.data?.productStock ?? []} margin={{ left: -16, right: 8, top: 8 }}>
+                <BarChart data={dashboard.data?.productStock ?? []} layout="vertical" margin={{ left: 16, right: 24, top: 8, bottom: 4 }}>
                   <defs>
-                    <linearGradient id="stockBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
+                    <linearGradient id="stockBar" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} interval={0} tickFormatter={(name) => String(name).slice(0, 10)} />
-                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} />
-                  <Tooltip contentStyle={chartTooltip} cursor={{ fill: 'rgba(139,92,246,0.06)' }} />
-                  <Bar dataKey="quantity" name="Stock" fill="url(#stockBar)" radius={[7, 7, 2, 2]} maxBarSize={38} />
+                  <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke="hsl(var(--border))" />
+                  <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} />
+                  <YAxis type="category" dataKey="name" width={128} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(name) => shortLabel(name)} />
+                  <Tooltip contentStyle={chartTooltip} cursor={{ fill: 'rgba(139,92,246,0.06)' }} formatter={(value) => [Number(value ?? 0), 'Stock']} labelFormatter={(label) => String(label)} />
+                  <Bar dataKey="quantity" name="Stock" fill="url(#stockBar)" radius={[2, 7, 7, 2]} maxBarSize={28} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
