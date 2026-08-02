@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ArrowUpRight, Boxes, FilePlus2, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
 import {
@@ -13,6 +14,7 @@ import { Card } from '@/components/common/Card';
 import { Alert } from '@/components/ui/Alert';
 import { dashboardService } from '@/services/dashboardService';
 import { useAuthStore } from '@/store/authStore';
+import type { SalesRange } from '@/types/dashboard';
 
 const chartTooltip = {
   backgroundColor: 'hsl(var(--background))',
@@ -28,9 +30,20 @@ function shortLabel(value: unknown, maxLength = 18) {
   return label.length > maxLength ? `${label.slice(0, maxLength - 1)}...` : label;
 }
 
+const salesRanges: Array<{ value: SalesRange; label: string; description: string }> = [
+  { value: '7d', label: '7D', description: 'Last 7 days' },
+  { value: '30d', label: '30D', description: 'Last 30 days' },
+  { value: '6m', label: '6M', description: 'Last 6 months' },
+];
+
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
-  const dashboard = useQuery({ queryKey: ['dashboard', 'summary'], queryFn: dashboardService.summary });
+  const [salesRange, setSalesRange] = useState<SalesRange>('6m');
+  const selectedSalesRange = salesRanges.find((range) => range.value === salesRange) ?? salesRanges[2];
+  const dashboard = useQuery({
+    queryKey: ['dashboard', 'summary', salesRange],
+    queryFn: () => dashboardService.summary(salesRange),
+  });
   const currency = user?.setting?.currency ?? 'MMK';
   const currencyFormatter = new Intl.NumberFormat(undefined, {
     style: 'currency',
@@ -121,9 +134,22 @@ export function DashboardPage() {
           <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
             <div>
               <h2 className="font-bold text-slate-950 dark:text-white">Sales overview</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Paid invoice revenue over the last six months</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Paid invoice revenue for {selectedSalesRange.description.toLowerCase()}</p>
             </div>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Revenue</span>
+            <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-900" aria-label="Sales chart range">
+              {salesRanges.map((range) => (
+                <button
+                  key={range.value}
+                  type="button"
+                  className={`min-h-8 rounded-lg px-3 text-xs font-bold transition ${salesRange === range.value ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                  onClick={() => setSalesRange(range.value)}
+                  aria-pressed={salesRange === range.value}
+                  title={range.description}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
           </div>
           {dashboard.isLoading ? (
             <div className="m-6 h-72 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
@@ -137,7 +163,7 @@ export function DashboardPage() {
                     <linearGradient id="salesBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} />
+                  <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} interval={salesRange === '30d' ? 4 : 0} />
                   <YAxis width={82} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
                   <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
                   <Bar dataKey="revenue" name="Revenue" fill="url(#salesBar)" radius={[7, 7, 2, 2]} maxBarSize={42} />
