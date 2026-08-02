@@ -44,22 +44,22 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
       <img src="docs/screenshots/AI_advisor1.png" alt="Climbio AI advisor overview" />
       <strong>AI Advisor Overview</strong>
     </td>
+  </tr>
+  <tr>
     <td width="50%">
       <img src="docs/screenshots/AI_chatbot.png" alt="Climbio AI chatbot" />
       <strong>AI Business Chatbot</strong>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
       <img src="docs/screenshots/AI_advisor2.png" alt="Climbio AI advisor recommendations" />
       <strong>AI Recommendations</strong>
     </td>
+  </tr>
+  <tr>
     <td width="50%">
       <img src="docs/screenshots/Setting.png" alt="Climbio settings page" />
       <strong>Shop Settings</strong>
     </td>
-  </tr>
-  <tr>
     <td width="50%">
       <img src="docs/screenshots/Climbio_indarkmode.png" alt="Climbio dark mode" />
       <strong>Dark Mode</strong>
