@@ -64,10 +64,6 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
       <img src="docs/screenshots/Climbio_indarkmode.png" alt="Climbio dark mode" />
       <strong>Dark Mode</strong>
     </td>
-    <td width="50%">
-      <strong>Built for SME workflows</strong>
-      <p>Inventory, invoices, public storefronts, analytics, and AI guidance in one workspace.</p>
-    </td>
   </tr>
 </table>
 
