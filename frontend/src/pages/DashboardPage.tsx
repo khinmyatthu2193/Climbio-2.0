@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ArrowUpRight, Boxes, FilePlus2, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -27,22 +29,18 @@ const chartTooltip = {
   fontSize: '12px',
 };
 
-function shortLabel(value: unknown, maxLength = 18) {
-  const label = String(value ?? '');
-  return label.length > maxLength ? `${label.slice(0, maxLength - 1)}...` : label;
-}
-
 const salesRanges: Array<{ value: SalesRange; label: string; description: string }> = [
   { value: '7d', label: '7D', description: 'Last 7 days' },
   { value: '30d', label: '30D', description: 'Last 30 days' },
   { value: '6m', label: '6M', description: 'Last 6 months' },
 ];
 
-type SalesChartView = 'bar' | 'line';
+type SalesChartView = 'bar' | 'line' | 'area';
 
 const salesChartViews: Array<{ value: SalesChartView; label: string }> = [
   { value: 'bar', label: 'Bar' },
   { value: 'line', label: 'Line' },
+  { value: 'area', label: 'Area' },
 ];
 
 export function DashboardPage() {
@@ -66,6 +64,7 @@ export function DashboardPage() {
     notation: 'compact',
     maximumFractionDigits: 1,
   });
+  const maxStock = Math.max(...(dashboard.data?.productStock.map((product) => product.quantity) ?? [0]), 1);
   const today = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
 
   const cards = [
@@ -183,7 +182,7 @@ export function DashboardPage() {
           ) : (
             <div className="h-80 px-2 pb-4 pt-6 sm:px-4">
               <ResponsiveContainer width="100%" height="100%">
-                {salesChartView === 'bar' ? (
+                {salesChartView === 'bar' && (
                   <BarChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
                     <defs>
                       <linearGradient id="salesBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
@@ -194,7 +193,8 @@ export function DashboardPage() {
                     <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
                     <Bar dataKey="revenue" name="Revenue" fill="url(#salesBar)" radius={[7, 7, 2, 2]} maxBarSize={42} />
                   </BarChart>
-                ) : (
+                )}
+                {salesChartView === 'line' && (
                   <LineChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
                     <defs>
                       <linearGradient id="salesLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#C084FC" /></linearGradient>
@@ -206,6 +206,18 @@ export function DashboardPage() {
                     <Line type="linear" dataKey="revenue" name="Revenue" stroke="url(#salesLine)" strokeWidth={3} dot={{ fill: '#8B5CF6', strokeWidth: 0, r: 3 }} activeDot={{ fill: '#8B5CF6', stroke: '#ede9fe', strokeWidth: 5, r: 5 }} />
                   </LineChart>
                 )}
+                {salesChartView === 'area' && (
+                  <AreaChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
+                    <defs>
+                      <linearGradient id="salesArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.45} /><stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.03} /></linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} interval={salesRange === '30d' ? 4 : 0} />
+                    <YAxis width={82} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
+                    <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
+                    <Area type="linear" dataKey="revenue" name="Revenue" stroke="#8B5CF6" strokeWidth={3} fill="url(#salesArea)" dot={{ fill: '#8B5CF6', strokeWidth: 0, r: 3 }} activeDot={{ fill: '#8B5CF6', stroke: '#ede9fe', strokeWidth: 5, r: 5 }} />
+                  </AreaChart>
+                )}
               </ResponsiveContainer>
             </div>
           )}
@@ -215,7 +227,7 @@ export function DashboardPage() {
           <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
             <div>
               <h2 className="font-bold text-slate-950 dark:text-white">Inventory levels</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Products with the most available stock</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Ranked stock position by product</p>
             </div>
             <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Stock</span>
           </div>
@@ -224,19 +236,30 @@ export function DashboardPage() {
           ) : dashboard.data?.productStock.length === 0 ? (
             <ChartEmptyState icon={ShoppingBag} title="No inventory yet" description="Add products to start monitoring stock levels here." actionLabel="Add a product" actionHref="/products/new" />
           ) : (
-            <div className="h-80 px-2 pb-4 pt-6 sm:px-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dashboard.data?.productStock ?? []} layout="vertical" margin={{ left: 16, right: 24, top: 8, bottom: 4 }}>
-                  <defs>
-                    <linearGradient id="stockBar" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="4 4" horizontal={false} stroke="hsl(var(--border))" />
-                  <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} />
-                  <YAxis type="category" dataKey="name" width={128} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(name) => shortLabel(name)} />
-                  <Tooltip contentStyle={chartTooltip} cursor={{ fill: 'rgba(139,92,246,0.06)' }} formatter={(value) => [Number(value ?? 0), 'Stock']} labelFormatter={(label) => String(label)} />
-                  <Bar dataKey="quantity" name="Stock" fill="url(#stockBar)" radius={[2, 7, 7, 2]} maxBarSize={28} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="space-y-4 px-5 py-6 sm:px-6">
+              {(dashboard.data?.productStock ?? []).slice(0, 7).map((product, index) => {
+                const percent = Math.max((product.quantity / maxStock) * 100, product.quantity > 0 ? 5 : 0);
+                const isLow = product.quantity <= 5;
+                return (
+                  <div key={product.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="grid size-6 shrink-0 place-items-center rounded-lg bg-white text-xs font-black text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300">{index + 1}</span>
+                          <p className="truncate text-sm font-bold text-slate-900 dark:text-white" title={product.name}>{product.name}</p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-sm font-black text-slate-950 dark:text-white">{product.quantity}</p>
+                        <p className={`text-[11px] font-bold ${isLow ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-300'}`}>{isLow ? 'Low' : 'Healthy'}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800" aria-label={`${product.name} stock level`}>
+                      <div className={`h-full rounded-full ${isLow ? 'bg-amber-500' : 'bg-gradient-to-r from-violet-600 to-fuchsia-500'}`} style={{ width: `${percent}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </Card>
