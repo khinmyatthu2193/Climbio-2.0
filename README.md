@@ -2,6 +2,27 @@
 
 Smart business suite for SMEs in Myanmar. This repository contains a React/Vite client and an Express/Prisma API.
 
+![Climbio 2.0 app preview](docs/screenshots/climbio-preview.png)
+
+## Overview
+
+Climbio 2.0 helps small business owners manage inventory, invoices, sales performance, and public shop visibility from one secure workspace. It includes a dashboard for business metrics, product and category management, invoice workflows, public storefront pages, and an AI advisor that analyzes real shop data to generate practical recommendations.
+
+## Highlights
+
+- Product, category, stock, pricing, and image management.
+- Invoice creation, invoice status tracking, customer details, discounts, and PDF output.
+- Sales dashboard with revenue, inventory, low-stock, and chart-based summaries.
+- Public storefront pages using shareable shop slugs.
+- AI business advisor for sales analysis, inventory recommendations, and action plans.
+- Secure authentication with JWT access tokens, rotating refresh tokens, bcrypt password hashing, and role guards.
+
+## Tech Stack
+
+- Frontend: React, TypeScript, Vite, Tailwind CSS, Zustand, TanStack React Query, Recharts.
+- Backend: Node.js, Express, TypeScript, Prisma ORM, PostgreSQL.
+- Infrastructure: Supabase Storage, Docker, Vercel-ready frontend deployment.
+
 ## Prerequisites
 
 - Node.js 20+
