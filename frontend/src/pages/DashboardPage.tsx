@@ -5,6 +5,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -36,9 +38,17 @@ const salesRanges: Array<{ value: SalesRange; label: string; description: string
   { value: '6m', label: '6M', description: 'Last 6 months' },
 ];
 
+type SalesChartView = 'bar' | 'line';
+
+const salesChartViews: Array<{ value: SalesChartView; label: string }> = [
+  { value: 'bar', label: 'Bar' },
+  { value: 'line', label: 'Line' },
+];
+
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const [salesRange, setSalesRange] = useState<SalesRange>('6m');
+  const [salesChartView, setSalesChartView] = useState<SalesChartView>('bar');
   const selectedSalesRange = salesRanges.find((range) => range.value === salesRange) ?? salesRanges[2];
   const dashboard = useQuery({
     queryKey: ['dashboard', 'summary', salesRange],
@@ -136,19 +146,34 @@ export function DashboardPage() {
               <h2 className="font-bold text-slate-950 dark:text-white">Sales overview</h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Paid invoice revenue for {selectedSalesRange.description.toLowerCase()}</p>
             </div>
-            <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-900" aria-label="Sales chart range">
-              {salesRanges.map((range) => (
-                <button
-                  key={range.value}
-                  type="button"
-                  className={`min-h-8 rounded-lg px-3 text-xs font-bold transition ${salesRange === range.value ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
-                  onClick={() => setSalesRange(range.value)}
-                  aria-pressed={salesRange === range.value}
-                  title={range.description}
-                >
-                  {range.label}
-                </button>
-              ))}
+            <div className="flex flex-col items-end gap-2 sm:flex-row">
+              <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-900" aria-label="Sales chart type">
+                {salesChartViews.map((view) => (
+                  <button
+                    key={view.value}
+                    type="button"
+                    className={`min-h-8 rounded-lg px-3 text-xs font-bold transition ${salesChartView === view.value ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                    onClick={() => setSalesChartView(view.value)}
+                    aria-pressed={salesChartView === view.value}
+                  >
+                    {view.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-900" aria-label="Sales chart range">
+                {salesRanges.map((range) => (
+                  <button
+                    key={range.value}
+                    type="button"
+                    className={`min-h-8 rounded-lg px-3 text-xs font-bold transition ${salesRange === range.value ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                    onClick={() => setSalesRange(range.value)}
+                    aria-pressed={salesRange === range.value}
+                    title={range.description}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           {dashboard.isLoading ? (
@@ -158,16 +183,29 @@ export function DashboardPage() {
           ) : (
             <div className="h-80 px-2 pb-4 pt-6 sm:px-4">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
-                  <defs>
-                    <linearGradient id="salesBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} interval={salesRange === '30d' ? 4 : 0} />
-                  <YAxis width={82} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
-                  <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
-                  <Bar dataKey="revenue" name="Revenue" fill="url(#salesBar)" radius={[7, 7, 2, 2]} maxBarSize={42} />
-                </BarChart>
+                {salesChartView === 'bar' ? (
+                  <BarChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
+                    <defs>
+                      <linearGradient id="salesBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#A78BFA" /></linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} interval={salesRange === '30d' ? 4 : 0} />
+                    <YAxis width={82} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
+                    <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
+                    <Bar dataKey="revenue" name="Revenue" fill="url(#salesBar)" radius={[7, 7, 2, 2]} maxBarSize={42} />
+                  </BarChart>
+                ) : (
+                  <LineChart data={dashboard.data?.salesOverview ?? []} margin={{ left: 8, right: 16, top: 8, bottom: 4 }}>
+                    <defs>
+                      <linearGradient id="salesLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#8B5CF6" /><stop offset="100%" stopColor="#C084FC" /></linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} interval={salesRange === '30d' ? 4 : 0} />
+                    <YAxis width={82} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted))' }} tickFormatter={(value) => compactCurrency.format(Number(value))} />
+                    <Tooltip contentStyle={chartTooltip} formatter={(value) => [currencyFormatter.format(Number(value ?? 0)), 'Revenue']} />
+                    <Line type="linear" dataKey="revenue" name="Revenue" stroke="url(#salesLine)" strokeWidth={3} dot={{ fill: '#8B5CF6', strokeWidth: 0, r: 3 }} activeDot={{ fill: '#8B5CF6', stroke: '#ede9fe', strokeWidth: 5, r: 5 }} />
+                  </LineChart>
+                )}
               </ResponsiveContainer>
             </div>
           )}
