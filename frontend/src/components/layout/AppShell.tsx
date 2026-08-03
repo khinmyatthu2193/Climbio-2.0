@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
 
@@ -134,6 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
             <a className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:border-violet-300 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-slate-700" href="/my-store">View store <ExternalLink className="size-3.5" /></a>
           </div>
