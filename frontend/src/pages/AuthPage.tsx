@@ -2,6 +2,7 @@ import { CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/authStore';
 import climbioLogo from '@/assets/branding/climbio-logo.png';
@@ -20,7 +21,8 @@ export function AuthPage({ register }: { register: boolean }) {
         <div className="pointer-events-none absolute -left-24 top-1/4 size-72 rounded-full bg-violet-300/25 blur-3xl dark:bg-violet-600/10" />
         <div className="pointer-events-none absolute -right-24 bottom-0 size-80 rounded-full bg-fuchsia-300/20 blur-3xl dark:bg-fuchsia-600/10" />
 
-        <div className="relative mx-auto flex max-w-6xl justify-end">
+        <div className="relative mx-auto flex max-w-6xl justify-end gap-2">
+          <LanguageToggle />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
 
