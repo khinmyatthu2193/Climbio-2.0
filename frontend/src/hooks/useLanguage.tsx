@@ -60,6 +60,7 @@ function translateText(value: string, language: Language) {
   const leading = value.match(/^\s*/)?.[0] ?? '';
   const trailing = value.match(/\s*$/)?.[0] ?? '';
   const core = value.slice(leading.length, value.length - trailing.length);
+  if (!core) return value;
   const dictionary = language === 'my' ? burmese : english;
   return `${leading}${dictionary[core] ?? core}${trailing}`;
 }
