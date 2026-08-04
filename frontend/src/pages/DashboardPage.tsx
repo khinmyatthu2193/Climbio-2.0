@@ -19,6 +19,7 @@ import { Alert } from '@/components/ui/Alert';
 import { dashboardService } from '@/services/dashboardService';
 import { useAuthStore } from '@/store/authStore';
 import type { SalesRange } from '@/types/dashboard';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const chartTooltip = {
   backgroundColor: 'hsl(var(--background))',
@@ -45,6 +46,7 @@ const salesChartViews: Array<{ value: SalesChartView; label: string }> = [
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
+  const { language, translate } = useLanguage();
   const [salesRange, setSalesRange] = useState<SalesRange>('6m');
   const [salesChartView, setSalesChartView] = useState<SalesChartView>('bar');
   const selectedSalesRange = salesRanges.find((range) => range.value === salesRange) ?? salesRanges[2];
@@ -65,7 +67,7 @@ export function DashboardPage() {
     maximumFractionDigits: 1,
   });
   const maxStock = Math.max(...(dashboard.data?.productStock.map((product) => product.quantity) ?? [0]), 1);
-  const today = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+  const today = new Intl.DateTimeFormat(language === 'my' ? 'my-MM' : undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
 
   const cards = [
     {
@@ -104,9 +106,9 @@ export function DashboardPage() {
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{today}</p>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-            Welcome back, {user?.name?.split(' ')[0]}.
+            {language === 'my' ? `${user?.name?.split(' ')[0]}၊ ပြန်လည်ကြိုဆိုပါသည်။` : `Welcome back, ${user?.name?.split(' ')[0]}.`}
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">A clear view of what is happening at {user?.shopName}.</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{language === 'my' ? `${user?.shopName}၏ လုပ်ငန်းအခြေအနေကို တစ်နေရာတည်းတွင် ကြည့်ရှုပါ။` : `A clear view of what is happening at ${user?.shopName}.`}</p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex">
           <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-violet-300 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-slate-800" href="/invoices/new">
@@ -143,7 +145,7 @@ export function DashboardPage() {
           <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
             <div>
               <h2 className="font-bold text-slate-950 dark:text-white">Sales overview</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Paid invoice revenue for {selectedSalesRange.description.toLowerCase()}</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{language === 'my' ? `ပေးချေပြီး ဘောင်ချာ ဝင်ငွေ - ${translate(selectedSalesRange.description)}` : `Paid invoice revenue for ${selectedSalesRange.description.toLowerCase()}`}</p>
             </div>
             <div className="flex flex-col items-end gap-2 sm:flex-row">
               <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-900" aria-label="Sales chart type">
