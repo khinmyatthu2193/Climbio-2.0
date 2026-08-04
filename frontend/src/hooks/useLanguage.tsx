@@ -34,6 +34,15 @@ const burmese: Record<string, string> = {
   'Welcome back': 'ပြန်လည်ကြိုဆိုပါသည်', 'Sign in to your account': 'သင့်အကောင့်သို့ ဝင်ရန်', 'Create your account': 'သင့်အကောင့် ဖန်တီးရန်',
   'AI business advisor': 'AI လုပ်ငန်းအကြံပေး', 'Ask anything about your business': 'သင့်လုပ်ငန်းအကြောင်း မေးမြန်းနိုင်ပါသည်',
   'Send': 'ပို့ရန်', 'Close': 'ပိတ်ရန်', 'Back': 'နောက်သို့', 'Continue': 'ဆက်လုပ်ရန်', 'Required': 'လိုအပ်သည်',
+  'Bar': 'တိုင်', 'Line': 'လိုင်း', 'Area': 'ဧရိယာ', 'Revenue': 'ဝင်ငွေ',
+  'Last 7 days': 'နောက်ဆုံး ၇ ရက်', 'Last 30 days': 'နောက်ဆုံး ၃၀ ရက်', 'Last 6 months': 'နောက်ဆုံး ၆ လ',
+  'Sales overview': 'အရောင်းအနှစ်ချုပ်', 'Sales chart type': 'အရောင်းဇယား အမျိုးအစား', 'Sales chart range': 'အရောင်းဇယား ကာလ',
+  'Inventory levels': 'စတော့အဆင့်များ', 'Stock': 'စတော့', 'Low': 'နည်းသည်', 'Healthy': 'ကောင်းမွန်သည်',
+  'Business summary': 'လုပ်ငန်းအနှစ်ချုပ်', 'Product view': 'ကုန်ပစ္စည်း မြင်ကွင်း',
+  'All statuses': 'အခြေအနေအားလုံး', 'Paid': 'ပေးချေပြီး', 'Draft': 'မူကြမ်း', 'Sent': 'ပို့ပြီး', 'Cancelled': 'ပယ်ဖျက်ပြီး',
+  'List view': 'စာရင်းမြင်ကွင်း', 'Grid view': 'ကွက်မြင်ကွင်း', 'Filter by category': 'အမျိုးအစားအလိုက် စစ်ရန်',
+  'Filter by stock': 'စတော့အလိုက် စစ်ရန်', 'Sort products': 'ကုန်ပစ္စည်းများ စီရန်',
+  'All categories': 'အမျိုးအစားအားလုံး', 'All stock': 'စတော့အားလုံး', 'In Stock': 'စတော့ရှိသည်', 'Low Stock': 'စတော့နည်းသည်', 'Out of Stock': 'စတော့ကုန်သည်',
 };
 const english = Object.fromEntries(Object.entries(burmese).map(([source, translated]) => [translated, source]));
 
@@ -59,21 +68,34 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const translateElement = (element: Element) => {
       for (const attribute of ['placeholder', 'title', 'aria-label']) {
         const value = element.getAttribute(attribute);
-        if (value) element.setAttribute(attribute, translateText(value, language));
+        const translated = value ? translateText(value, language) : value;
+        if (value && translated && translated !== value) element.setAttribute(attribute, translated);
       }
       element.childNodes.forEach((node) => {
-        if (node.nodeType === Node.TEXT_NODE && node.nodeValue) node.nodeValue = translateText(node.nodeValue, language);
+        if (node.nodeType === Node.TEXT_NODE && node.nodeValue) {
+          const translated = translateText(node.nodeValue, language);
+          if (translated !== node.nodeValue) node.nodeValue = translated;
+        }
         else if (node.nodeType === Node.ELEMENT_NODE) translateElement(node as Element);
       });
     };
     const root = document.getElementById('root');
     if (!root) return;
     translateElement(root);
-    const observer = new MutationObserver((records) => records.forEach((record) => record.addedNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE && node.nodeValue) node.nodeValue = translateText(node.nodeValue, language);
-      if (node.nodeType === Node.ELEMENT_NODE) translateElement(node as Element);
-    })));
-    observer.observe(root, { childList: true, subtree: true });
+    const observer = new MutationObserver((records) => records.forEach((record) => {
+      if (record.type === 'characterData' && record.target.nodeValue) {
+        const translated = translateText(record.target.nodeValue, language);
+        if (translated !== record.target.nodeValue) record.target.nodeValue = translated;
+      }
+      record.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.nodeValue) {
+          const translated = translateText(node.nodeValue, language);
+          if (translated !== node.nodeValue) node.nodeValue = translated;
+        }
+        if (node.nodeType === Node.ELEMENT_NODE) translateElement(node as Element);
+      });
+    }));
+    observer.observe(root, { childList: true, characterData: true, subtree: true });
     return () => observer.disconnect();
   }, [language]);
 
