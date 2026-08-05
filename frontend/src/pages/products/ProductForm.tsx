@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/Alert';
 import { PageHeader } from '@/components/common/PageHeader';
+import { ImageCropper } from '@/components/common/ImageCropper';
 import { inventoryService } from '@/services/inventoryService';
 import type { ProductInput } from '@/types/inventory';
 
@@ -50,6 +51,7 @@ export function ProductForm({ productId }: { productId?: string }) {
   const [form, setForm] = useState<ProductFormState>(emptyForm);
   const [categoryName, setCategoryName] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
+  const [imageToCrop, setImageToCrop] = useState<File | null>(null);
 
   const product = useQuery({
     queryKey: ['products', productId],
@@ -96,6 +98,15 @@ export function ProductForm({ productId }: { productId?: string }) {
 
   const update = (field: keyof ProductFormState, value: string | File) =>
     setForm((current) => ({ ...current, [field]: value }));
+
+  const useImage = (file: File) => {
+    if (file.size > 2 * 1024 * 1024) {
+      window.alert('Image must be 2 MB or smaller.');
+      return;
+    }
+    update('image', file);
+    setPreview(URL.createObjectURL(file));
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -287,16 +298,12 @@ export function ProductForm({ productId }: { productId?: string }) {
                     onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 2 * 1024 * 1024) {
-                        event.target.value = '';
-                        window.alert('Image must be 2 MB or smaller.');
-                        return;
-                      }
-                      update('image', file);
-                      setPreview(URL.createObjectURL(file));
+                      setImageToCrop(file);
+                      event.target.value = '';
                     }}
                   />
-                  <p className="mt-2 text-xs text-slate-500">JPG, PNG, or WebP. Maximum 2 MB.</p>
+                  {form.image instanceof File && <button className="mt-3 inline-flex items-center rounded-lg text-sm font-semibold text-violet-600 hover:underline dark:text-violet-400" type="button" onClick={() => setImageToCrop(form.image as File)}>Crop or adjust image</button>}
+                  <p className="mt-2 text-xs text-slate-500">JPG, PNG, or WebP. Maximum 2 MB. You can crop before saving.</p>
                 </div>
               </div>
             </Card>
@@ -309,6 +316,7 @@ export function ProductForm({ productId }: { productId?: string }) {
           </form>
         )}
       </div>
+      {imageToCrop && <ImageCropper file={imageToCrop} onCancel={() => setImageToCrop(null)} onComplete={(file) => { setImageToCrop(null); useImage(file); }} />}
     </main>
   );
 }
