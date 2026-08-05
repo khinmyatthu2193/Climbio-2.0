@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { productController } from '../controllers/productController.js';
 import { requireAuth } from '../middleware/auth.js';
+import { requireApprovedShop } from '../middleware/approval.js';
 import { productImageUpload } from '../middleware/productUpload.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
 
@@ -23,7 +24,7 @@ const productSchema = z.object({
 }).strict();
 
 export const productRoutes = Router();
-productRoutes.use(requireAuth);
+productRoutes.use(requireAuth, requireApprovedShop);
 productRoutes.get('/', productController.list);
 productRoutes.get('/:id', validateParams(idParams), productController.get);
 productRoutes.post('/', productImageUpload.single('image'), validateBody(productSchema), productController.create);

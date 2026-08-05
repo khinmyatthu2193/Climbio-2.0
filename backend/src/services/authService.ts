@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { Prisma } from '@prisma/client';
+import { Prisma, type Role } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { createAccessToken, createRefreshToken, hashToken, verifyRefreshToken } from '../utils/tokens.js';
@@ -13,6 +13,10 @@ const publicUser = {
   shopAddress: true,
   phone: true,
   role: true,
+  accountStatus: true,
+  approvalStatus: true,
+  submittedAt: true,
+  approvedAt: true,
   setting: {
     select: { currency: true, invoiceFooter: true, companyName: true, companyLogo: true, theme: true },
   },
@@ -20,7 +24,7 @@ const publicUser = {
 
 const refreshExpiry = () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-async function issueSession(user: { id: string; email: string; role: 'ADMIN' | 'MANAGER' | 'STAFF' }) {
+async function issueSession(user: { id: string; email: string; role: Role }) {
   const payload = { sub: user.id, email: user.email, role: user.role };
   const accessToken = createAccessToken(payload);
   const refreshToken = createRefreshToken(payload);
@@ -37,7 +41,7 @@ export const authService = {
     if (existing) throw new AppError('An account with this email already exists', 409);
     const password = await bcrypt.hash(input.password, 12);
     const user = await prisma.user.create({
-      data: { ...input, email, password, setting: { create: {} } },
+      data: { ...input, email, password, role: 'SHOP_OWNER', accountStatus: 'ACTIVE', approvalStatus: 'PENDING', publicEnabled: false, setting: { create: {} } },
       select: publicUser,
     });
     return { user, ...await issueSession(user) };

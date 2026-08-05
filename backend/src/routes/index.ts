@@ -6,6 +6,8 @@ import { invoiceRoutes } from './invoiceRoutes.js';
 import { productRoutes } from './productRoutes.js';
 import { publicShopRoutes } from './publicShopRoutes.js';
 import { aiRoutes } from './aiRoutes.js';
+import { adminRoutes } from './adminRoutes.js';
+import { shopApplicationRoutes } from './shopApplicationRoutes.js';
 
 export const apiRoutes = Router();
 apiRoutes.use('/auth', authRoutes);
@@ -15,3 +17,5 @@ apiRoutes.use('/dashboard', dashboardRoutes);
 apiRoutes.use('/invoices', invoiceRoutes);
 apiRoutes.use('/shop', publicShopRoutes);
 apiRoutes.use('/ai', aiRoutes);
+apiRoutes.use('/shop-application', shopApplicationRoutes);
+apiRoutes.use('/admin', adminRoutes);

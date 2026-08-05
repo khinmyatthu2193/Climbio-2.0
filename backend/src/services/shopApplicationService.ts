@@ -1,0 +1,51 @@
+import { prisma } from '../config/prisma.js';
+import { approvalNotificationService } from './approvalNotificationService.js';
+import { AppError } from '../utils/AppError.js';
+
+const shopSelect = {
+  id: true, email: true, name: true, shopName: true, phone: true, shopLogo: true, shopAddress: true,
+  accountStatus: true, approvalStatus: true, submittedAt: true, approvedAt: true, suspendedAt: true, applicationVersion: true,
+} as const;
+
+export const shopApplicationService = {
+  async get(userId: string) {
+    const shop = await prisma.user.findUnique({
+      where: { id: userId }, select: {
+        ...shopSelect,
+        reviewsReceived: {
+          select: { id: true, action: true, previousStatus: true, nextStatus: true, feedback: true, version: true, createdAt: true, admin: { select: { name: true } } },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+    if (!shop) throw new AppError('Application not found', 404);
+    return shop;
+  },
+
+  async update(userId: string, input: { name: string; shopName: string; phone?: string | null; shopAddress?: string | null }) {
+    const found = await prisma.user.findUnique({ where: { id: userId }, select: { approvalStatus: true } });
+    if (!found) throw new AppError('Application not found', 404);
+    if (!['PENDING', 'CHANGES_REQUESTED'].includes(found.approvalStatus)) {
+      throw new AppError('This application can no longer be edited', 403);
+    }
+    return prisma.user.update({ where: { id: userId }, data: input, select: shopSelect });
+  },
+
+  async resubmit(userId: string) {
+    const result = await prisma.$transaction(async (tx) => {
+      const shop = await tx.user.findUnique({ where: { id: userId }, select: { approvalStatus: true, applicationVersion: true } });
+      if (!shop) throw new AppError('Application not found', 404);
+      if (shop.approvalStatus !== 'CHANGES_REQUESTED') throw new AppError('Only applications with requested changes can be resubmitted', 409);
+      const version = shop.applicationVersion + 1;
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: { approvalStatus: 'PENDING', submittedAt: new Date(), applicationVersion: version, publicEnabled: false },
+        select: shopSelect,
+      });
+      await tx.shopReview.create({ data: { shopId: userId, action: 'RESUBMITTED', previousStatus: 'CHANGES_REQUESTED', nextStatus: 'PENDING', version } });
+      return updated;
+    });
+    void approvalNotificationService.notify({ shopId: userId, action: 'RESUBMITTED' });
+    return result;
+  },
+};

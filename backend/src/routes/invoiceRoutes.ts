@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { invoiceController } from '../controllers/invoiceController.js';
 import { requireAuth } from '../middleware/auth.js';
+import { requireApprovedShop } from '../middleware/approval.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
 
 const idParams = z.object({ id: z.string().uuid() }).strict();
@@ -28,7 +29,7 @@ const statusSchema = z.object({
 }).strict();
 
 export const invoiceRoutes = Router();
-invoiceRoutes.use(requireAuth);
+invoiceRoutes.use(requireAuth, requireApprovedShop);
 invoiceRoutes.get('/', invoiceController.list);
 invoiceRoutes.get('/:id', validateParams(idParams), invoiceController.get);
 invoiceRoutes.post('/', validateBody(createInvoiceSchema), invoiceController.create);

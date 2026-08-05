@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { publicShopController } from '../controllers/publicShopController.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
+import { requireApprovedShop } from '../middleware/approval.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
 
 const slugParams = z.object({
@@ -16,7 +17,7 @@ const storeSchema = z.object({
 }).strict();
 
 export const publicShopRoutes = Router();
-publicShopRoutes.get('/my-store', requireAuth, requireRole('ADMIN'), publicShopController.getMyStore);
-publicShopRoutes.put('/my-store/status', requireAuth, requireRole('ADMIN'), validateBody(statusSchema), publicShopController.updateStatus);
-publicShopRoutes.put('/my-store', requireAuth, requireRole('ADMIN'), validateBody(storeSchema), publicShopController.updateMyStore);
+publicShopRoutes.get('/my-store', requireAuth, requireApprovedShop, publicShopController.getMyStore);
+publicShopRoutes.put('/my-store/status', requireAuth, requireApprovedShop, validateBody(statusSchema), publicShopController.updateStatus);
+publicShopRoutes.put('/my-store', requireAuth, requireApprovedShop, validateBody(storeSchema), publicShopController.updateMyStore);
 publicShopRoutes.get('/:slug', validateParams(slugParams), publicShopController.get);

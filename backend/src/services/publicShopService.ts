@@ -4,8 +4,8 @@ import { AppError } from '../utils/AppError.js';
 
 export const publicShopService = {
   async getBySlug(slug: string) {
-    const shop = await prisma.user.findUnique({
-      where: { slug },
+    const shop = await prisma.user.findFirst({
+      where: { slug, publicEnabled: true, approvalStatus: 'APPROVED', accountStatus: 'ACTIVE' },
       select: {
         publicEnabled: true,
         slug: true,

@@ -23,8 +23,34 @@ enum Currency {
 
 enum Role {
   ADMIN
+  SHOP_OWNER
   MANAGER
   STAFF
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum ShopApprovalStatus {
+  PENDING
+  APPROVED
+  CHANGES_REQUESTED
+  DECLINED
+  SUSPENDED
+}
+
+enum ShopReviewAction {
+  APPROVED
+  CHANGES_REQUESTED
+  DECLINED
+  SUSPENDED
+  REACTIVATED
+  GENERAL_FEEDBACK
+  RESUBMITTED
+  REOPENED
 }
 
 enum AIInsightType {
@@ -44,7 +70,13 @@ model User {
   shopLogo      String?        @map("shop_logo")
   shopAddress   String?        @map("shop_address")
   phone         String?        @db.VarChar(30)
-  role          Role           @default(ADMIN)
+  role          Role           @default(SHOP_OWNER)
+  accountStatus AccountStatus  @default(ACTIVE) @map("account_status")
+  approvalStatus ShopApprovalStatus @default(PENDING) @map("approval_status")
+  submittedAt   DateTime       @default(now()) @map("submitted_at")
+  approvedAt    DateTime?      @map("approved_at")
+  suspendedAt   DateTime?      @map("suspended_at")
+  applicationVersion Int       @default(1) @map("application_version")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
   products      Product[]
@@ -55,8 +87,29 @@ model User {
   refreshTokens RefreshToken[]
   aiInsights    AIInsight[]
   aiChatHistory AIChatHistory[]
+  reviewsReceived ShopReview[] @relation("ShopReviewsReceived")
+  reviewsPerformed ShopReview[] @relation("ShopReviewsPerformed")
 
   @@map("users")
+}
+
+model ShopReview {
+  id             String             @id @default(uuid()) @db.Uuid
+  shopId         String             @map("shop_id") @db.Uuid
+  adminId        String?            @map("admin_id") @db.Uuid
+  action         ShopReviewAction
+  previousStatus ShopApprovalStatus? @map("previous_status")
+  nextStatus     ShopApprovalStatus? @map("next_status")
+  feedback       String?
+  version        Int                @default(1)
+  createdAt      DateTime           @default(now()) @map("created_at")
+  shop           User               @relation("ShopReviewsReceived", fields: [shopId], references: [id], onDelete: Cascade)
+  admin          User?              @relation("ShopReviewsPerformed", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([shopId, createdAt])
+  @@index([adminId, createdAt])
+  @@index([action, createdAt])
+  @@map("shop_reviews")
 }
 
 model Product {
