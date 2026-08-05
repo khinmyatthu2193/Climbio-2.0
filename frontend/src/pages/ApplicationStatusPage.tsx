@@ -11,10 +11,16 @@ import { useAuthStore } from '@/store/authStore';
 
 export function ApplicationStatusPage() {
   const queryClient = useQueryClient();
-  const application = useQuery({ queryKey: ['shop-application'], queryFn: shopApplicationService.get });
+  const application = useQuery({ queryKey: ['shop-application'], queryFn: shopApplicationService.get, refetchInterval: 15_000 });
   const [form, setForm] = useState({ name: '', shopName: '', phone: '', shopAddress: '' });
   const setUser = useAuthStore((state) => state.setUser);
   useEffect(() => { if (application.data) setForm({ name: application.data.name, shopName: application.data.shopName, phone: application.data.phone ?? '', shopAddress: application.data.shopAddress ?? '' }); }, [application.data]);
+  useEffect(() => {
+    if (application.data?.accountStatus === 'ACTIVE' && application.data.approvalStatus === 'APPROVED') {
+      setUser({ ...useAuthStore.getState().user!, accountStatus: application.data.accountStatus, approvalStatus: application.data.approvalStatus, approvedAt: application.data.approvedAt });
+      window.location.replace('/');
+    }
+  }, [application.data?.accountStatus, application.data?.approvalStatus, application.data?.approvedAt, setUser]);
   const update = useMutation({ mutationFn: shopApplicationService.update, onSuccess: async () => queryClient.invalidateQueries({ queryKey: ['shop-application'] }) });
   const resubmit = useMutation({ mutationFn: shopApplicationService.resubmit, onSuccess: async (data) => { setUser({ ...useAuthStore.getState().user!, approvalStatus: data.approvalStatus, submittedAt: data.submittedAt }); await queryClient.invalidateQueries({ queryKey: ['shop-application'] }); } });
   if (application.isLoading) return <main className="page-container"><Card className="mt-8 p-0"><LoadingState label="Loading application" /></Card></main>;
