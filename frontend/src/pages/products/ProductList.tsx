@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Boxes,
-  Copy,
   EllipsisVertical,
   Grid2X2,
   List,
@@ -43,10 +42,9 @@ function ProductImage({ product, className }: { product: Product; className: str
   );
 }
 
-function ProductActions({ product, busy, onDuplicate, onAdjustStock, onDelete }: {
+function ProductActions({ product, busy, onAdjustStock, onDelete }: {
   product: Product;
   busy: boolean;
-  onDuplicate: () => void;
   onAdjustStock: () => void;
   onDelete: () => void;
 }) {
@@ -58,7 +56,6 @@ function ProductActions({ product, busy, onDuplicate, onAdjustStock, onDelete }:
       </summary>
       <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-800">
         <a className={itemClass} href={`/products/${product.id}/edit`}><Pencil className="size-4" /> Edit product</a>
-        <button className={itemClass} type="button" disabled={busy} onClick={onDuplicate}><Copy className="size-4" /> Duplicate</button>
         <button className={itemClass} type="button" disabled={busy} onClick={onAdjustStock}><SlidersHorizontal className="size-4" /> Adjust stock</button>
         <button className={`${itemClass} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10`} type="button" disabled={busy} onClick={onDelete}><Trash2 className="size-4" /> Delete product</button>
       </div>
@@ -90,20 +87,6 @@ export function ProductList() {
     ]);
   };
   const removeProduct = useMutation({ mutationFn: inventoryService.deleteProduct, onSuccess: refreshProducts });
-  const duplicateProduct = useMutation({
-    mutationFn: (product: Product) => {
-      const input: ProductInput = {
-        name: `${product.name.slice(0, 93)} (Copy)`,
-        description: product.description ?? '',
-        price: product.price,
-        costPrice: product.costPrice,
-        quantity: '0',
-        categoryId: product.categoryId ?? '',
-      };
-      return inventoryService.createProduct(input);
-    },
-    onSuccess: refreshProducts,
-  });
   const adjustStock = useMutation({
     mutationFn: ({ product, quantity }: { product: Product; quantity: number }) => inventoryService.updateProduct(product.id, {
       name: product.name,
@@ -169,7 +152,7 @@ export function ProductList() {
     }
     adjustStock.mutate({ product, quantity });
   };
-  const busy = removeProduct.isPending || duplicateProduct.isPending || adjustStock.isPending;
+  const busy = removeProduct.isPending || adjustStock.isPending;
   const hasFilters = search || categoryId !== 'all' || stockFilter !== 'all';
   const clearFilters = () => { setSearch(''); setCategoryId('all'); setStockFilter('all'); };
 
@@ -183,7 +166,7 @@ export function ProductList() {
       />
 
       {products.isError && <Alert className="mt-6" tone="error">Could not load inventory. Please refresh and try again.</Alert>}
-      {(removeProduct.isError || duplicateProduct.isError || adjustStock.isError) && <Alert className="mt-6" tone="error">The product action could not be completed. Please try again.</Alert>}
+      {(removeProduct.isError || adjustStock.isError) && <Alert className="mt-6" tone="error">The product action could not be completed. Please try again.</Alert>}
 
       {!products.isLoading && !products.isError && (
         <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Inventory summary">
@@ -232,7 +215,7 @@ export function ProductList() {
               <Card className="flex h-full flex-col overflow-visible p-0" key={product.id}>
                 <div className="relative h-56 overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800"><ProductImage product={product} className="h-full w-full rounded-t-2xl" /><div className="absolute right-3 top-3"><Badge className={stock.className}>{stock.label}</Badge></div></div>
                 <div className="flex flex-1 flex-col p-4">
-                  <div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-bold">{product.name}</h2><p className="mt-1 text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onDuplicate={() => duplicateProduct.mutate(product)} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div>
+                  <div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-bold">{product.name}</h2><p className="mt-1 text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div>
                   <div className="mt-auto grid grid-cols-2 gap-3 border-t border-slate-200 pt-3 text-sm dark:border-slate-700"><div><p className="text-xs text-slate-500">Selling price</p><p className="mt-1 font-semibold">{money.format(Number(product.price))}</p></div><div><p className="text-xs text-slate-500">Cost price</p><p className="mt-1 font-semibold">{money.format(Number(product.costPrice))}</p></div></div>
                   <p className="mt-3 text-sm"><span className="text-slate-500">Stock quantity:</span> <strong>{product.quantity}</strong></p>
                 </div>
@@ -247,7 +230,7 @@ export function ProductList() {
           <div className="divide-y dark:divide-slate-800 sm:hidden">
             {filteredProducts.map((product) => {
               const stock = stockState(product.quantity, lowStockThreshold);
-              return <article className="p-4" key={product.id}><div className="flex gap-3"><ProductImage product={product} className="size-16 rounded-xl" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-semibold">{product.name}</h2><p className="text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onDuplicate={() => duplicateProduct.mutate(product)} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div><div className="mt-3 flex items-center justify-between"><div><p className="font-semibold">{money.format(Number(product.price))}</p><p className="text-xs text-slate-500">Cost {money.format(Number(product.costPrice))}</p></div><div className="text-right"><Badge className={stock.className}>{stock.label}</Badge><p className="mt-1 text-xs text-slate-500">Qty {product.quantity}</p></div></div></div></div></article>;
+              return <article className="p-4" key={product.id}><div className="flex gap-3"><ProductImage product={product} className="size-16 rounded-xl" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-semibold">{product.name}</h2><p className="text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div><div className="mt-3 flex items-center justify-between"><div><p className="font-semibold">{money.format(Number(product.price))}</p><p className="text-xs text-slate-500">Cost {money.format(Number(product.costPrice))}</p></div><div className="text-right"><Badge className={stock.className}>{stock.label}</Badge><p className="mt-1 text-xs text-slate-500">Qty {product.quantity}</p></div></div></div></div></article>;
             })}
           </div>
           <div className="hidden overflow-x-auto sm:block">
@@ -255,7 +238,7 @@ export function ProductList() {
               <thead className="border-b bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-400"><tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Category</th><th className="px-5 py-4">Selling price</th><th className="px-5 py-4">Cost price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4">Status</th><th className="px-5 py-4 text-right">Actions</th></tr></thead>
               <tbody className="divide-y dark:divide-slate-800">
                 {filteredProducts.map((product) => { const stock = stockState(product.quantity, lowStockThreshold); return (
-                  <tr key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50"><td className="px-5 py-4"><div className="flex items-center gap-3"><ProductImage product={product} className="size-12 rounded-xl" /><div><p className="font-semibold">{product.name}</p><p className="max-w-52 truncate text-xs text-slate-500">{product.description || 'No description'}</p></div></div></td><td className="px-5 py-4 text-sm">{product.category?.name ?? 'Uncategorized'}</td><td className="px-5 py-4 font-semibold">{money.format(Number(product.price))}</td><td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{money.format(Number(product.costPrice))}</td><td className="px-5 py-4 font-semibold">{product.quantity}</td><td className="px-5 py-4"><Badge className={stock.className}>{stock.label}</Badge></td><td className="px-5 py-4"><div className="flex justify-end"><ProductActions product={product} busy={busy} onDuplicate={() => duplicateProduct.mutate(product)} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div></td></tr>
+                  <tr key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50"><td className="px-5 py-4"><div className="flex items-center gap-3"><ProductImage product={product} className="size-12 rounded-xl" /><div><p className="font-semibold">{product.name}</p><p className="max-w-52 truncate text-xs text-slate-500">{product.description || 'No description'}</p></div></div></td><td className="px-5 py-4 text-sm">{product.category?.name ?? 'Uncategorized'}</td><td className="px-5 py-4 font-semibold">{money.format(Number(product.price))}</td><td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{money.format(Number(product.costPrice))}</td><td className="px-5 py-4 font-semibold">{product.quantity}</td><td className="px-5 py-4"><Badge className={stock.className}>{stock.label}</Badge></td><td className="px-5 py-4"><div className="flex justify-end"><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div></td></tr>
                 ); })}
               </tbody>
             </table>
