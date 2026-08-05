@@ -14,6 +14,14 @@ import { MyPublicStore } from '@/pages/store/MyPublicStore';
 import { AppShell } from '@/components/layout/AppShell';
 import { useTheme } from '@/hooks/useTheme';
 import { AIAdvisorPage } from '@/pages/AIAdvisorPage';
+import { ApplicationStatusPage } from '@/pages/ApplicationStatusPage';
+import { AdminShell } from '@/components/layout/AdminShell';
+import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage';
+import { AdminApplicationsPage } from '@/pages/admin/AdminApplicationsPage';
+import { AdminApplicationDetailPage } from '@/pages/admin/AdminApplicationDetailPage';
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
+import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage';
+import type { Role } from '@/types/auth';
 
 export default function App() {
   useTheme();
@@ -52,19 +60,28 @@ export default function App() {
   if (path === '/register') return <AuthPage register />;
   const publicShop = path.match(/^\/shop\/([a-z0-9-]+)$/i);
   if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
-  const protectedPage = (page: React.ReactNode, roles?: Array<'ADMIN' | 'MANAGER' | 'STAFF'>) => (
-    <ProtectedRoute roles={roles}><AppShell>{page}</AppShell></ProtectedRoute>
+  const protectedPage = (page: React.ReactNode, roles?: Role[], requireApproved = false) => (
+    <ProtectedRoute roles={roles} requireApproved={requireApproved}><AppShell>{page}</AppShell></ProtectedRoute>
   );
-  if (path === '/profile') return protectedPage(<ProfilePage />);
-  if (path === '/my-store') return protectedPage(<MyPublicStore />, ['ADMIN']);
-  if (path === '/ai-advisor') return protectedPage(<AIAdvisorPage />);
-  if (path === '/products') return protectedPage(<ProductList />);
-  if (path === '/products/new') return protectedPage(<ProductForm />);
-  if (path === '/invoices') return protectedPage(<InvoiceList />);
-  if (path === '/invoices/new') return protectedPage(<CreateInvoice />);
+  const adminPage = (page: React.ReactNode) => <ProtectedRoute roles={['ADMIN']}><AdminShell>{page}</AdminShell></ProtectedRoute>;
+  if (path === '/admin/dashboard') return adminPage(<AdminDashboardPage />);
+  if (path === '/admin/applications') return adminPage(<AdminApplicationsPage />);
+  if (path === '/admin/shops') return adminPage(<AdminApplicationsPage mode="shops" />);
+  if (path === '/admin/users') return adminPage(<AdminUsersPage />);
+  if (path === '/admin/audit-logs') return adminPage(<AdminAuditLogsPage />);
+  const adminApplication = path.match(/^\/admin\/applications\/([0-9a-f-]+)$/i);
+  if (adminApplication) return adminPage(<AdminApplicationDetailPage shopId={adminApplication[1]} />);
+  if (path === '/application') return <ProtectedRoute><ApplicationStatusPage /></ProtectedRoute>;
+  if (path === '/profile') return protectedPage(<ProfilePage />, undefined, true);
+  if (path === '/my-store') return protectedPage(<MyPublicStore />, undefined, true);
+  if (path === '/ai-advisor') return protectedPage(<AIAdvisorPage />, undefined, true);
+  if (path === '/products') return protectedPage(<ProductList />, undefined, true);
+  if (path === '/products/new') return protectedPage(<ProductForm />, undefined, true);
+  if (path === '/invoices') return protectedPage(<InvoiceList />, undefined, true);
+  if (path === '/invoices/new') return protectedPage(<CreateInvoice />, undefined, true);
   const invoiceDetail = path.match(/^\/invoices\/([0-9a-f-]+)$/i);
-  if (invoiceDetail) return protectedPage(<InvoiceDetail invoiceId={invoiceDetail[1]} />);
+  if (invoiceDetail) return protectedPage(<InvoiceDetail invoiceId={invoiceDetail[1]} />, undefined, true);
   const productEdit = path.match(/^\/products\/([0-9a-f-]+)\/edit$/i);
-  if (productEdit) return protectedPage(<ProductForm productId={productEdit[1]} />);
-  return protectedPage(<DashboardPage />);
+  if (productEdit) return protectedPage(<ProductForm productId={productEdit[1]} />, undefined, true);
+  return protectedPage(<DashboardPage />, undefined, true);
 }

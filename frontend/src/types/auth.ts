@@ -1,4 +1,6 @@
-export type Role = 'ADMIN' | 'MANAGER' | 'STAFF';
+export type Role = 'ADMIN' | 'SHOP_OWNER' | 'MANAGER' | 'STAFF';
+export type AccountStatus = 'ACTIVE' | 'SUSPENDED' | 'DISABLED';
+export type ShopApprovalStatus = 'PENDING' | 'APPROVED' | 'CHANGES_REQUESTED' | 'DECLINED' | 'SUSPENDED';
 export type Currency = 'MMK' | 'USD' | 'THB';
 
 export interface ShopSetting {
@@ -18,6 +20,10 @@ export interface User {
   shopLogo: string | null;
   shopAddress: string | null;
   role: Role;
+  accountStatus: AccountStatus;
+  approvalStatus: ShopApprovalStatus;
+  submittedAt: string;
+  approvedAt: string | null;
   setting: ShopSetting | null;
 }
 

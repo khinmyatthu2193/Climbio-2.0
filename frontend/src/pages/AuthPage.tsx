@@ -12,7 +12,7 @@ export function AuthPage({ register }: { register: boolean }) {
   const { theme, toggleTheme } = useTheme();
 
   if (user) {
-    window.location.replace('/');
+    window.location.replace(user.role === 'ADMIN' ? '/admin/dashboard' : user.accountStatus !== 'ACTIVE' || user.approvalStatus !== 'APPROVED' ? '/application' : '/');
     return null;
   }
   return (

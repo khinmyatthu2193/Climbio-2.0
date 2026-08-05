@@ -136,7 +136,9 @@ To run the complete development stack in containers, create the three `.env` fil
 - `PUT /api/auth/profile` updates profile, address, currency, and invoice settings.
 - `PUT /api/auth/change-password` changes the password and revokes active refresh sessions.
 - `POST /api/auth/upload-logo` accepts one `logo` image (JPG, PNG, or WebP; maximum 2 MB).
-- New accounts receive the `ADMIN` role. Backend and frontend role guards support `ADMIN`, `MANAGER`, and `STAFF`.
+- New public registrations receive the `SHOP_OWNER` role with a `PENDING` shop application. They can sign in and view their application status, but business modules are available only after approval. Existing `ADMIN`, `MANAGER`, and `STAFF` roles remain supported.
+- Platform administrators are never created by public registration. Configure `ADMIN_EMAILS` (comma-separated), `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_NAME` in the private backend environment, then run `npm run admin:bootstrap` after `npm run prisma:deploy`.
+- The bootstrap command is idempotent: it creates the configured bootstrap account only if missing, keeps only allowlisted accounts as `ADMIN`, and converts legacy non-allowlisted `ADMIN` accounts to `SHOP_OWNER` while revoking their active refresh sessions.
 
 ## Database
 
@@ -147,6 +149,6 @@ Supabase Storage credentials are server-only. Product upload implementation belo
 ## Deployment notes
 
 - In Vercel, set `VITE_API_URL` to the deployed backend API URL including `/api` (for example, `https://your-backend.example.com/api`) for Production and Preview, then redeploy so Vite can embed it in the bundle.
-- Build the backend with `npm run build`, run `npm run prisma:deploy`, and start with `npm start`.
+- Build the backend with `npm run build`, run `npm run prisma:deploy`, run `npm run admin:bootstrap`, and start with `npm start`.
 - On the backend host, set `NODE_ENV=production`, `DATABASE_URL`, `OPENROUTER_API_KEY`, HTTPS `FRONTEND_URL`, strong JWT secrets, and Supabase Storage credentials. `FRONTEND_URL` accepts comma-separated HTTPS origins when both the production and preview frontend must be allowed.
 - The PRD mentions both Supabase and Railway for backend hosting. The API is provider-neutral and can run on either; Supabase provides PostgreSQL and Storage.
