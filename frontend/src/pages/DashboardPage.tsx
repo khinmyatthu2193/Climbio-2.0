@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, ArrowUpRight, Boxes, FilePlus2, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -20,6 +20,8 @@ import { dashboardService } from '@/services/dashboardService';
 import { useAuthStore } from '@/store/authStore';
 import type { SalesRange } from '@/types/dashboard';
 import { useLanguage } from '@/hooks/useLanguage';
+import { Button } from '@/components/ui/button';
+import { download, downloadFinancialReportExcel } from '@/utils/financialReportExport';
 
 const chartTooltip = {
   backgroundColor: 'hsl(var(--background))',
@@ -49,6 +51,7 @@ export function DashboardPage() {
   const { language, translate } = useLanguage();
   const [salesRange, setSalesRange] = useState<SalesRange>('6m');
   const [salesChartView, setSalesChartView] = useState<SalesChartView>('bar');
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const selectedSalesRange = salesRanges.find((range) => range.value === salesRange) ?? salesRanges[2];
   const dashboard = useQuery({
     queryKey: ['dashboard', 'summary', salesRange],
@@ -68,6 +71,27 @@ export function DashboardPage() {
   });
   const maxStock = Math.max(...(dashboard.data?.productStock.map((product) => product.quantity) ?? [0]), 1);
   const today = new Intl.DateTimeFormat(language === 'my' ? 'my-MM' : undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+
+  const downloadPdfReport = async () => {
+    if (!dashboard.data || !user) return;
+    setIsDownloadingPdf(true);
+    try {
+      const [{ pdf }, { FinancialReportPdfDocument }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('@/components/reports/FinancialReportPdfDocument'),
+      ]);
+      const createdAt = new Date();
+      const blob = await pdf(<FinancialReportPdfDocument report={dashboard.data} shop={user} range={salesRange} createdAt={createdAt} />).toBlob();
+      download(blob, `financial-report-${createdAt.toISOString().slice(0, 10)}.pdf`);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
+  const downloadExcelReport = () => {
+    if (!dashboard.data || !user) return;
+    downloadFinancialReportExcel({ report: dashboard.data, shopName: user.shopName, currency, range: salesRange, createdAt: new Date() });
+  };
 
   const cards = [
     {
@@ -110,7 +134,13 @@ export function DashboardPage() {
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{language === 'my' ? `${user?.shopName}၏ လုပ်ငန်းအခြေအနေကို တစ်နေရာတည်းတွင် ကြည့်ရှုပါ။` : `A clear view of what is happening at ${user?.shopName}.`}</p>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+          <Button variant="outline" size="md" onClick={downloadPdfReport} disabled={!dashboard.data || isDownloadingPdf} title="Download financial report as PDF">
+            <FileDown className="size-4" /> {isDownloadingPdf ? 'Preparing PDF...' : 'PDF report'}
+          </Button>
+          <Button variant="outline" size="md" onClick={downloadExcelReport} disabled={!dashboard.data} title="Download financial report for Excel">
+            <FileSpreadsheet className="size-4" /> Excel report
+          </Button>
           <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-violet-300 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-slate-800" href="/invoices/new">
             <FilePlus2 className="size-4" /> Create invoice
           </a>
