@@ -32,15 +32,15 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md rounded-3xl border-white/80 bg-white/90 p-6 shadow-2xl shadow-violet-950/10 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/90 dark:shadow-black/30 sm:p-8">
-      <p className="text-sm font-bold text-violet-600 dark:text-violet-300">WELCOME BACK</p>
-      <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">Sign in to Climbio</h1>
-      <p className="mb-7 mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">Enter your details to continue managing your business.</p>
+    <Card className="w-full max-w-[500px] rounded-[28px] border-white bg-white p-8 shadow-[0_24px_70px_rgba(91,56,172,0.12)] dark:border-slate-700/80 dark:bg-slate-900 dark:shadow-black/30 sm:p-9">
+      <p className="text-sm font-extrabold text-violet-600 dark:text-violet-300">WELCOME BACK</p>
+      <h1 className="mt-2 text-[32px] font-black tracking-[-0.035em] text-slate-950 dark:text-white">Sign in to Climbio</h1>
+      <p className="mb-8 mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">Enter your details to continue managing your business.</p>
       <form className="space-y-5" onSubmit={submit}>
         <AuthInput label="Email address" name="email" autoComplete="email" type="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} icon={<Mail className="size-[18px]" />} required />
         <PasswordInput label="Password" name="password" autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required />
         {login.isError && <p className="flex gap-2 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300" role="alert"><AlertCircle className="mt-0.5 size-4 shrink-0" />{loginError(login.error)}</p>}
-        <Button className="min-h-12 w-full rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-base shadow-lg shadow-violet-600/20 hover:from-violet-700 hover:to-purple-700 active:scale-[0.99]" disabled={login.isPending}>
+        <Button className="min-h-[54px] w-full rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-base shadow-xl shadow-violet-600/25 hover:from-violet-700 hover:to-purple-700 active:scale-[0.99]" disabled={login.isPending}>
           {login.isPending && <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />}
           {login.isPending ? 'Signing in…' : 'Sign in'}
         </Button>

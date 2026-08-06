@@ -15,7 +15,7 @@ export function AuthInput({ label, icon, id, ...props }: AuthInputProps) {
         <input
           {...props}
           id={inputId}
-          className="min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/80 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-slate-900/[0.02] transition placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:bg-slate-950 dark:focus:ring-violet-500/15"
+          className="min-h-[54px] w-full rounded-2xl border border-slate-200 bg-[#edf3ff] py-3 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-slate-900/[0.02] transition placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:bg-slate-950 dark:focus:ring-violet-500/15"
         />
       </span>
     </label>
