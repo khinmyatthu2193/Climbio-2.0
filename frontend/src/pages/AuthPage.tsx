@@ -55,27 +55,27 @@ export function AuthPage({ register }: { register: boolean }) {
           </section>
 
           <section className="hidden py-8 lg:block" aria-label="Climbio business workspace preview">
-            <div className="relative max-w-[590px] overflow-hidden rounded-[36px] bg-slate-950 p-8 shadow-[0_30px_80px_rgba(49,46,129,0.24)] xl:p-10">
-              <div className="absolute -right-24 -top-24 size-72 rounded-full bg-violet-500/45 blur-3xl" />
-              <div className="absolute -bottom-24 -left-16 size-64 rounded-full bg-fuchsia-600/30 blur-3xl" />
+            <div className="relative max-w-[590px] overflow-hidden rounded-[36px] border border-violet-100 bg-white p-8 shadow-[0_30px_80px_rgba(139,92,246,0.16)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-[0_30px_80px_rgba(49,46,129,0.24)] xl:p-10">
+              <div className="absolute -right-24 -top-24 size-72 rounded-full bg-violet-300/35 blur-3xl dark:bg-violet-500/45" />
+              <div className="absolute -bottom-24 -left-16 size-64 rounded-full bg-fuchsia-300/25 blur-3xl dark:bg-fuchsia-600/30" />
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold tracking-wide text-violet-100">
-                    <Sparkles className="size-3.5 text-violet-300" /> {isBurmese ? 'CLIMBIO လုပ်ငန်းစီမံခန့်ခွဲမှု' : 'CLIMBIO BUSINESS HUB'}
+                  <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold tracking-wide text-violet-700 dark:border-white/15 dark:bg-white/10 dark:text-violet-100">
+                    <Sparkles className="size-3.5 text-violet-500 dark:text-violet-300" /> {isBurmese ? 'CLIMBIO လုပ်ငန်းစီမံခန့်ခွဲမှု' : 'CLIMBIO BUSINESS HUB'}
                   </div>
-                  <div className="grid size-10 place-items-center rounded-2xl bg-white/10 text-violet-200"><TrendingUp className="size-5" /></div>
+                  <div className="grid size-10 place-items-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-white/10 dark:text-violet-200"><TrendingUp className="size-5" /></div>
                 </div>
-                <h1 className="mt-7 max-w-[470px] text-4xl font-black leading-tight tracking-[-0.04em] text-white xl:text-[48px]">
-                  {isBurmese ? 'လုပ်ငန်းရဲ့ အရေးကြီးသမျှကို ရှင်းလင်းစွာ မြင်နိုင်ပါသည်။' : 'See the important parts of your business, clearly.'}
+                <h1 className="mt-7 max-w-[470px] text-4xl font-black leading-tight tracking-[-0.04em] text-slate-950 dark:text-white xl:text-[48px]">
+                  {isBurmese ? 'မိတ်ဆွေတို့ရဲ့ လုပ်ငန်းကို Climbio နဲ့အတူ ချဲ့ထွင်လိုက်ပါ။' : 'See the important parts of your business, clearly.'}
                 </h1>
-                <p className="mt-4 max-w-[455px] text-base leading-7 text-slate-300">
-                  {isBurmese ? 'အရောင်း၊ စတော့နှင့် ငွေတောင်းခံလွှာများကို တစ်နေရာတည်းမှ လွယ်ကူစွာ ထိန်းချုပ်ပါ။' : 'Track sales, stock, and invoices from one calm, connected workspace.'}
+                <p className="mt-4 max-w-[455px] text-base leading-7 text-slate-600 dark:text-slate-300">
+                  {isBurmese ? 'အရောင်းစာရင်း၊ ကုန်ပစ္စည်းစာရင်းနဲ့ ဘောင်ချာတွေကို တစ်နေရာတည်းမှာ လွယ်ကူစွာ စီမံလိုက်ပါ။' : 'Track sales, stock, and invoices from one calm, connected workspace.'}
                 </p>
 
-                <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.08] p-5 backdrop-blur-sm">
+                <div className="mt-8 rounded-3xl border border-violet-100 bg-violet-50/80 p-5 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                   <div className="flex items-center justify-between">
-                    <div><p className="text-xs font-bold uppercase tracking-wider text-slate-400">{isBurmese ? 'ယနေ့အခြေအနေ' : 'TODAY AT A GLANCE'}</p><p className="mt-1 text-lg font-bold text-white">{isBurmese ? 'သင့်လုပ်ငန်းအကျဉ်းချုပ်' : 'Your business snapshot'}</p></div>
-                    <div className="rounded-xl bg-emerald-400/15 px-2.5 py-1 text-xs font-bold text-emerald-300">+18.4%</div>
+                    <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{isBurmese ? 'ယနေ့အခြေအနေ' : 'TODAY AT A GLANCE'}</p><p className="mt-1 text-lg font-bold text-slate-950 dark:text-white">{isBurmese ? 'သင့်လုပ်ငန်းအကျဉ်းချုပ်' : 'Your business snapshot'}</p></div>
+                    <div className="rounded-xl bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300">+18.4%</div>
                   </div>
                   <div className="mt-5 grid grid-cols-3 gap-3">
                     <Snapshot label={isBurmese ? 'ရောင်းအား' : 'Revenue'} value="1.28M" icon={BarChart3} />
@@ -86,7 +86,7 @@ export function AuthPage({ register }: { register: boolean }) {
                     {[38, 56, 43, 72, 59, 88, 76, 100].map((height, index) => <span key={index} className="flex-1 rounded-t-md bg-gradient-to-t from-violet-500 to-fuchsia-400" style={{ height: `${height}%`, opacity: 0.45 + index * 0.07 }} />)}
                   </div>
                 </div>
-                <div className="mt-6 flex items-center gap-3 text-sm font-medium text-slate-300"><CheckCircle2 className="size-5 shrink-0 text-emerald-400" /> {isBurmese ? 'သင့်လုပ်ငန်းအတွက် လုံခြုံပြီး အသင့်ဖြစ်နေပါသည်။' : 'Secure, simple, and ready for your business.'}</div>
+                <div className="mt-6 flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300"><CheckCircle2 className="size-5 shrink-0 text-emerald-500 dark:text-emerald-400" /> {isBurmese ? 'သင့်လုပ်ငန်းအတွက် လုံခြုံပြီး အသင့်ဖြစ်နေပါသည်။' : 'Secure, simple, and ready for your business.'}</div>
               </div>
             </div>
           </section>
@@ -112,10 +112,10 @@ export function AuthPage({ register }: { register: boolean }) {
 
 function Snapshot({ label, value, icon: Icon }: { label: string; value: string; icon: typeof BarChart3 }) {
   return (
-    <div className="rounded-2xl bg-slate-900/50 p-3">
-      <Icon className="size-4 text-violet-300" />
-      <p className="mt-3 text-[11px] font-medium text-slate-400">{label}</p>
-      <p className="mt-1 text-lg font-black tracking-tight text-white">{value}</p>
+    <div className="rounded-2xl bg-white/80 p-3 shadow-sm shadow-violet-950/[0.03] dark:bg-slate-900/50 dark:shadow-none">
+      <Icon className="size-4 text-violet-600 dark:text-violet-300" />
+      <p className="mt-3 text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-1 text-lg font-black tracking-tight text-slate-950 dark:text-white">{value}</p>
     </div>
   );
 }
