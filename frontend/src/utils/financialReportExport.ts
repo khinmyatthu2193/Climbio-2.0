@@ -7,8 +7,8 @@ function escapeXml(value: string | number) {
   return String(value).replace(/[<>&'\"]/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[character] ?? character);
 }
 
-function cell(value: string | number, type: 'String' | 'Number' = 'String') {
-  return `<Cell><Data ss:Type="${type}">${escapeXml(value)}</Data></Cell>`;
+function cell(value: string | number, type: 'String' | 'Number' = 'String', style = 'body', attributes = '') {
+  return `<Cell ss:StyleID="${style}"${attributes}><Data ss:Type="${type}">${escapeXml(value)}</Data></Cell>`;
 }
 
 export function downloadFinancialReportExcel({ report, shopName, currency, range, createdAt }: {
@@ -19,27 +19,53 @@ export function downloadFinancialReportExcel({ report, shopName, currency, range
   createdAt: Date;
 }) {
   const date = createdAt.toISOString().slice(0, 10);
-  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: currency === 'MMK' ? 0 : 2 });
-  const rows = [
-    `<Row>${cell('Financial Report')}${cell(shopName)}</Row>`,
-    `<Row>${cell('Reporting period')}${cell(rangeLabels[range])}</Row>`,
-    `<Row>${cell('Generated')}${cell(createdAt.toLocaleString())}</Row>`,
-    '<Row></Row>',
-    `<Row>${cell('Summary')}${cell('Value')}</Row>`,
-    `<Row>${cell('Paid revenue')}${cell(report.totalRevenue, 'Number')}</Row>`,
-    `<Row>${cell('Products')}${cell(report.totalProducts, 'Number')}</Row>`,
-    `<Row>${cell('Stock on hand')}${cell(report.totalStock, 'Number')}</Row>`,
-    `<Row>${cell('Low-stock items')}${cell(report.lowStockCount, 'Number')}</Row>`,
-    '<Row></Row>',
-    `<Row>${cell('Paid sales revenue')}${cell(money.format(report.totalRevenue))}</Row>`,
-    `<Row>${cell('Period')}${cell('Revenue')}</Row>`,
-    ...report.salesOverview.map((item) => `<Row>${cell(item.label)}${cell(item.revenue, 'Number')}</Row>`),
-    '<Row></Row>',
-    `<Row>${cell('Inventory snapshot')}${cell('Units in stock')}</Row>`,
-    `<Row>${cell('Product')}${cell('Quantity')}</Row>`,
-    ...report.productStock.map((item) => `<Row>${cell(item.name)}${cell(item.quantity, 'Number')}</Row>`),
+  const currencyFormat = currency === 'MMK' ? 'MMK #,##0;[Red]-MMK #,##0' : `${currency} #,##0.00;[Red]-${currency} #,##0.00`;
+  const summaryRows = [
+    ['Paid revenue', report.totalRevenue, 'currency'],
+    ['Products', report.totalProducts, 'number'],
+    ['Stock on hand', report.totalStock, 'number'],
+    ['Low-stock items', report.lowStockCount, 'number'],
   ];
-  const workbook = `<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Financial Report"><Table>${rows.join('')}</Table></Worksheet></Workbook>`;
+  const rows = [
+    `<Row ss:Height="34">${cell('FINANCIAL REPORT', 'String', 'title', ' ss:MergeAcross="3"')}</Row>`,
+    `<Row ss:Height="22">${cell(shopName, 'String', 'shopName', ' ss:MergeAcross="3"')}</Row>`,
+    `<Row>${cell('Reporting period', 'String', 'metaLabel')}${cell(rangeLabels[range], 'String', 'metaValue', ' ss:MergeAcross="2"')}</Row>`,
+    `<Row>${cell('Generated', 'String', 'metaLabel')}${cell(createdAt.toLocaleString(), 'String', 'metaValue', ' ss:MergeAcross="2"')}</Row>`,
+    '<Row ss:Height="10"></Row>',
+    `<Row ss:Height="23">${cell('BUSINESS SUMMARY', 'String', 'section', ' ss:MergeAcross="3"')}</Row>`,
+    `<Row>${cell('Metric', 'String', 'tableHeader')}${cell('Value', 'String', 'tableHeader')}${cell('', 'String', 'tableHeader')}${cell('', 'String', 'tableHeader')}</Row>`,
+    ...summaryRows.map(([label, value, style], index) => `<Row>${cell(label, 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}${cell(value as number, 'Number', style === 'currency' ? (index % 2 === 0 ? 'currency' : 'currencyAlt') : (index % 2 === 0 ? 'number' : 'numberAlt'))}${cell('', 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}${cell('', 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}</Row>`),
+    '<Row ss:Height="10"></Row>',
+    `<Row ss:Height="23">${cell('PAID SALES REVENUE', 'String', 'section', ' ss:MergeAcross="3"')}</Row>`,
+    `<Row>${cell('Period', 'String', 'tableHeader')}${cell('Revenue', 'String', 'tableHeader')}${cell('', 'String', 'tableHeader')}${cell('', 'String', 'tableHeader')}</Row>`,
+    ...report.salesOverview.map((item, index) => `<Row>${cell(item.label, 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}${cell(item.revenue, 'Number', index % 2 === 0 ? 'currency' : 'currencyAlt')}${cell('', 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}${cell('', 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}</Row>`),
+    `<Row>${cell('Total paid revenue', 'String', 'totalLabel')}${cell(report.totalRevenue, 'Number', 'totalCurrency')}${cell('', 'String', 'totalLabel')}${cell('', 'String', 'totalLabel')}</Row>`,
+    '<Row ss:Height="10"></Row>',
+    `<Row ss:Height="23">${cell('INVENTORY SNAPSHOT', 'String', 'section', ' ss:MergeAcross="3"')}</Row>`,
+    `<Row>${cell('Product', 'String', 'tableHeader')}${cell('Units in stock', 'String', 'tableHeader')}${cell('', 'String', 'tableHeader')}${cell('', 'String', 'tableHeader')}</Row>`,
+    ...report.productStock.map((item, index) => `<Row>${cell(item.name, 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}${cell(item.quantity, 'Number', index % 2 === 0 ? 'number' : 'numberAlt')}${cell('', 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}${cell('', 'String', index % 2 === 0 ? 'body' : 'bodyAlt')}</Row>`),
+    '<Row ss:Height="12"></Row>',
+    `<Row>${cell('Generated by Climbio - Revenue is calculated from paid invoices only.', 'String', 'footer', ' ss:MergeAcross="3"')}</Row>`,
+  ];
+  const styles = `<Styles>
+    <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="10" ss:Color="#1E293B"/></Style>
+    <Style ss:ID="title"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Bold="1" ss:Size="18" ss:Color="#FFFFFF"/><Interior ss:Color="#7C3AED" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="shopName"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Bold="1" ss:Size="12" ss:Color="#5B21B6"/><Interior ss:Color="#F5F3FF" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="metaLabel"><Font ss:Bold="1" ss:Color="#64748B"/><Interior ss:Color="#FAFAFF" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="metaValue"><Font ss:Color="#334155"/><Interior ss:Color="#FAFAFF" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="section"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#8B5CF6" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="tableHeader"><Font ss:Bold="1" ss:Color="#5B21B6"/><Interior ss:Color="#EDE9FE" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#C4B5FD"/></Borders></Style>
+    <Style ss:ID="body"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#EDE9FE"/></Borders></Style>
+    <Style ss:ID="bodyAlt"><Interior ss:Color="#FAFAFF" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#EDE9FE"/></Borders></Style>
+    <Style ss:ID="number"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1" ss:Color="#334155"/><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#EDE9FE"/></Borders></Style>
+    <Style ss:ID="numberAlt"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1" ss:Color="#334155"/><Interior ss:Color="#FAFAFF" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#EDE9FE"/></Borders></Style>
+    <Style ss:ID="currency"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1" ss:Color="#047857"/><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/><NumberFormat ss:Format="${currencyFormat}"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#EDE9FE"/></Borders></Style>
+    <Style ss:ID="currencyAlt"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1" ss:Color="#047857"/><Interior ss:Color="#FAFAFF" ss:Pattern="Solid"/><NumberFormat ss:Format="${currencyFormat}"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#EDE9FE"/></Borders></Style>
+    <Style ss:ID="totalLabel"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#6D28D9" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="totalCurrency"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#6D28D9" ss:Pattern="Solid"/><NumberFormat ss:Format="${currencyFormat}"/></Style>
+    <Style ss:ID="footer"><Alignment ss:Horizontal="Center"/><Font ss:Italic="1" ss:Size="9" ss:Color="#64748B"/></Style>
+  </Styles>`;
+  const workbook = `<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">${styles}<Worksheet ss:Name="Financial Report"><Table ss:ExpandedColumnCount="4" ss:DefaultRowHeight="20"><Column ss:Width="190"/><Column ss:Width="145"/><Column ss:Width="22"/><Column ss:Width="145"/>${rows.join('')}</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>6</SplitHorizontal><TopRowBottomPane>6</TopRowBottomPane><Panes><Pane><Number>3</Number></Pane></Panes><ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios></WorksheetOptions></Worksheet></Workbook>`;
   download(new Blob([workbook], { type: 'application/vnd.ms-excel;charset=utf-8' }), `financial-report-${date}.xls`);
 }
 
