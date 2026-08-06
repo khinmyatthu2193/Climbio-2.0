@@ -36,7 +36,14 @@ let refreshRequest: Promise<string> | null = null;
 
 api.interceptors.response.use(undefined, async (error: AxiosError) => {
   const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
-  if (error.response?.status !== 401 || !original || original._retry || original.url?.includes('/auth/refresh')) {
+  if (
+    error.response?.status !== 401
+    || !original
+    || original._retry
+    || original.url?.includes('/auth/refresh')
+    || original.url?.includes('/auth/login')
+    || original.url?.includes('/auth/register')
+  ) {
     return Promise.reject(error);
   }
   original._retry = true;

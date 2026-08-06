@@ -11,6 +11,7 @@ import { PasswordInput } from '@/components/auth/PasswordInput';
 
 function loginError(error: unknown) {
   if (axios.isAxiosError<{ error?: string; details?: Record<string, string[] | undefined> }>(error)) {
+    if (error.response?.status === 401) return 'Wrong password. Please try again.';
     const messages = Object.entries(error.response?.data?.details ?? {}).flatMap(([field, details]) => (details ?? []).map((detail) => `${field}: ${detail}`));
     if (messages.length) return messages.join(' ');
     return error.response?.data?.error ?? 'Unable to reach the server. Please try again.';
