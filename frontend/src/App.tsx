@@ -21,6 +21,7 @@ import { AdminApplicationsPage } from '@/pages/admin/AdminApplicationsPage';
 import { AdminApplicationDetailPage } from '@/pages/admin/AdminApplicationDetailPage';
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
 import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage';
+import { UserManualPage } from '@/pages/UserManualPage';
 import type { Role } from '@/types/auth';
 
 export default function App() {
@@ -75,6 +76,7 @@ export default function App() {
   if (path === '/profile') return protectedPage(<ProfilePage />, undefined, true);
   if (path === '/my-store') return protectedPage(<MyPublicStore />, undefined, true);
   if (path === '/ai-advisor') return protectedPage(<AIAdvisorPage />, undefined, true);
+  if (path === '/user-manual') return protectedPage(<UserManualPage />, undefined, true);
   if (path === '/products') return protectedPage(<ProductList />, undefined, true);
   if (path === '/products/new') return protectedPage(<ProductForm />, undefined, true);
   if (path === '/invoices') return protectedPage(<InvoiceList />, undefined, true);

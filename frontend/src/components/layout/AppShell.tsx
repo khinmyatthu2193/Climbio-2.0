@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, PanelLeftClose, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
+import { BookOpen, ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, PanelLeftClose, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
@@ -15,6 +15,7 @@ const navigation = [
   { label: 'Invoices', href: '/invoices', icon: FileText },
   { label: 'AI Advisor', href: '/ai-advisor', icon: Sparkles },
   { label: 'Public store', href: '/my-store', icon: ShoppingBag },
+  { label: 'User manual', href: '/user-manual', icon: BookOpen },
   { label: 'Settings', href: '/profile', icon: Settings },
 ];
 
