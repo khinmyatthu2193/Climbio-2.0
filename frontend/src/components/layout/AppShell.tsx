@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
-import { BookOpen, ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, PanelLeftClose, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
+import { useIsFetching } from '@tanstack/react-query';
+import { BookOpen, ExternalLink, FileText, LayoutDashboard, LoaderCircle, LogOut, Menu, Package, PanelLeftClose, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
@@ -8,6 +9,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -28,6 +30,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('climbio-sidebar-collapsed') === 'true');
   const { theme, toggleTheme } = useTheme();
+  const { language } = useLanguage();
+  const aiAnalysisRunning = useIsFetching({ queryKey: ['ai-business-analysis'] }) > 0;
   const { user, clearSession } = useAuthStore();
   const currentPage = navigation.find((item) => isCurrent(item.href)) ?? navigation[0];
 
@@ -136,6 +140,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {aiAnalysisRunning && (
+              <a href="/ai-advisor" className="hidden min-h-11 items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 text-xs font-bold text-violet-700 shadow-sm sm:inline-flex dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
+                <LoaderCircle className="size-4 animate-spin" />
+                {language === 'my' ? 'AI သုံးသပ်နေဆဲ' : 'AI analysis running'}
+              </a>
+            )}
             <LanguageToggle />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
             <a className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:border-violet-300 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-slate-700" href="/my-store">View store <ExternalLink className="size-3.5" /></a>

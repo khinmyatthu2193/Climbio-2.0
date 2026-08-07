@@ -61,7 +61,7 @@ export const aiController = {
     const language = resolveLanguage(req.body.language, question);
     const context = await collectBusinessAnalysis(shopId);
     const requiredHeadings = chatHeadings[language];
-    const rawAnswer = await askAI(createBusinessConsultantPrompt(context, question, language));
+    const rawAnswer = await askAI({ ...createBusinessConsultantPrompt(context, question, language), maxTokens: 1_200 });
     const answer = normalizeResponse(rawAnswer, 'CHAT_RESPONSE_START', requiredHeadings[0]!);
     ensureCompleteResponse(answer, requiredHeadings, language === 'my' ? 100 : 180);
     const message = await prisma.aIChatHistory.create({

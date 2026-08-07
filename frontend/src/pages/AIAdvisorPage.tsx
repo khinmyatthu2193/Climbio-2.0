@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { aiService } from '@/services/aiService';
 import type { AIChatHistoryResponse } from '@/types/ai';
 import { useLanguage } from '@/hooks/useLanguage';
+import { AIAnalysisWaiting } from '@/components/ai/AIAnalysisWaiting';
+import { useAuthStore } from '@/store/authStore';
 
 function InsightContent({ content }: { content: string }) {
   return (
@@ -33,8 +35,16 @@ function InsightContent({ content }: { content: string }) {
 
 export function AIAdvisorPage() {
   const { language } = useLanguage();
+  const userId = useAuthStore((state) => state.user?.id);
   const queryClient = useQueryClient();
-  const analysis = useMutation({ mutationFn: () => aiService.analyze(language) });
+  const analysis = useQuery({
+    queryKey: ['ai-business-analysis', userId],
+    queryFn: () => aiService.analyze(language),
+    enabled: false,
+    retry: false,
+    staleTime: Infinity,
+    gcTime: 30 * 60 * 1_000,
+  });
   const chatHistory = useQuery({ queryKey: ['ai-chat-history'], queryFn: aiService.chatHistory });
   const [question, setQuestion] = useState('');
   const chat = useMutation({
@@ -45,6 +55,11 @@ export function AIAdvisorPage() {
     },
   });
   const data = analysis.data;
+  const analysisRunning = analysis.isFetching;
+  const startAnalysis = () => {
+    sessionStorage.setItem('climbio-ai-analysis-started-at', String(Date.now()));
+    void analysis.refetch().finally(() => sessionStorage.removeItem('climbio-ai-analysis-started-at'));
+  };
   const currency = data?.overview.shop.currency ?? 'MMK';
   const money = new Intl.NumberFormat(undefined, { style: 'currency', currency });
   const submitQuestion = (event: FormEvent) => {
@@ -60,33 +75,29 @@ export function AIAdvisorPage() {
         title="Climbio AI Advisor"
         description="Get practical insights from your sales, products, inventory, and customers."
         actions={
-          <Button onClick={() => analysis.mutate()} disabled={analysis.isPending}>
-            {analysis.isPending ? <LoaderCircle className="size-4 animate-spin" /> : data ? <RefreshCw className="size-4" /> : <Sparkles className="size-4" />}
-            {analysis.isPending ? 'Analyzing business…' : data ? 'Analyze again' : 'Analyze My Business'}
+          <Button onClick={startAnalysis} disabled={analysisRunning}>
+            {analysisRunning ? <LoaderCircle className="size-4 animate-spin" /> : data ? <RefreshCw className="size-4" /> : <Sparkles className="size-4" />}
+            {analysisRunning ? 'Analyzing business…' : data ? 'Analyze again' : 'Analyze My Business'}
           </Button>
         }
       />
 
       {analysis.isError && <Alert className="mt-6" tone="error">AI analysis could not be completed. Check the backend configuration or try again shortly.</Alert>}
 
-      {!data && !analysis.isPending && (
+      {!data && !analysisRunning && (
         <Card className="mt-6 grid min-h-72 place-items-center border-dashed text-center">
           <div className="max-w-md">
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300"><Bot className="size-7" /></span>
             <h2 className="mt-4 text-xl font-bold">Your business analysis is ready when you are</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Climbio will securely analyze your shop records and reply in your selected language. Your API key stays on the server.</p>
-            <Button className="mt-5" onClick={() => analysis.mutate()}><Sparkles className="size-4" /> Analyze My Business</Button>
+            <Button className="mt-5" onClick={startAnalysis}><Sparkles className="size-4" /> Analyze My Business</Button>
           </div>
         </Card>
       )}
 
-      {analysis.isPending && (
-        <Card className="mt-6 grid min-h-72 place-items-center text-center">
-          <div><LoaderCircle className="mx-auto size-9 animate-spin text-violet-500" /><h2 className="mt-4 font-bold">Reviewing your business data</h2><p className="mt-2 text-sm text-slate-500">Analyzing sales, products, stock, and customer patterns…</p></div>
-        </Card>
-      )}
+      {analysisRunning && <AIAnalysisWaiting language={language} />}
 
-      {data && (
+      {data && !analysisRunning && (
         <div className="mt-6 space-y-6">
           <Card>
             <div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300"><BarChart3 className="size-5" /></span><div><h2 className="text-lg font-bold">Business Overview</h2><p className="text-sm text-slate-500">Based on current Climbio records</p></div></div>

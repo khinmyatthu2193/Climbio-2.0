@@ -9,9 +9,10 @@ interface OpenRouterResponse {
 export interface AIRequest {
   systemPrompt: string;
   userPrompt: string;
+  maxTokens?: number;
 }
 
-export async function askAI({ systemPrompt, userPrompt }: AIRequest) {
+export async function askAI({ systemPrompt, userPrompt, maxTokens = 1_600 }: AIRequest) {
   if (!env.OPENROUTER_API_KEY) {
     console.error('[openrouter] request skipped: API key is not configured');
     throw new AppError('AI analysis is not configured', 503);
@@ -28,11 +29,12 @@ export async function askAI({ systemPrompt, userPrompt }: AIRequest) {
           { role: 'user', content: userPrompt },
         ],
         temperature: 0.35,
-        max_tokens: 3_000,
+        max_tokens: maxTokens,
         reasoning: { exclude: true },
       },
       {
-        timeout: 60_000,
+        // Free providers can queue requests for a while before generation starts.
+        timeout: 180_000,
         headers: {
           Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
