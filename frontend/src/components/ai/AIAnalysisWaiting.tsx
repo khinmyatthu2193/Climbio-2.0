@@ -3,19 +3,7 @@ import { Brain, CheckCircle2, Clock3, PartyPopper, Sparkles } from 'lucide-react
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import type { Language } from '@/hooks/useLanguage';
-
-const quiz = {
-  en: [
-    { question: 'Which products should you review first?', choices: ['Low-stock products', 'Every product equally', 'Only new products'], answer: 0, note: 'Low-stock products can cause missed sales if they are not replenished.' },
-    { question: 'Which invoices count toward Climbio paid revenue?', choices: ['Draft invoices', 'Sent invoices', 'Paid invoices'], answer: 2, note: 'Revenue metrics use invoices confirmed as Paid.' },
-    { question: 'What appears in the public catalog?', choices: ['Every saved product', 'Active and publicly visible products', 'Out-of-stock products only'], answer: 1, note: 'Only active products enabled for public visibility appear to customers.' },
-  ],
-  my: [
-    { question: 'မည်သည့်ကုန်ပစ္စည်းများကို အရင်ဆုံး စစ်ဆေးသင့်သလဲ?', choices: ['စတော့နည်းသောပစ္စည်းများ', 'ပစ္စည်းအားလုံးကို တူညီစွာ', 'အသစ်ထည့်ထားသောပစ္စည်းများသာ'], answer: 0, note: 'စတော့နည်းသောပစ္စည်းများကို အချိန်မီမဖြည့်ပါက အရောင်းလွတ်သွားနိုင်ပါသည်။' },
-    { question: 'Climbio ဝင်ငွေတွင် မည်သည့်ဘောက်ချာများကို ထည့်တွက်သလဲ?', choices: ['မူကြမ်းဘောက်ချာ', 'ပို့ပြီးဘောက်ချာ', 'ပေးချေပြီးဘောက်ချာ'], answer: 2, note: 'ဝင်ငွေကိန်းဂဏန်းများသည် Paid အဖြစ် အတည်ပြုထားသောဘောက်ချာများကို သုံးပါသည်။' },
-    { question: 'အများမြင်ကုန်ပစ္စည်းစာရင်းတွင် မည်သည့်ပစ္စည်းများ ပေါ်သလဲ?', choices: ['သိမ်းထားသမျှပစ္စည်းအားလုံး', 'အသုံးပြုနေပြီး အများမြင်ခွင့်ဖွင့်ထားသောပစ္စည်းများ', 'စတော့ကုန်ပစ္စည်းများသာ'], answer: 1, note: 'အသုံးပြုနေပြီး Public visibility ဖွင့်ထားသောပစ္စည်းများသာ ဝယ်ယူသူများမြင်နိုင်ပါသည်။' },
-  ],
-};
+import { shuffledBusinessQuiz } from '@/components/ai/businessQuiz';
 
 const copy = {
   en: { title: 'Your analysis is still running', estimate: 'Free AI providers can take about 1–3 minutes.', leave: 'You can keep using Climbio or open another page. The analysis will continue in the background.', elapsed: 'Time elapsed', quiz: 'Business quick quiz', quizHelp: 'Test your Climbio knowledge while you wait.', correct: 'Correct!', incorrect: 'Good try!', next: 'Next question', finish: 'See score', score: 'Quiz complete', replay: 'Play again' },
@@ -29,7 +17,7 @@ function formatElapsed(seconds: number) {
 
 export function AIAnalysisWaiting({ language }: { language: Language }) {
   const text = copy[language];
-  const questions = quiz[language];
+  const [questions, setQuestions] = useState(() => shuffledBusinessQuiz(language));
   const [elapsed, setElapsed] = useState(() => {
     const startedAt = Number(sessionStorage.getItem('climbio-ai-analysis-started-at'));
     return Number.isFinite(startedAt) && startedAt > 0 ? Math.max(0, Math.floor((Date.now() - startedAt) / 1_000)) : 0;
@@ -61,6 +49,7 @@ export function AIAnalysisWaiting({ language }: { language: Language }) {
   };
 
   const restart = () => {
+    setQuestions(shuffledBusinessQuiz(language));
     setQuestionIndex(0);
     setSelected(null);
     setScore(0);

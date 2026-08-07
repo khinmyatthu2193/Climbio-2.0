@@ -1,13 +1,11 @@
-import { useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
-import { BarChart3, Bot, Boxes, CircleDollarSign, Lightbulb, LoaderCircle, MessageSquareText, RefreshCw, Send, Sparkles, TrendingUp, Users } from 'lucide-react';
+import { BarChart3, Bot, Boxes, CircleDollarSign, Lightbulb, LoaderCircle, RefreshCw, Sparkles, TrendingUp, Users } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/button';
 import { aiService } from '@/services/aiService';
-import type { AIChatHistoryResponse } from '@/types/ai';
 import { useLanguage } from '@/hooks/useLanguage';
 import { AIAnalysisWaiting } from '@/components/ai/AIAnalysisWaiting';
 import { useAuthStore } from '@/store/authStore';
@@ -36,23 +34,13 @@ function InsightContent({ content }: { content: string }) {
 export function AIAdvisorPage() {
   const { language } = useLanguage();
   const userId = useAuthStore((state) => state.user?.id);
-  const queryClient = useQueryClient();
   const analysis = useQuery({
-    queryKey: ['ai-business-analysis', userId],
+    queryKey: ['ai-business-analysis', userId, language],
     queryFn: () => aiService.analyze(language),
     enabled: false,
     retry: false,
     staleTime: Infinity,
     gcTime: 30 * 60 * 1_000,
-  });
-  const chatHistory = useQuery({ queryKey: ['ai-chat-history'], queryFn: aiService.chatHistory });
-  const [question, setQuestion] = useState('');
-  const chat = useMutation({
-    mutationFn: (value: string) => aiService.chat({ question: value, language }),
-    onSuccess: ({ message }) => {
-      queryClient.setQueryData<AIChatHistoryResponse>(['ai-chat-history'], (current) => ({ messages: [...(current?.messages ?? []), message] }));
-      setQuestion('');
-    },
   });
   const data = analysis.data;
   const analysisRunning = analysis.isFetching;
@@ -62,11 +50,6 @@ export function AIAdvisorPage() {
   };
   const currency = data?.overview.shop.currency ?? 'MMK';
   const money = new Intl.NumberFormat(undefined, { style: 'currency', currency });
-  const submitQuestion = (event: FormEvent) => {
-    event.preventDefault();
-    const value = question.trim();
-    if (value) chat.mutate(value);
-  };
 
   return (
     <main className="page-container">
@@ -95,7 +78,7 @@ export function AIAdvisorPage() {
         </Card>
       )}
 
-      {analysisRunning && <AIAnalysisWaiting language={language} />}
+      {analysisRunning && <AIAnalysisWaiting key={language} language={language} />}
 
       {data && !analysisRunning && (
         <div className="mt-6 space-y-6">
@@ -128,47 +111,6 @@ export function AIAdvisorPage() {
         </div>
       )}
 
-      <Card className="mt-6">
-        <div className="flex items-center gap-3">
-          <span className="grid size-10 place-items-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300"><MessageSquareText className="size-5" /></span>
-          <div><h2 className="text-lg font-bold">Ask Climbio AI</h2><p className="text-sm text-slate-500 dark:text-slate-400">Get advice based on your actual business data.</p></div>
-        </div>
-
-        <div className="mt-5 max-h-[620px] space-y-5 overflow-y-auto rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/50 sm:p-5">
-          {chatHistory.isLoading && <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500"><LoaderCircle className="size-4 animate-spin" /> Loading previous advice…</div>}
-          {chatHistory.isError && <Alert tone="error">Previous consultant messages could not be loaded.</Alert>}
-          {!chatHistory.isLoading && !chatHistory.data?.messages.length && !chat.isPending && (
-            <div className="py-10 text-center"><Bot className="mx-auto size-8 text-violet-400" /><p className="mt-3 font-semibold">Ask a question about your business</p><p className="mt-1 text-sm text-slate-500">Climbio will use your sales and inventory records to prepare an answer.</p></div>
-          )}
-          {chatHistory.data?.messages.map((message) => (
-            <div className="space-y-3" key={message.id}>
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-violet-600 px-4 py-3 text-sm font-medium text-white shadow-sm">{message.question}</div>
-              <div className="max-w-[92%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300"><Sparkles className="size-3.5" /> Climbio AI Consultant</div>
-                <InsightContent content={message.answer} />
-                <p className="mt-3 text-[11px] text-slate-400">{new Date(message.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-          ))}
-          {chat.isPending && (
-            <div className="space-y-3">
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-violet-600 px-4 py-3 text-sm font-medium text-white">{question.trim()}</div>
-              <div className="flex w-fit items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900"><LoaderCircle className="size-4 animate-spin text-violet-500" /> Analyzing your business data…</div>
-            </div>
-          )}
-        </div>
-
-        {chat.isError && <Alert className="mt-4" tone="error">Climbio AI could not answer that question. Please try again.</Alert>}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {['Which products should I buy more?', 'Why are my sales decreasing?', 'How can I increase my profit?'].map((suggestion) => (
-            <button key={suggestion} type="button" className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-violet-300 hover:text-violet-600 dark:border-slate-700 dark:text-slate-300" onClick={() => setQuestion(suggestion)}>{suggestion}</button>
-          ))}
-        </div>
-        <form className="mt-3 flex flex-col gap-3 sm:flex-row" onSubmit={submitQuestion}>
-          <label className="min-w-0 flex-1"><span className="sr-only">Business question</span><input className="control" value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} placeholder="Should I open another branch?" disabled={chat.isPending} /></label>
-          <Button type="submit" className="shrink-0" disabled={chat.isPending || question.trim().length < 3}><Send className="size-4" /> Send</Button>
-        </form>
-      </Card>
     </main>
   );
 }

@@ -14,6 +14,7 @@ import { MyPublicStore } from '@/pages/store/MyPublicStore';
 import { AppShell } from '@/components/layout/AppShell';
 import { useTheme } from '@/hooks/useTheme';
 import { AIAdvisorPage } from '@/pages/AIAdvisorPage';
+import { AIChatPage } from '@/pages/AIChatPage';
 import { ApplicationStatusPage } from '@/pages/ApplicationStatusPage';
 import { AdminShell } from '@/components/layout/AdminShell';
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage';
@@ -76,6 +77,7 @@ export default function App() {
   if (path === '/profile') return protectedPage(<ProfilePage />, undefined, true);
   if (path === '/my-store') return protectedPage(<MyPublicStore />, undefined, true);
   if (path === '/ai-advisor') return protectedPage(<AIAdvisorPage />, undefined, true);
+  if (path === '/ai-chat') return protectedPage(<AIChatPage />, undefined, true);
   if (path === '/user-manual') return protectedPage(<UserManualPage />, undefined, true);
   if (path === '/products') return protectedPage(<ProductList />, undefined, true);
   if (path === '/products/new') return protectedPage(<ProductForm />, undefined, true);
