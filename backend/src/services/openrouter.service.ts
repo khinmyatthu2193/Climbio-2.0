@@ -6,7 +6,12 @@ interface OpenRouterResponse {
   choices?: Array<{ message?: { content?: string } }>;
 }
 
-export async function askAI(prompt: string) {
+export interface AIRequest {
+  systemPrompt: string;
+  userPrompt: string;
+}
+
+export async function askAI({ systemPrompt, userPrompt }: AIRequest) {
   if (!env.OPENROUTER_API_KEY) {
     console.error('[openrouter] request skipped: API key is not configured');
     throw new AppError('AI analysis is not configured', 503);
@@ -18,7 +23,10 @@ export async function askAI(prompt: string) {
       'https://openrouter.ai/api/v1/chat/completions',
       {
         model: env.OPENROUTER_MODEL,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
         temperature: 0.35,
         max_tokens: 3_000,
         reasoning: { exclude: true },

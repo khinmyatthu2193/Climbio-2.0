@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { prisma } from '../config/prisma.js';
-import { collectBusinessAnalysis, createBusinessAdvisorPrompt, createBusinessConsultantPrompt } from '../services/aiAnalysis.service.js';
+import { analysisHeadings, chatHeadings, collectBusinessAnalysis, createBusinessAdvisorPrompt, createBusinessConsultantPrompt, isLikelyPromptInjection, type AIResponseLanguage } from '../services/aiAnalysis.service.js';
 import { askAI } from '../services/openrouter.service.js';
 import { AppError } from '../utils/AppError.js';
 
@@ -13,13 +13,19 @@ function normalizeResponse(rawContent: string, marker: string, firstHeading: str
       ? rawContent.slice(headingIndex).trim()
       : rawContent.trim();
   return extractedContent
-    .normalize('NFKD')
+    .normalize('NFKC')
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/[\u2013\u2014]/g, '-')
     .replace(/\u2026/g, '...')
-    .replace(/[^\x00-\x7F]/g, '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
     .trim();
+}
+
+function resolveLanguage(value: unknown, question = ''): AIResponseLanguage {
+  if (value === 'my') return 'my';
+  if (value === 'en') return 'en';
+  return /[\u1000-\u109F\uAA60-\uAA7F]/u.test(question) ? 'my' : 'en';
 }
 
 function ensureCompleteResponse(content: string, headings: string[], minimumLength: number) {
@@ -32,16 +38,11 @@ export const aiController = {
   analyze: async (req: Request, res: Response) => {
     const shopId = req.user!.id;
     console.info('[ai] analyze endpoint reached', { openRouterKeyConfigured: Boolean(process.env.OPENROUTER_API_KEY) });
+    const language = resolveLanguage(req.body.language);
     const overview = await collectBusinessAnalysis(shopId);
-    const rawContent = await askAI(createBusinessAdvisorPrompt(overview));
-    const content = normalizeResponse(rawContent, 'FINAL_REPORT_START', '## Business Performance Summary');
-    const requiredHeadings = [
-      '## Business Performance Summary',
-      '## Important Problems',
-      '## Inventory Recommendations',
-      '## Sales Improvement Suggestions',
-      '## Action Plan',
-    ];
+    const requiredHeadings = analysisHeadings[language];
+    const rawContent = await askAI(createBusinessAdvisorPrompt(overview, language));
+    const content = normalizeResponse(rawContent, 'FINAL_REPORT_START', requiredHeadings[0]!);
     ensureCompleteResponse(content, requiredHeadings, 300);
     const insight = await prisma.aIInsight.create({
       data: { shopId, type: 'SALES_ANALYSIS', content },
@@ -54,15 +55,15 @@ export const aiController = {
     const shopId = req.user!.id;
     console.info('[ai] chat endpoint reached', { openRouterKeyConfigured: Boolean(process.env.OPENROUTER_API_KEY) });
     const question = req.body.question as string;
+    if (isLikelyPromptInjection(question)) {
+      throw new AppError('Please ask a question about your Climbio business data.', 400);
+    }
+    const language = resolveLanguage(req.body.language, question);
     const context = await collectBusinessAnalysis(shopId);
-    const rawAnswer = await askAI(createBusinessConsultantPrompt(context, question));
-    const answer = normalizeResponse(rawAnswer, 'CHAT_RESPONSE_START', '## Recommendation');
-    ensureCompleteResponse(answer, [
-      '## Recommendation',
-      '## Analysis',
-      '## Risks / Considerations',
-      '## Suggested Next Steps',
-    ], 180);
+    const requiredHeadings = chatHeadings[language];
+    const rawAnswer = await askAI(createBusinessConsultantPrompt(context, question, language));
+    const answer = normalizeResponse(rawAnswer, 'CHAT_RESPONSE_START', requiredHeadings[0]!);
+    ensureCompleteResponse(answer, requiredHeadings, language === 'my' ? 100 : 180);
     const message = await prisma.aIChatHistory.create({
       data: { shopId, question, answer },
       select: { id: true, question: true, answer: true, createdAt: true },

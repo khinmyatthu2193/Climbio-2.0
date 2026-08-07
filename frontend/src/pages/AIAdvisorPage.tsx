@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/button';
 import { aiService } from '@/services/aiService';
 import type { AIChatHistoryResponse } from '@/types/ai';
+import { useLanguage } from '@/hooks/useLanguage';
 
 function InsightContent({ content }: { content: string }) {
   return (
@@ -31,12 +32,13 @@ function InsightContent({ content }: { content: string }) {
 }
 
 export function AIAdvisorPage() {
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
-  const analysis = useMutation({ mutationFn: aiService.analyze });
+  const analysis = useMutation({ mutationFn: () => aiService.analyze(language) });
   const chatHistory = useQuery({ queryKey: ['ai-chat-history'], queryFn: aiService.chatHistory });
   const [question, setQuestion] = useState('');
   const chat = useMutation({
-    mutationFn: aiService.chat,
+    mutationFn: (value: string) => aiService.chat({ question: value, language }),
     onSuccess: ({ message }) => {
       queryClient.setQueryData<AIChatHistoryResponse>(['ai-chat-history'], (current) => ({ messages: [...(current?.messages ?? []), message] }));
       setQuestion('');
@@ -72,7 +74,7 @@ export function AIAdvisorPage() {
           <div className="max-w-md">
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300"><Bot className="size-7" /></span>
             <h2 className="mt-4 text-xl font-bold">Your business analysis is ready when you are</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Climbio will securely analyze your shop records and prepare a practical English business report. Your API key stays on the server.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Climbio will securely analyze your shop records and reply in your selected language. Your API key stays on the server.</p>
             <Button className="mt-5" onClick={() => analysis.mutate()}><Sparkles className="size-4" /> Analyze My Business</Button>
           </div>
         </Card>
