@@ -18,6 +18,20 @@ const statusLabels: Record<Language, Record<InvoiceStatus, string>> = {
   en: { DRAFT: 'Draft', SENT: 'Sent', PAID: 'Paid', OVERDUE: 'Overdue', CANCELLED: 'Cancelled' },
   my: { DRAFT: 'မူကြမ်း', SENT: 'ပို့ပြီး', PAID: 'ပေးချေပြီး', OVERDUE: 'ငွေပေးချေရန်ကျော်လွန်', CANCELLED: 'ပယ်ဖျက်ပြီး' },
 };
+const statusDialogCopy: Record<Language, { title: string; description: string; cancel: string; confirm: string }> = {
+  en: {
+    title: 'Change invoice status?',
+    description: 'Are you sure you want to change this invoice status?',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+  },
+  my: {
+    title: 'ဘောက်ချာအခြေအနေ ပြောင်းမည်လား?',
+    description: 'ဤဘောက်ချာအခြေအနေကို ပြောင်းလဲရန် သေချာပါသလား?',
+    cancel: 'မလုပ်တော့ပါ',
+    confirm: 'အတည်ပြုရန်',
+  },
+};
 
 interface ToastState {
   tone: 'success' | 'error';
@@ -27,6 +41,7 @@ interface ToastState {
 
 export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
   const { language } = useLanguage();
+  const dialogCopy = statusDialogCopy[language];
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const currency = user?.setting?.currency ?? 'MMK';
@@ -171,11 +186,11 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
       {pendingStatus && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/75 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900" role="alertdialog" aria-modal="true" aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description">
-            <h2 id="status-dialog-title" className="text-lg font-semibold text-slate-950 dark:text-white">Change invoice status?</h2>
-            <p id="status-dialog-description" className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Are you sure you want to change this invoice status?</p>
+            <h2 id="status-dialog-title" className="text-lg font-semibold text-slate-950 dark:text-white">{dialogCopy.title}</h2>
+            <p id="status-dialog-description" className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{dialogCopy.description}</p>
             <div className="mt-6 flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setPendingStatus(null)}>Cancel</Button>
-              <Button type="button" className="bg-red-600 hover:bg-red-500" onClick={() => { updateStatus.mutate(pendingStatus); setPendingStatus(null); }}>Confirm</Button>
+              <Button type="button" variant="outline" onClick={() => setPendingStatus(null)}>{dialogCopy.cancel}</Button>
+              <Button type="button" className="bg-red-600 hover:bg-red-500" onClick={() => { updateStatus.mutate(pendingStatus); setPendingStatus(null); }}>{dialogCopy.confirm}</Button>
             </div>
           </div>
         </div>
