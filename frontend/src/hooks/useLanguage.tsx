@@ -4,7 +4,7 @@ export type Language = 'en' | 'my';
 
 const burmese: Record<string, string> = {
   'Overview': 'အနှစ်ချုပ်', 'Products': 'ကုန်ပစ္စည်းများ', 'Invoices': 'ဘောင်ချာများ', 'AI Advisor': 'AI အကြံပေး',
-  'Public store': 'အများမြင်ဆိုင်', 'Settings': 'ဆက်တင်များ', 'Workspace': 'လုပ်ငန်းခွင်', 'Log out': 'ထွက်ရန်',
+  'Public store': 'အများမြင်ဆိုင်', 'User manual': 'အသုံးပြုသူလမ်းညွှန်', 'Settings': 'ဆက်တင်များ', 'Workspace': 'လုပ်ငန်းခွင်', 'Log out': 'ထွက်ရန်',
   'View store': 'ဆိုင်ကြည့်ရန်', 'Expand sidebar': 'ဘေးဘား ချဲ့ရန်', 'Collapse sidebar': 'ဘေးဘား ချုံ့ရန်',
   'Close navigation': 'မီနူးပိတ်ရန်', 'Open navigation': 'မီနူးဖွင့်ရန်', 'Primary navigation': 'အဓိက မီနူး',
   'Switch to light mode': 'အလင်းမုဒ်သို့ ပြောင်းရန်', 'Switch to dark mode': 'အမှောင်မုဒ်သို့ ပြောင်းရန်',
