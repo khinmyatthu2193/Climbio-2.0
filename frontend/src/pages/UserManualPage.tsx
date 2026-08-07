@@ -12,6 +12,13 @@ import {
 import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useLanguage } from '@/hooks/useLanguage';
+import loginScreenshot from '@/assets/manual/login.png';
+import dashboardScreenshot from '@/assets/manual/dashboard.png';
+import inventoryScreenshot from '@/assets/manual/inventory.png';
+import invoiceScreenshot from '@/assets/manual/invoice.png';
+import publicStoreScreenshot from '@/assets/manual/public-store.png';
+import aiAdvisorScreenshot from '@/assets/manual/ai-advisor.png';
+import settingsScreenshot from '@/assets/manual/settings.png';
 
 type Guide = {
   id: string;
@@ -19,6 +26,8 @@ type Guide = {
   description: string;
   icon: LucideIcon;
   steps: string[];
+  screenshot: string;
+  screenshotCaption: string;
   link?: { label: string; href: string };
 };
 
@@ -33,6 +42,8 @@ const guides: Guide[] = [
       'Upload your shop logo so it appears consistently across your business materials.',
       'Add an invoice footer for payment instructions, contact details, or a short thank-you note.',
     ],
+    screenshot: loginScreenshot,
+    screenshotCaption: 'Climbio sign-in page',
     link: { label: 'Open settings', href: '/profile' },
   },
   {
@@ -45,6 +56,8 @@ const guides: Guide[] = [
       'Change the sales chart period to compare recent performance over 7 days, 30 days, or 6 months.',
       'Review inventory levels and top products, then export a report when you need a shareable copy.',
     ],
+    screenshot: dashboardScreenshot,
+    screenshotCaption: 'Dashboard overview and business metrics',
     link: { label: 'Go to dashboard', href: '/' },
   },
   {
@@ -58,6 +71,8 @@ const guides: Guide[] = [
       'Use search, category, and stock filters to find items. Edit a product whenever its price or quantity changes.',
       'Check low-stock and out-of-stock indicators regularly so you can restock before missing sales.',
     ],
+    screenshot: inventoryScreenshot,
+    screenshotCaption: 'Product list and inventory management',
     link: { label: 'Manage products', href: '/products' },
   },
   {
@@ -71,6 +86,8 @@ const guides: Guide[] = [
       'Move the invoice through Draft, Sent, Paid, or Cancelled as the sale progresses.',
       'Open an invoice to download or print its PDF. Stock and dashboard totals reflect recorded sales.',
     ],
+    screenshot: invoiceScreenshot,
+    screenshotCaption: 'Invoice creation and management',
     link: { label: 'View invoices', href: '/invoices' },
   },
   {
@@ -83,6 +100,8 @@ const guides: Guide[] = [
       'Only active, publicly visible products are displayed, so review each product before sharing your link.',
       'Copy your public store link or QR code and share it through social media, chat, or printed materials.',
     ],
+    screenshot: publicStoreScreenshot,
+    screenshotCaption: 'Customer view of the public product catalog',
     link: { label: 'View public store tools', href: '/my-store' },
   },
   {
@@ -96,6 +115,8 @@ const guides: Guide[] = [
       'Ask a specific question, such as which products need restocking or how recent sales are performing.',
       'Treat recommendations as decision support and confirm important business choices against your records.',
     ],
+    screenshot: aiAdvisorScreenshot,
+    screenshotCaption: 'AI business analysis and recommendations',
     link: { label: 'Open AI Advisor', href: '/ai-advisor' },
   },
   {
@@ -109,11 +130,13 @@ const guides: Guide[] = [
       'Use the language and theme controls in the top bar to adjust the workspace display on this device.',
       'Always log out when using a shared computer.',
     ],
+    screenshot: settingsScreenshot,
+    screenshotCaption: 'Profile and shop settings',
     link: { label: 'Manage account', href: '/profile' },
   },
 ];
 
-const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps'> & { linkLabel: string }> = {
+const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps' | 'screenshotCaption'> & { linkLabel: string }> = {
   'getting-started': {
     title: 'စတင်အသုံးပြုခြင်း',
     description: 'ပထမဆုံးရောင်းချမှု မမှတ်တမ်းတင်မီ သင့်လုပ်ငန်းခွင်ကို ပြင်ဆင်ပါ။',
@@ -122,6 +145,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'လုပ်ငန်းဆိုင်ရာ စာရွက်စာတမ်းများတွင် တစ်သမတ်တည်း ဖော်ပြနိုင်ရန် ဆိုင်လိုဂိုကို တင်ပါ။',
       'ငွေပေးချေမှုညွှန်ကြားချက်၊ ဆက်သွယ်ရန်အချက်အလက် သို့မဟုတ် ကျေးဇူးတင်စကားတိုကို ဘောက်ချာအောက်ခြေတွင် ထည့်ပါ။',
     ],
+    screenshotCaption: 'Climbio အကောင့်ဝင်ရန် စာမျက်နှာ',
     linkLabel: 'ဆက်တင်များကို ဖွင့်ရန်',
   },
   dashboard: {
@@ -132,6 +156,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'လတ်တလောစွမ်းဆောင်ရည်ကို နှိုင်းယှဉ်ရန် အရောင်းဇယားကာလကို ၇ ရက်၊ ၃၀ ရက် သို့မဟုတ် ၆ လသို့ ပြောင်းပါ။',
       'စတော့အဆင့်နှင့် ရောင်းအားကောင်းသောပစ္စည်းများကို စစ်ဆေးပြီး မျှဝေရန်လိုအပ်သည့်အခါ အစီရင်ခံစာထုတ်ယူပါ။',
     ],
+    screenshotCaption: 'ဒက်ရှ်ဘုတ်နှင့် လုပ်ငန်းအချက်အလက်များ',
     linkLabel: 'ဒက်ရှ်ဘုတ်သို့ သွားရန်',
   },
   products: {
@@ -143,6 +168,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'ပစ္စည်းရှာရန် ရှာဖွေမှု၊ အမျိုးအစားနှင့် စတော့စစ်ထုတ်မှုများကို သုံးပါ။ ဈေးနှုန်း သို့မဟုတ် အရေအတွက်ပြောင်းသည့်အခါ ပြင်ဆင်ပါ။',
       'အရောင်းမလွတ်စေရန် စတော့နည်းနှင့် စတော့ကုန် အမှတ်အသားများကို ပုံမှန်စစ်ဆေးပါ။',
     ],
+    screenshotCaption: 'ကုန်ပစ္စည်းစာရင်းနှင့် စတော့စီမံခန့်ခွဲမှု',
     linkLabel: 'ကုန်ပစ္စည်းများ စီမံရန်',
   },
   invoices: {
@@ -154,6 +180,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'အရောင်းအခြေအနေအလိုက် ဘောက်ချာကို မူကြမ်း၊ ပို့ပြီး၊ ပေးချေပြီး သို့မဟုတ် ပယ်ဖျက်ပြီးအဖြစ် ပြောင်းပါ။',
       'PDF ဒေါင်းလုဒ် သို့မဟုတ် ပရင့်ထုတ်ရန် ဘောက်ချာကို ဖွင့်ပါ။ စတော့နှင့် ဒက်ရှ်ဘုတ်စုစုပေါင်းများသည် မှတ်တမ်းတင်ထားသော အရောင်းကို ထင်ဟပ်ပါသည်။',
     ],
+    screenshotCaption: 'ဘောက်ချာဖန်တီးခြင်းနှင့် စီမံခန့်ခွဲမှု',
     linkLabel: 'ဘောက်ချာများ ကြည့်ရန်',
   },
   'public-store': {
@@ -164,6 +191,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'အသုံးပြုနေပြီး အများမြင်နိုင်သော ကုန်ပစ္စည်းများသာ ပြသသောကြောင့် လင့်ခ်မမျှဝေမီ ပစ္စည်းတစ်ခုချင်းစီကို စစ်ဆေးပါ။',
       'အများမြင်ဆိုင်လင့်ခ် သို့မဟုတ် QR ကုဒ်ကို ကူးယူပြီး လူမှုကွန်ရက်၊ စကားပြောအက်ပ် သို့မဟုတ် ပုံနှိပ်ပစ္စည်းများမှ မျှဝေပါ။',
     ],
+    screenshotCaption: 'ဝယ်ယူသူမြင်ရသည့် အများမြင်ကုန်ပစ္စည်းစာရင်း',
     linkLabel: 'အများမြင်ဆိုင် ကိရိယာများကြည့်ရန်',
   },
   'ai-advisor': {
@@ -175,6 +203,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'မည်သည့်ပစ္စည်းများ ပြန်ဖြည့်ရမည် သို့မဟုတ် လတ်တလောအရောင်းမည်သို့ရှိသည် စသည့် တိကျသောမေးခွန်းကို မေးပါ။',
       'အကြံပြုချက်များကို ဆုံးဖြတ်ချက်အထောက်အကူအဖြစ် သုံးပြီး အရေးကြီးသော လုပ်ငန်းဆုံးဖြတ်ချက်များကို သင့်မှတ်တမ်းများနှင့် ပြန်လည်စစ်ဆေးပါ။',
     ],
+    screenshotCaption: 'AI လုပ်ငန်းသုံးသပ်ချက်နှင့် အကြံပြုချက်များ',
     linkLabel: 'AI အကြံပေးကို ဖွင့်ရန်',
   },
   account: {
@@ -186,6 +215,7 @@ const burmeseGuides: Record<string, Pick<Guide, 'title' | 'description' | 'steps
       'ဤစက်ပေါ်ရှိ လုပ်ငန်းခွင်မြင်ကွင်းကို ချိန်ညှိရန် အပေါ်ဘားရှိ ဘာသာစကားနှင့် အပြင်အဆင်ခလုတ်များကို သုံးပါ။',
       'အများသုံးကွန်ပျူတာ အသုံးပြုပြီးတိုင်း အမြဲထွက်ပါ။',
     ],
+    screenshotCaption: 'ပရိုဖိုင်နှင့် ဆိုင်ဆက်တင်များ',
     linkLabel: 'အကောင့် စီမံရန်',
   },
 };
@@ -194,12 +224,12 @@ const pageCopy = {
   en: {
     eyebrow: 'Help center', title: 'Climbio user manual', description: 'A practical guide to setting up your shop, managing daily work, and getting the most from Climbio.',
     recommended: 'Recommended setup', setupTitle: 'Start selling in three steps', setupDescription: 'Complete your shop profile, add your products, then create an invoice. Your dashboard and AI insights become more useful as you keep these records current.',
-    checklist: ['Complete shop settings', 'Add products and stock', 'Create your first invoice'], jump: 'Jump to a section', navLabel: 'Manual sections',
+    checklist: ['Complete shop settings', 'Add products and stock', 'Create your first invoice'], jump: 'Jump to a section', navLabel: 'Manual sections', screenshotHint: 'Select the image to view it full size',
   },
   my: {
     eyebrow: 'အကူအညီစင်တာ', title: 'Climbio အသုံးပြုသူလမ်းညွှန်', description: 'သင့်ဆိုင်ကို ပြင်ဆင်ခြင်း၊ နေ့စဉ်လုပ်ငန်းများ စီမံခြင်းနှင့် Climbio ကို အကောင်းဆုံးအသုံးချခြင်းအတွက် လက်တွေ့လမ်းညွှန်။',
     recommended: 'အကြံပြုထားသော ပြင်ဆင်မှု', setupTitle: 'အဆင့်သုံးဆင့်ဖြင့် စတင်ရောင်းချပါ', setupDescription: 'ဆိုင်ပရိုဖိုင်ကို ဖြည့်စွက်ပါ၊ ကုန်ပစ္စည်းများထည့်ပါ၊ ထို့နောက် ဘောက်ချာတစ်စောင် ဖန်တီးပါ။ မှတ်တမ်းများကို နောက်ဆုံးအခြေအနေဖြစ်အောင် ထားလျှင် ဒက်ရှ်ဘုတ်နှင့် AI အချက်အလက်များ ပိုမိုအသုံးဝင်လာပါမည်။',
-    checklist: ['ဆိုင်ဆက်တင်များ ဖြည့်စွက်ပါ', 'ကုန်ပစ္စည်းနှင့် စတော့ထည့်ပါ', 'ပထမဆုံးဘောက်ချာ ဖန်တီးပါ'], jump: 'ကဏ္ဍတစ်ခုသို့ သွားရန်', navLabel: 'လမ်းညွှန်ကဏ္ဍများ',
+    checklist: ['ဆိုင်ဆက်တင်များ ဖြည့်စွက်ပါ', 'ကုန်ပစ္စည်းနှင့် စတော့ထည့်ပါ', 'ပထမဆုံးဘောက်ချာ ဖန်တီးပါ'], jump: 'ကဏ္ဍတစ်ခုသို့ သွားရန်', navLabel: 'လမ်းညွှန်ကဏ္ဍများ', screenshotHint: 'ပုံအပြည့်အစုံကြည့်ရန် ပုံကိုနှိပ်ပါ',
   },
 };
 
@@ -249,7 +279,7 @@ export function UserManualPage() {
         </nav>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
-          {localizedGuides.map(({ id, title, description, icon: Icon, steps, link }) => (
+          {localizedGuides.map(({ id, title, description, icon: Icon, steps, screenshot, screenshotCaption, link }) => (
             <Card key={id} id={id} className="scroll-mt-24">
               <div className="flex items-start gap-4">
                 <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
@@ -268,6 +298,20 @@ export function UserManualPage() {
                   </li>
                 ))}
               </ol>
+              <figure className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950">
+                <a href={screenshot} target="_blank" rel="noreferrer" aria-label={`${screenshotCaption}. ${copy.screenshotHint}`}>
+                  <img
+                    src={screenshot}
+                    alt={screenshotCaption}
+                    loading="lazy"
+                    className="aspect-video w-full object-cover object-top transition duration-300 hover:scale-[1.02]"
+                  />
+                </a>
+                <figcaption className="border-t border-slate-200 px-3 py-2.5 text-xs leading-5 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">{screenshotCaption}</span>
+                  <span className="ml-1">— {copy.screenshotHint}</span>
+                </figcaption>
+              </figure>
               {link && <a href={link.href} className="mt-5 inline-flex text-sm font-bold text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-200">{link.label} →</a>}
             </Card>
           ))}
