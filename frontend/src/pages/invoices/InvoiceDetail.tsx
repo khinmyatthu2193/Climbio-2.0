@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { Download } from 'lucide-react';
 import { Card } from '@/components/common/Card';
 import { InvoiceSummary } from '@/components/invoices/InvoiceSummary';
@@ -10,8 +11,13 @@ import { Button } from '@/components/ui/button';
 import { invoiceService } from '@/services/invoiceService';
 import { useAuthStore } from '@/store/authStore';
 import type { InvoiceStatus } from '@/types/invoice';
+import { useLanguage, type Language } from '@/hooks/useLanguage';
 
 const statuses: InvoiceStatus[] = ['DRAFT', 'SENT', 'PAID', 'OVERDUE', 'CANCELLED'];
+const statusLabels: Record<Language, Record<InvoiceStatus, string>> = {
+  en: { DRAFT: 'Draft', SENT: 'Sent', PAID: 'Paid', OVERDUE: 'Overdue', CANCELLED: 'Cancelled' },
+  my: { DRAFT: 'မူကြမ်း', SENT: 'ပို့ပြီး', PAID: 'ပေးချေပြီး', OVERDUE: 'ငွေပေးချေရန်ကျော်လွန်', CANCELLED: 'ပယ်ဖျက်ပြီး' },
+};
 
 interface ToastState {
   tone: 'success' | 'error';
@@ -20,6 +26,7 @@ interface ToastState {
 }
 
 export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const currency = user?.setting?.currency ?? 'MMK';
@@ -38,9 +45,16 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
         queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       ]);
       setStatus(nextStatus);
-      setToast({ tone: 'success', title: 'Invoice status updated', description: `Invoice is now marked as ${nextStatus}` });
+      setToast(language === 'my'
+        ? { tone: 'success', title: 'ဘောက်ချာအခြေအနေ ပြောင်းပြီးပါပြီ', description: `ယခု ${statusLabels.my[nextStatus]} အဖြစ် သတ်မှတ်ထားပါသည်။` }
+        : { tone: 'success', title: 'Invoice status updated', description: `Invoice is now marked as ${statusLabels.en[nextStatus]}.` });
     },
-    onError: () => setToast({ tone: 'error', title: 'Status could not be updated', description: 'Please try again.' }),
+    onError: (error) => {
+      const serverMessage = axios.isAxiosError<{ error?: string }>(error) ? error.response?.data?.error : undefined;
+      setToast(language === 'my'
+        ? { tone: 'error', title: 'အခြေအနေကို မပြောင်းနိုင်ပါ', description: serverMessage ?? 'ထပ်မံကြိုးစားပါ။' }
+        : { tone: 'error', title: 'Status could not be updated', description: serverMessage ?? 'Please try again.' });
+    },
   });
   const selectedStatus = status ?? invoice.data?.status ?? 'DRAFT';
 
@@ -102,7 +116,7 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
                 Status <StatusBadge status={invoice.data.status} />
               </span>
               <select className="control min-w-40" value={selectedStatus} onChange={(event) => setStatus(event.target.value as InvoiceStatus)}>
-                {statuses.map((option) => <option key={option}>{option}</option>)}
+                {statuses.map((option) => <option key={option} value={option}>{statusLabels[language][option]}</option>)}
               </select>
             </label>
             <Button disabled={updateStatus.isPending || selectedStatus === invoice.data.status} onClick={requestStatusUpdate}>
