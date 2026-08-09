@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthBootstrap } from '@/hooks/useAuthBootstrap';
-import { AuthPage } from '@/pages/AuthPage';
+import { LandingPage } from '@/pages/LandingPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { ProductForm } from '@/pages/products/ProductForm';
@@ -60,9 +60,9 @@ export default function App() {
     };
   }, []);
 
-  if (path === '/account/login') return <AuthPage initialMode="login" />;
-  if (path === '/account/signup') return <AuthPage initialMode="signup" />;
-  if (path === '/' && initialized && !user) return <AuthPage initialMode="login" />;
+  if (path === '/account/login') return <LandingPage initialAuthMode="login" />;
+  if (path === '/account/signup') return <LandingPage initialAuthMode="signup" />;
+  if (path === '/' && initialized && !user) return <LandingPage />;
   const publicShop = path.match(/^\/shop\/([a-z0-9-]+)$/i);
   if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
   const protectedPage = (page: React.ReactNode, roles?: Role[], requireApproved = false) => (
