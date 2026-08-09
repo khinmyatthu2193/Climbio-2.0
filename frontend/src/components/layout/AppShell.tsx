@@ -10,6 +10,7 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
 import { useLanguage } from '@/hooks/useLanguage';
+import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -101,7 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="flex size-5 min-w-5 shrink-0 items-center justify-center leading-none" aria-hidden="true">
               <Icon className={cn('block size-5 shrink-0 transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} />
             </span>
-            {!compact && <span className="flex h-5 min-w-0 items-center leading-5">{label}</span>}
+            {!compact && <span className={sidebarLabelClass}>{label}</span>}
           </a>
         ))}
       </nav>
@@ -116,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>}
         </div>
         <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out">
-          <span className="flex size-5 min-w-5 shrink-0 items-center justify-center leading-none" aria-hidden="true"><LogOut className="block size-5 shrink-0" /></span>{!compact && <span className="flex h-5 items-center leading-5">Log out</span>}
+          <span className="flex size-5 min-w-5 shrink-0 items-center justify-center leading-none" aria-hidden="true"><LogOut className="block size-5 shrink-0" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}
         </Button>
       </div>
     </>

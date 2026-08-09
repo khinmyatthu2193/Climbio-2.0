@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
+import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
 
 const navigation = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -62,7 +63,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <a key={href} href={href} title={compact ? label : undefined} aria-current={isCurrent(href) ? 'page' : undefined} className={cn('group relative flex h-[52px] items-center rounded-xl text-sm font-semibold transition', compact ? 'justify-center px-2' : 'gap-3 px-4', isCurrent(href) ? 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-200 dark:bg-violet-500/20 dark:text-white dark:ring-violet-400/30' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-white')}>
             {isCurrent(href) && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-violet-500 dark:bg-violet-400" />}
             <span className="flex size-5 min-w-5 shrink-0 items-center justify-center leading-none" aria-hidden="true"><Icon className={cn('block size-5 shrink-0 transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} /></span>
-            {!compact && <span className="flex h-5 min-w-0 items-center leading-5">{label}</span>}
+            {!compact && <span className={sidebarLabelClass}>{label}</span>}
           </a>
         ))}
       </nav>
@@ -71,7 +72,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30">{user?.name?.charAt(0).toUpperCase()}</div>
           {!compact && <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p><p className="truncate text-xs text-slate-500">Administrator</p></div>}
         </div>
-        <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out"><span className="flex size-5 min-w-5 shrink-0 items-center justify-center leading-none" aria-hidden="true"><LogOut className="block size-5 shrink-0" /></span>{!compact && <span className="flex h-5 items-center leading-5">Log out</span>}</Button>
+        <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out"><span className="flex size-5 min-w-5 shrink-0 items-center justify-center leading-none" aria-hidden="true"><LogOut className="block size-5 shrink-0" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}</Button>
       </div>
     </>
   );
