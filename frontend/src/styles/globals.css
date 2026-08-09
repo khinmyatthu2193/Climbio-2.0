@@ -23,9 +23,14 @@
   }
   * { @apply border-border; }
   html { @apply scroll-smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body { @apply m-0 min-w-80 bg-background text-foreground antialiased transition-colors; font-family: Inter, "Noto Sans Myanmar", "Myanmar Text", ui-sans-serif, system-ui, sans-serif; }
   button, a, input, select, textarea { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2; }
   ::selection { @apply bg-violet-200 text-violet-950; }
+}
+
+@layer utilities {
+  .landing-section { scroll-margin-top: 76px; }
 }
 
 @layer components {

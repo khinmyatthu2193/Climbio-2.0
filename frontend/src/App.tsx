@@ -46,10 +46,18 @@ export default function App() {
       if (destination.origin !== window.location.origin) return;
       if (destination.pathname === window.location.pathname && destination.search === window.location.search && destination.hash === window.location.hash) return;
 
+      if (destination.pathname === window.location.pathname && destination.search === window.location.search && destination.hash) {
+        event.preventDefault();
+        window.history.pushState({}, '', destination);
+        document.getElementById(destination.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
       event.preventDefault();
       window.history.pushState({}, '', destination);
       updatePath();
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (destination.hash) document.getElementById(destination.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else window.scrollTo({ top: 0, behavior: 'instant' });
     };
 
     window.addEventListener('popstate', updatePath);
