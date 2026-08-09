@@ -6,7 +6,7 @@ import type { Role } from '@/types/auth';
 export function ProtectedRoute({ children, roles, requireApproved = false }: { children: ReactNode; roles?: Role[]; requireApproved?: boolean }) {
   const { user, initialized } = useAuthStore();
   useEffect(() => {
-    if (initialized && !user) window.location.replace('/login');
+    if (initialized && !user) window.location.replace('/account/login');
     else if (initialized && user && roles && !roles.includes(user.role)) window.location.replace('/');
     else if (initialized && user && requireApproved && (user.accountStatus !== 'ACTIVE' || user.approvalStatus !== 'APPROVED')) window.location.replace('/application');
   }, [initialized, requireApproved, roles, user]);

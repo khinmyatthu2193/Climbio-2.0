@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { BarChart3, Boxes, CheckCircle2, ReceiptText, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -8,16 +9,28 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useAuthStore } from '@/store/authStore';
 import climbioLogo from '@/assets/branding/climbio-logo.png';
 
-export function AuthPage({ register }: { register: boolean }) {
+type AuthMode = 'login' | 'signup';
+
+export function AuthPage({ initialMode = 'login' }: { initialMode?: AuthMode }) {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const user = useAuthStore((state) => state.user);
   const { theme, toggleTheme } = useTheme();
   const { language } = useLanguage();
   const isBurmese = language === 'my';
 
-  if (user) {
+  useEffect(() => setMode(initialMode), [initialMode]);
+
+  useEffect(() => {
+    if (!user) return;
     window.location.replace(user.role === 'ADMIN' ? '/admin/dashboard' : user.accountStatus !== 'ACTIVE' || user.approvalStatus !== 'APPROVED' ? '/application' : '/');
-    return null;
-  }
+  }, [user]);
+
+  const changeMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
+    window.history.replaceState({}, '', nextMode === 'login' ? '/account/login' : '/account/signup');
+  };
+
+  if (user) return null;
   return (
     <main className={theme === 'dark' ? 'dark' : ''}>
       <div className="relative min-h-screen overflow-hidden bg-[#fbfaff] px-5 py-5 transition-colors duration-300 dark:bg-slate-950 sm:px-8 lg:px-12">
@@ -95,12 +108,12 @@ export function AuthPage({ register }: { register: boolean }) {
             <a className="mb-5 rounded-2xl transition hover:scale-[1.02]" href="/" aria-label="Climbio home">
               <img className="h-24 w-auto object-contain drop-shadow-sm dark:brightness-0 dark:invert sm:h-28" src={climbioLogo} alt="Climbio" />
             </a>
-            {register ? <RegisterForm /> : <LoginForm />}
+            {mode === 'signup' ? <RegisterForm /> : <LoginForm />}
             <p className="mt-5 text-center text-sm text-slate-600 dark:text-slate-400">
-              {register ? 'Already have an account?' : 'Don’t have an account?'}{' '}
-              <a className="font-bold text-violet-700 underline-offset-4 hover:underline dark:text-violet-300" href={register ? '/login' : '/register'}>
-                {register ? 'Sign in' : 'Create account'}
-              </a>
+              {mode === 'signup' ? 'Already have an account?' : 'Don’t have an account?'}{' '}
+              <button className="font-bold text-violet-700 underline-offset-4 hover:underline dark:text-violet-300" type="button" onClick={() => changeMode(mode === 'signup' ? 'login' : 'signup')}>
+                {mode === 'signup' ? 'Sign in' : 'Create account'}
+              </button>
             </p>
             <p className="mt-5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500"><ShieldCheck className="size-4" /> Your workspace is protected with secure authentication.</p>
           </section>

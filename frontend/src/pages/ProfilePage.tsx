@@ -29,7 +29,7 @@ export function ProfilePage() {
   });
   const passwordMutation = useMutation({
     mutationFn: authService.changePassword,
-    onSuccess: () => { clearSession(); window.location.replace('/login'); },
+    onSuccess: () => { clearSession(); window.location.replace('/account/login'); },
   });
   const logoMutation = useMutation({ mutationFn: authService.uploadLogo, onSuccess: setUser });
   const saveProfile = (event: FormEvent) => {

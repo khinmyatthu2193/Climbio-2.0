@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const logout = async () => {
     try { await authService.logout(); } finally {
       clearSession();
-      window.location.replace('/login');
+      window.location.replace('/account/login');
     }
   };
 

@@ -24,10 +24,12 @@ import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
 import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage';
 import { UserManualPage } from '@/pages/UserManualPage';
 import type { Role } from '@/types/auth';
+import { useAuthStore } from '@/store/authStore';
 
 export default function App() {
   useTheme();
   useAuthBootstrap();
+  const { user, initialized } = useAuthStore();
   const [path, setPath] = useState(() => window.location.pathname.replace(/\/+$/, '') || '/');
 
   useEffect(() => {
@@ -58,8 +60,9 @@ export default function App() {
     };
   }, []);
 
-  if (path === '/login') return <AuthPage register={false} />;
-  if (path === '/register') return <AuthPage register />;
+  if (path === '/account/login') return <AuthPage initialMode="login" />;
+  if (path === '/account/signup') return <AuthPage initialMode="signup" />;
+  if (path === '/' && initialized && !user) return <AuthPage initialMode="login" />;
   const publicShop = path.match(/^\/shop\/([a-z0-9-]+)$/i);
   if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
   const protectedPage = (page: React.ReactNode, roles?: Role[], requireApproved = false) => (
