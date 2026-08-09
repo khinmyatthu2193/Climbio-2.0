@@ -20,6 +20,7 @@ import { Card } from '@/components/common/Card';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingState } from '@/components/common/LoadingState';
 import { PageHeader } from '@/components/common/PageHeader';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { inventoryService } from '@/services/inventoryService';
 import { useAuthStore } from '@/store/authStore';
 import type { Product, ProductInput } from '@/types/inventory';
@@ -162,7 +163,7 @@ export function ProductList() {
         eyebrow="Product management"
         title="Inventory"
         description="Manage products, prices, visibility, and stock in one place."
-        actions={<a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-violet-700" href="/products/new"><Plus className="size-4" /> Add product</a>}
+        actions={<a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-violet-700" href="/products/new"><IconLabel icon={Plus}>Add product</IconLabel></a>}
       />
 
       {products.isError && <Alert className="mt-6" tone="error">Could not load inventory. Please refresh and try again.</Alert>}

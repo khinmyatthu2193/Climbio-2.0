@@ -19,6 +19,7 @@ import { Card } from '@/components/common/Card';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingState } from '@/components/common/LoadingState';
 import { PageHeader } from '@/components/common/PageHeader';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { StatusBadge } from '@/components/invoices/StatusBadge';
 import { invoiceService } from '@/services/invoiceService';
 import { useAuthStore } from '@/store/authStore';
@@ -177,7 +178,7 @@ export function InvoiceList() {
   return (
     <main className="page-container">
       <PageHeader eyebrow="Sales" title="Invoices" description="Review sales history, customer details, and payment status." actions={
-        <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-violet-700" href="/invoices/new"><FilePlus2 className="size-4" /> Create invoice</a>
+        <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-violet-700" href="/invoices/new"><IconLabel icon={FilePlus2}>Create invoice</IconLabel></a>
       } />
 
       {invoices.isError && <Alert className="mt-6" tone="error">Could not load invoices. Please refresh and try again.</Alert>}

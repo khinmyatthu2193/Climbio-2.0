@@ -21,6 +21,7 @@ import { useAuthStore } from '@/store/authStore';
 import type { SalesRange } from '@/types/dashboard';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { download, downloadFinancialReportExcel } from '@/utils/financialReportExport';
 
 const chartTooltip = {
@@ -136,16 +137,16 @@ export function DashboardPage() {
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <Button variant="outline" size="md" onClick={downloadPdfReport} disabled={!dashboard.data || isDownloadingPdf} title="Download financial report as PDF">
-            <FileDown className="size-4" /> {isDownloadingPdf ? 'Preparing PDF...' : 'PDF report'}
+            <IconLabel icon={FileDown}>{isDownloadingPdf ? 'Preparing PDF...' : 'PDF report'}</IconLabel>
           </Button>
           <Button variant="outline" size="md" onClick={downloadExcelReport} disabled={!dashboard.data} title="Download financial report for Excel">
-            <FileSpreadsheet className="size-4" /> Excel report
+            <IconLabel icon={FileSpreadsheet}>Excel report</IconLabel>
           </Button>
           <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-violet-300 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-slate-800" href="/invoices/new">
-            <FilePlus2 className="size-4" /> Create invoice
+            <IconLabel icon={FilePlus2}>Create invoice</IconLabel>
           </a>
           <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white shadow-lg shadow-violet-600/15 transition hover:bg-violet-700" href="/products/new">
-            <Plus className="size-4" /> Add product
+            <IconLabel icon={Plus}>Add product</IconLabel>
           </a>
         </div>
       </section>
