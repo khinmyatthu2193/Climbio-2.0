@@ -98,10 +98,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             )}
           >
             {isCurrent(href) && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-violet-500 dark:bg-violet-400" />}
-            <span className="grid size-6 shrink-0 place-items-center self-center" aria-hidden="true">
+            <span className="flex size-6 shrink-0 items-center justify-center" aria-hidden="true">
               <Icon className={cn('size-[18px] transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} />
             </span>
-            {!compact && <span className="min-w-0 self-center leading-5">{label}</span>}
+            {!compact && <span className="flex min-h-6 min-w-0 items-center leading-none">{label}</span>}
           </a>
         ))}
       </nav>
