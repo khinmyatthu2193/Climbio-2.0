@@ -6,66 +6,43 @@ import type { Theme } from '@/hooks/useTheme';
 import type { LandingAuthMode } from '@/pages/LandingPage';
 import climbioLogo from '@/assets/branding/climbio-logo.png';
 
-const navigation = [
-  { label: 'Features', id: 'features' },
-  { label: 'How it works', id: 'how-it-works' },
+const links = [
+  { label: 'Product', id: 'product' },
+  { label: 'Workflow', id: 'workflow' },
+  { label: 'AI', id: 'ai' },
   { label: 'Security', id: 'security' },
 ];
 
-export function LandingHeader({ theme, onToggleTheme, onOpenAuth }: { theme: Theme; onToggleTheme: () => void; onOpenAuth: (mode: LandingAuthMode) => void }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export function FloatingNavbar({ theme, onToggleTheme, onOpenAuth }: { theme: Theme; onToggleTheme: () => void; onOpenAuth: (mode: LandingAuthMode) => void }) {
+  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
+  const [active, setActive] = useState('');
 
   useEffect(() => {
-    const updateScrolled = () => setScrolled(window.scrollY > 16);
-    updateScrolled();
-    window.addEventListener('scroll', updateScrolled, { passive: true });
-    return () => window.removeEventListener('scroll', updateScrolled);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
-    const sections = navigation.map(({ id }) => document.getElementById(id)).filter((section): section is HTMLElement => Boolean(section));
+    const sections = links.map(({ id }) => document.getElementById(id)).filter((item): item is HTMLElement => Boolean(item));
     const observer = new IntersectionObserver((entries) => {
-      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible) setActiveSection(visible.target.id);
-    }, { rootMargin: '-20% 0px -65% 0px', threshold: [0, 0.2, 0.6] });
+      const current = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (current) setActive(current.target.id);
+    }, { rootMargin: '-18% 0px -68% 0px', threshold: [0, 0.2, 0.5] });
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, []);
 
-  const closeMenu = () => setMobileMenuOpen(false);
-  const accountAction = (mode: LandingAuthMode) => { closeMenu(); onOpenAuth(mode); };
-
-  return (
-    <header className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-all ${scrolled ? 'border-slate-200/90 bg-white/95 shadow-sm dark:border-slate-800 dark:bg-slate-950/95' : 'border-transparent bg-white/75 dark:bg-slate-950/75'}`}>
-      <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-5 sm:px-8" aria-label="Main navigation">
-        <a href="/#top" onClick={closeMenu} className="inline-flex shrink-0 rounded-xl focus-visible:ring-offset-4" aria-label="Climbio home, go to top">
-          <img src={climbioLogo} alt="Climbio" className="h-12 w-auto object-contain dark:brightness-0 dark:invert" />
-        </a>
-        <div className="hidden items-center gap-1 lg:flex">
-          {navigation.map(({ label, id }) => <a key={id} href={`/#${id}`} aria-current={activeSection === id ? 'location' : undefined} className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${activeSection === id ? 'bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300' : 'text-slate-600 hover:bg-slate-50 hover:text-violet-700 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-violet-300'}`}>{label}</a>)}
-        </div>
-        <div className="hidden items-center gap-2 md:flex">
-          <LanguageToggle />
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          <button type="button" onClick={() => accountAction('login')} className="min-h-11 rounded-xl px-4 text-sm font-bold text-slate-700 transition hover:bg-violet-50 hover:text-violet-700 dark:text-slate-200 dark:hover:bg-slate-900">Sign in</button>
-          <button type="button" onClick={() => accountAction('signup')} className="min-h-11 rounded-xl bg-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-600/20 transition hover:bg-violet-700">Start free</button>
-        </div>
-        <button type="button" onClick={() => setMobileMenuOpen((open) => !open)} className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 md:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} aria-controls="landing-mobile-menu">
-          {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
-      </nav>
-      {mobileMenuOpen && (
-        <div id="landing-mobile-menu" className="border-t border-slate-100 bg-white px-5 py-5 shadow-lg dark:border-slate-800 dark:bg-slate-950 md:hidden">
-          <div className="mx-auto grid max-w-7xl gap-1">
-            {navigation.map(({ label, id }) => <a key={id} href={`/#${id}`} onClick={closeMenu} className="rounded-xl px-3 py-3 font-semibold text-slate-700 hover:bg-violet-50 dark:text-slate-200 dark:hover:bg-slate-900">{label}</a>)}
-            <div className="my-3 flex items-center gap-2 border-y border-slate-100 py-3 dark:border-slate-800"><LanguageToggle /><ThemeToggle theme={theme} onToggle={onToggleTheme} /></div>
-            <button type="button" onClick={() => accountAction('login')} className="min-h-11 rounded-xl border border-violet-200 font-bold text-violet-700 dark:border-violet-500/30 dark:text-violet-300">Sign in</button>
-            <button type="button" onClick={() => accountAction('signup')} className="min-h-11 rounded-xl bg-violet-600 font-bold text-white">Start free</button>
-          </div>
-        </div>
-      )}
-    </header>
-  );
+  const account = (mode: LandingAuthMode) => { setOpen(false); onOpenAuth(mode); };
+  return <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
+    <nav className={`mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-4 rounded-2xl border px-4 backdrop-blur-xl transition-all sm:px-5 ${scrolled ? 'border-slate-200/90 bg-white/95 shadow-[0_14px_40px_rgba(15,23,42,0.10)] dark:border-violet-400/15 dark:bg-[#0b0e1a]/95' : 'border-white/70 bg-white/80 shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-[#0b0e1a]/75'}`} aria-label="Main navigation">
+      <a href="/#top" onClick={() => setOpen(false)} className="inline-flex shrink-0 rounded-lg" aria-label="Climbio home"><img src={climbioLogo} alt="Climbio" className="h-10 w-auto dark:brightness-0 dark:invert" /></a>
+      <div className="hidden items-center gap-1 lg:flex">{links.map(({ label, id }) => <a key={id} href={`/#${id}`} aria-current={active === id ? 'location' : undefined} className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${active === id ? 'bg-violet-600/10 text-violet-700 dark:text-violet-300' : 'text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'}`}>{label}</a>)}</div>
+      <div className="hidden items-center gap-2 md:flex"><LanguageToggle /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><button type="button" onClick={() => account('login')} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">Sign in</button><button type="button" onClick={() => account('signup')} className="min-h-10 rounded-lg bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:bg-violet-500">Get started</button></div>
+      <button type="button" onClick={() => setOpen((value) => !value)} className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white md:hidden dark:border-white/10 dark:bg-white/5" aria-label={open ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={open} aria-controls="floating-mobile-nav">{open ? <X className="size-5" /> : <Menu className="size-5" />}</button>
+    </nav>
+    {open && <div id="floating-mobile-nav" className="mx-auto mt-2 max-w-[1240px] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-[#0b0e1a] md:hidden"><div className="grid gap-1">{links.map(({ label, id }) => <a key={id} href={`/#${id}`} onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 font-semibold text-slate-700 hover:bg-violet-50 dark:text-slate-200 dark:hover:bg-white/5">{label}</a>)}<div className="my-2 flex flex-wrap items-center gap-2 border-y border-slate-100 py-3 dark:border-white/10"><LanguageToggle /><ThemeToggle theme={theme} onToggle={onToggleTheme} /></div><button type="button" onClick={() => account('login')} className="min-h-11 rounded-xl border border-slate-200 font-semibold dark:border-white/10">Sign in</button><button type="button" onClick={() => account('signup')} className="min-h-11 rounded-xl bg-violet-600 font-bold text-white">Get started</button></div></div>}
+  </header>;
 }

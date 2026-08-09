@@ -1,16 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { LandingHeader } from '@/components/landing/LandingHeader';
+import { FloatingNavbar } from '@/components/landing/LandingHeader';
 import { LandingAuthDialog } from '@/components/landing/LandingAuthDialog';
-import {
-  AudienceSection,
-  FeaturesSection,
-  FinalCTA,
-  HeroSection,
-  HowItWorksSection,
-  LandingFooter,
-  SecuritySection,
-  WorkflowSection,
-} from '@/components/landing/LandingSections';
+import { HeroSection } from '@/components/landing/LandingHero';
+import { ProductBento } from '@/components/landing/ProductBento';
+import { BusinessWorkflow, OnboardingTimeline, ProductShowcase } from '@/components/landing/LandingExperience';
+import { AISection, FinalCTA, LandingFooter, SecuritySection, StorefrontSection } from '@/components/landing/LandingTrust';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -44,14 +38,16 @@ export function LandingPage({ initialAuthMode = null }: { initialAuthMode?: Land
 
   return (
     <main className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen overflow-x-clip bg-[#fbfaff] text-slate-950 transition-colors dark:bg-slate-950 dark:text-white">
-        <LandingHeader theme={theme} onToggleTheme={toggleTheme} onOpenAuth={openAuth} />
+      <div className="min-h-screen overflow-x-clip bg-[#faf9f7] text-stone-900 transition-colors dark:bg-stone-950 dark:text-white">
+        <FloatingNavbar theme={theme} onToggleTheme={toggleTheme} onOpenAuth={openAuth} />
         <HeroSection onOpenAuth={openAuth} />
-        <FeaturesSection />
-        <HowItWorksSection />
-        <WorkflowSection />
-        <SecuritySection onOpenAuth={openAuth} />
-        <AudienceSection />
+        <ProductBento />
+        <BusinessWorkflow />
+        <ProductShowcase />
+        <OnboardingTimeline />
+        <AISection />
+        <StorefrontSection />
+        <SecuritySection />
         <FinalCTA onOpenAuth={openAuth} />
         <LandingFooter onOpenAuth={openAuth} />
       </div>
