@@ -59,10 +59,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <nav className="flex-1 space-y-1.5 p-3" aria-label="Admin navigation">
         {!compact && <p className="px-3 pb-2 pt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Administration</p>}
         {navigation.map(({ href, label, icon: Icon }) => (
-          <a key={href} href={href} title={compact ? label : undefined} aria-current={isCurrent(href) ? 'page' : undefined} className={cn('group relative flex min-h-11 items-center rounded-xl text-sm font-semibold transition', compact ? 'justify-center px-2' : 'gap-3 px-3', isCurrent(href) ? 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-200 dark:bg-violet-500/20 dark:text-white dark:ring-violet-400/30' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-white')}>
+          <a key={href} href={href} title={compact ? label : undefined} aria-current={isCurrent(href) ? 'page' : undefined} className={cn('group relative min-h-11 items-center rounded-xl text-sm font-semibold transition', compact ? 'flex justify-center px-2' : 'grid grid-cols-[24px_minmax(0,1fr)] gap-3 px-3', isCurrent(href) ? 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-200 dark:bg-violet-500/20 dark:text-white dark:ring-violet-400/30' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-white')}>
             {isCurrent(href) && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-violet-500 dark:bg-violet-400" />}
-            <Icon className={cn('size-[18px] transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} aria-hidden="true" />
-            {!compact && label}
+            <span className="grid size-6 shrink-0 place-items-center self-center" aria-hidden="true"><Icon className={cn('size-[18px] transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} /></span>
+            {!compact && <span className="min-w-0 self-center leading-5">{label}</span>}
           </a>
         ))}
       </nav>
