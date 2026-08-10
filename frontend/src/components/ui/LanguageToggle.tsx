@@ -1,5 +1,6 @@
 import { Languages } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { LandingButtonLabel } from '@/components/landing/LandingButtonLabel';
 
 export function LanguageToggle() {
   const { language, toggleLanguage, translate } = useLanguage();
@@ -13,7 +14,7 @@ export function LanguageToggle() {
       title={translate(switchingToBurmese ? 'Switch to Burmese' : 'Switch to English')}
     >
       <Languages className="size-4" aria-hidden="true" />
-      <span>{switchingToBurmese ? 'မြန်မာ' : 'EN'}</span>
+      <LandingButtonLabel>{switchingToBurmese ? 'မြန်မာ' : 'EN'}</LandingButtonLabel>
     </button>
   );
 }
