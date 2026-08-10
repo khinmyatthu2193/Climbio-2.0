@@ -11,7 +11,7 @@ export function AuthInput({ label, icon, id, ...props }: AuthInputProps) {
     <label className="block" htmlFor={inputId}>
       <span className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">{label}</span>
       <span className="relative block">
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">{icon}</span>
+        <span className="pointer-events-none absolute left-3.5 top-1/2 flex size-5 -translate-y-[calc(50%+2.5px)] items-center justify-center text-slate-400 dark:text-slate-500">{icon}</span>
         <input
           {...props}
           id={inputId}

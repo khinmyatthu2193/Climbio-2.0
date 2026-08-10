@@ -13,7 +13,7 @@ export function PasswordInput({ label, id, ...props }: PasswordInputProps) {
     <label className="block" htmlFor={inputId}>
       <span className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">{label}</span>
       <span className="relative block">
-        <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+        <span className="pointer-events-none absolute left-3.5 top-1/2 flex size-5 -translate-y-[calc(50%+2.5px)] items-center justify-center text-slate-400 dark:text-slate-500"><LockKeyhole className="block size-[18px]" aria-hidden="true" /></span>
         <input
           {...props}
           id={inputId}

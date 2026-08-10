@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/common/Card';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { PasswordInput } from '@/components/auth/PasswordInput';
+import { iconTextOpticalFrameClass } from '@/components/ui/IconLabel';
 
 function loginError(error: unknown) {
   if (axios.isAxiosError<{ error?: string; details?: Record<string, string[] | undefined> }>(error)) {
@@ -41,9 +42,9 @@ export function LoginForm() {
         <AuthInput label="Email address" name="email" autoComplete="email" type="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} icon={<Mail className="size-[18px]" />} required />
         <PasswordInput label="Password" name="password" autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required />
         {login.isError && <p className="flex gap-2 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300" role="alert"><AlertCircle className="mt-0.5 size-4 shrink-0" />{loginError(login.error)}</p>}
-        <Button className="min-h-[54px] w-full rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-base shadow-xl shadow-violet-600/25 hover:from-violet-700 hover:to-purple-700 active:scale-[0.99]" disabled={login.isPending}>
-          {login.isPending && <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />}
-          {login.isPending ? 'Signing in…' : 'Sign in'}
+        <Button className="min-h-[54px] w-full rounded-xl border border-violet-600 bg-violet-600 px-6 text-base shadow-[0_10px_24px_rgba(109,40,217,0.22)] hover:border-violet-700 hover:bg-violet-700 active:scale-[0.99]" disabled={login.isPending}>
+          {login.isPending && <span className={iconTextOpticalFrameClass} aria-hidden="true"><LoaderCircle className="block size-[18px] animate-spin" /></span>}
+          <span className="leading-none">{login.isPending ? 'Signing in…' : 'Sign in'}</span>
         </Button>
       </form>
     </Card>

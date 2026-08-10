@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/common/Card';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { PasswordInput } from '@/components/auth/PasswordInput';
+import { iconTextOpticalFrameClass } from '@/components/ui/IconLabel';
 
 function registrationError(error: unknown) {
   if (axios.isAxiosError<{ error?: string; details?: Record<string, string[] | undefined> }>(error)) {
@@ -47,9 +48,9 @@ export function RegisterForm() {
         <PasswordInput label="Password" name="password" autoComplete="new-password" placeholder="Create a strong password" value={form.password} onChange={update('password')} required />
         <p className="rounded-xl bg-violet-50 px-3 py-2 text-xs leading-5 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Use 8+ characters with uppercase, lowercase, and a number.</p>
         {register.isError && <p className="flex gap-2 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700 dark:border-red-500/25 dark:bg-red-500/10 dark:text-red-300" role="alert"><AlertCircle className="mt-0.5 size-4 shrink-0" />{registrationError(register.error)}</p>}
-        <Button className="min-h-[54px] w-full rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-base shadow-xl shadow-violet-600/25 hover:from-violet-700 hover:to-purple-700 active:scale-[0.99]" disabled={register.isPending}>
-          {register.isPending && <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />}
-          {register.isPending ? 'Creating account…' : 'Create account'}
+        <Button className="min-h-[54px] w-full rounded-xl border border-violet-600 bg-violet-600 px-6 text-base shadow-[0_10px_24px_rgba(109,40,217,0.22)] hover:border-violet-700 hover:bg-violet-700 active:scale-[0.99]" disabled={register.isPending}>
+          {register.isPending && <span className={iconTextOpticalFrameClass} aria-hidden="true"><LoaderCircle className="block size-[18px] animate-spin" /></span>}
+          <span className="leading-none">{register.isPending ? 'Creating account…' : 'Create account'}</span>
         </Button>
       </form>
     </Card>
