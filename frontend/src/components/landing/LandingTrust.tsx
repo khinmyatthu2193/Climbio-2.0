@@ -1,8 +1,7 @@
 import { ArrowRight, Bot, Check, KeyRound, LockKeyhole, Search, ShieldCheck, Sparkles, Store, UserCheck } from 'lucide-react';
 import type { LandingAuthMode } from '@/pages/LandingPage';
 import climbioLogo from '@/assets/branding/climbio-logo.png';
-import { LandingButtonLabel } from '@/components/landing/LandingButtonLabel';
-import { iconTextOpticalFrameClass } from '@/components/ui/IconLabel';
+import { LandingButtonLabel, landingIconTextFrameClass as iconTextOpticalFrameClass } from '@/components/landing/LandingButtonLabel';
 
 export function AISection() {
   return <section id="ai" className="landing-section overflow-hidden bg-gradient-to-br from-[#2b1760] via-[#2f195f] to-[#1d123c] py-24 text-white dark:from-[#0b0e19] dark:via-[#0b0e19] dark:to-[#0b0e19]"><div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center"><div><p className="text-xs font-black uppercase tracking-[0.18em] text-violet-200 dark:text-violet-300">AI business intelligence</p><h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.035em] sm:text-5xl">Your data tells a story.<br /><span className="text-violet-200 dark:text-violet-300">Climbio helps you understand it.</span></h2><p className="mt-6 text-lg leading-8 text-violet-100/75 dark:text-slate-400">Climbio&apos;s AI tools use your sales and inventory context to surface practical insights and answer business questions.</p><div className="mt-8 flex items-center gap-3 text-sm text-violet-100/80 dark:text-slate-300"><Sparkles className="size-5 text-violet-200 dark:text-violet-300" /> Based on your current Climbio records</div></div>

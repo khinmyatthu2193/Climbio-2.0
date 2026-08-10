@@ -1,7 +1,6 @@
 import { Languages } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { LandingButtonLabel } from '@/components/landing/LandingButtonLabel';
-import { iconTextOpticalFrameClass } from '@/components/ui/IconLabel';
+import { LandingButtonLabel, landingIconTextFrameClass } from '@/components/landing/LandingButtonLabel';
 
 export function LanguageToggle() {
   const { language, toggleLanguage, translate } = useLanguage();
@@ -14,7 +13,7 @@ export function LanguageToggle() {
       aria-label={translate(switchingToBurmese ? 'Switch to Burmese' : 'Switch to English')}
       title={translate(switchingToBurmese ? 'Switch to Burmese' : 'Switch to English')}
     >
-      <span className={iconTextOpticalFrameClass} aria-hidden="true"><Languages className="block size-4" /></span>
+      <span className={landingIconTextFrameClass} aria-hidden="true"><Languages className="block size-4" /></span>
       <LandingButtonLabel>{switchingToBurmese ? 'မြန်မာ' : 'EN'}</LandingButtonLabel>
     </button>
   );
