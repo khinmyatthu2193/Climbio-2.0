@@ -4,8 +4,8 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import type { Theme } from '@/hooks/useTheme';
 import type { LandingAuthMode } from '@/pages/LandingPage';
-import climbioLogo from '@/assets/branding/climbio-logo.png';
 import { LandingButtonLabel } from '@/components/landing/LandingButtonLabel';
+import { LandingLogo } from '@/components/landing/LandingLogo';
 
 const links = [
   { label: 'Product', id: 'product' },
@@ -39,7 +39,7 @@ export function FloatingNavbar({ theme, onToggleTheme, onOpenAuth }: { theme: Th
   const account = (mode: LandingAuthMode) => { setOpen(false); onOpenAuth(mode); };
   return <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
     <nav className={`mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-4 rounded-2xl border px-4 backdrop-blur-xl transition-all sm:px-5 ${scrolled ? 'border-slate-200/90 bg-white/95 shadow-[0_14px_40px_rgba(15,23,42,0.10)] dark:border-violet-400/15 dark:bg-[#0b0e1a]/95' : 'border-white/70 bg-white/80 shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-[#0b0e1a]/75'}`} aria-label="Main navigation">
-      <a href="/#top" onClick={() => setOpen(false)} className="inline-flex shrink-0 rounded-lg" aria-label="Climbio home"><img src={climbioLogo} alt="Climbio" className="h-10 w-auto dark:brightness-0 dark:invert" /></a>
+      <a href="/#top" onClick={() => setOpen(false)} className="inline-flex shrink-0 rounded-lg" aria-label="Climbio home"><LandingLogo /></a>
       <div className="hidden items-center gap-1 lg:flex">{links.map(({ label, id }) => <a key={id} href={`/#${id}`} aria-current={active === id ? 'location' : undefined} className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${active === id ? 'bg-violet-600/10 text-violet-700 dark:text-violet-300' : 'text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'}`}>{label}</a>)}</div>
       <div className="hidden items-center gap-2 md:flex"><LanguageToggle /><ThemeToggle theme={theme} onToggle={onToggleTheme} /><button type="button" onClick={() => account('login')} className="inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-sm font-semibold text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"><LandingButtonLabel>Sign in</LandingButtonLabel></button><button type="button" onClick={() => account('signup')} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-900/15 transition hover:bg-violet-500"><LandingButtonLabel>Get started</LandingButtonLabel></button></div>
       <button type="button" onClick={() => setOpen((value) => !value)} className="grid size-10 place-items-center rounded-lg border border-slate-200 bg-white md:hidden dark:border-white/10 dark:bg-white/5" aria-label={open ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={open} aria-controls="floating-mobile-nav">{open ? <X className="size-5" /> : <Menu className="size-5" />}</button>
