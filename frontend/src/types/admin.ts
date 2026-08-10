@@ -1,6 +1,8 @@
 import type { AccountStatus, Role, ShopApprovalStatus } from './auth';
 
 export type ReviewAction = 'APPROVE' | 'REQUEST_CHANGES' | 'DECLINE' | 'SUSPEND' | 'REACTIVATE' | 'GENERAL_FEEDBACK' | 'REOPEN';
+export type ApplicationReviewAction = Extract<ReviewAction, 'APPROVE' | 'REQUEST_CHANGES' | 'DECLINE'>;
+export type ShopManagementAction = Extract<ReviewAction, 'SUSPEND' | 'REACTIVATE'>;
 
 export interface AdminShop {
   id: string; email: string; name: string; shopName: string; phone: string | null; shopLogo: string | null; shopAddress: string | null;

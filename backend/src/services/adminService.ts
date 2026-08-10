@@ -5,6 +5,8 @@ import { AppError } from '../utils/AppError.js';
 
 type PageInput = { page: number; pageSize: number; search?: string; status?: ShopApprovalStatus; sort?: 'submittedAt' | 'shopName' | 'createdAt' };
 type ReviewAction = 'APPROVE' | 'REQUEST_CHANGES' | 'DECLINE' | 'SUSPEND' | 'REACTIVATE' | 'GENERAL_FEEDBACK' | 'REOPEN';
+const applicationStatuses: ShopApprovalStatus[] = ['PENDING', 'CHANGES_REQUESTED', 'APPROVED', 'DECLINED'];
+const managedShopStatuses: ShopApprovalStatus[] = ['APPROVED', 'SUSPENDED'];
 
 const safeShop = {
   id: true, email: true, name: true, shopName: true, phone: true, shopLogo: true, shopAddress: true,
@@ -47,7 +49,8 @@ export const adminService = {
 
   async listApplications(input: PageInput) {
     const paging = page(input);
-    const where: Prisma.UserWhereInput = { role: 'SHOP_OWNER', ...(input.status ? { approvalStatus: input.status } : {}), ...searchWhere(input.search) };
+    const status = input.status && applicationStatuses.includes(input.status) ? input.status : undefined;
+    const where: Prisma.UserWhereInput = { role: 'SHOP_OWNER', approvalStatus: status ?? { in: applicationStatuses }, ...searchWhere(input.search) };
     const orderBy = input.sort === 'shopName' ? { shopName: 'asc' as const } : { submittedAt: 'desc' as const };
     const [items, total] = await Promise.all([
       prisma.user.findMany({ where, select: safeShop, orderBy, skip: (paging.page - 1) * paging.pageSize, take: paging.pageSize }),
@@ -97,7 +100,17 @@ export const adminService = {
     return getApplication(result);
   },
 
-  async listShops(input: PageInput) { return this.listApplications(input); },
+  async listShops(input: PageInput) {
+    const paging = page(input);
+    const status = input.status && managedShopStatuses.includes(input.status) ? input.status : undefined;
+    const where: Prisma.UserWhereInput = { role: 'SHOP_OWNER', approvalStatus: status ?? { in: managedShopStatuses }, ...searchWhere(input.search) };
+    const orderBy = input.sort === 'shopName' ? { shopName: 'asc' as const } : { submittedAt: 'desc' as const };
+    const [items, total] = await Promise.all([
+      prisma.user.findMany({ where, select: safeShop, orderBy, skip: (paging.page - 1) * paging.pageSize, take: paging.pageSize }),
+      prisma.user.count({ where }),
+    ]);
+    return { items, total, ...paging };
+  },
 
   async listUsers(input: PageInput) {
     const paging = page(input);
