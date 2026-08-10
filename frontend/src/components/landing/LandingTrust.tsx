@@ -1,6 +1,6 @@
 import { ArrowRight, Bot, Check, KeyRound, LockKeyhole, Search, ShieldCheck, Sparkles, Store, UserCheck } from 'lucide-react';
 import type { LandingAuthMode } from '@/pages/LandingPage';
-import climbioLogo from '@/assets/branding/climbio-logo.png';
+import climbioLogo from '@/assets/branding/climbio-for-sidenavbar.png';
 import { LandingButtonLabel, landingIconTextFrameClass as iconTextOpticalFrameClass } from '@/components/landing/LandingButtonLabel';
 
 export function AISection() {

@@ -34,6 +34,8 @@
 }
 
 @layer components {
+  footer a[aria-label="Climbio home"] { @apply relative h-11 w-[165px] shrink-0 overflow-hidden; }
+  footer a[aria-label="Climbio home"] > img { @apply absolute left-1/2 top-1/2 w-[286px] max-w-none -translate-x-1/2 -translate-y-1/2; }
   .page-container { @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8; }
   .field-label { @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200; }
   .control { @apply min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/20 dark:disabled:bg-slate-800; }
