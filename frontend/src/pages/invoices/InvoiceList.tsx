@@ -57,13 +57,13 @@ function InvoiceActions({ invoice, downloading, deleting, onDownload, onDelete }
         <EllipsisVertical className="size-4" />
       </summary>
       <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-800">
-        <a className={itemClass} href={`/invoices/${invoice.id}`}><Eye className="size-4" /> View invoice</a>
-        <a className={itemClass} href={`/invoices/${invoice.id}`}><FilePenLine className="size-4" /> Edit invoice</a>
+        <a className={itemClass} href={`/invoices/${invoice.id}`}><IconLabel icon={Eye}>View invoice</IconLabel></a>
+        <a className={itemClass} href={`/invoices/${invoice.id}`}><IconLabel icon={FilePenLine}>Edit invoice</IconLabel></a>
         <button className={itemClass} type="button" disabled={downloading} onClick={onDownload}>
-          <Download className="size-4" /> {downloading ? 'Preparing…' : 'Download PDF'}
+          <IconLabel icon={Download}>{downloading ? 'Preparing…' : 'Download PDF'}</IconLabel>
         </button>
         <button className={`${itemClass} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10`} type="button" disabled={deleting} onClick={onDelete}>
-          <Trash2 className="size-4" /> {deleting ? 'Deleting…' : 'Delete invoice'}
+          <IconLabel icon={Trash2}>{deleting ? 'Deleting…' : 'Delete invoice'}</IconLabel>
         </button>
       </div>
     </details>
@@ -229,7 +229,7 @@ export function InvoiceList() {
             ))}
           </div>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="mr-1 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><CalendarDays className="size-3.5" /> Date</span>
+            <span className="mr-1 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-400"><IconLabel icon={CalendarDays}>Date</IconLabel></span>
             {([
               { value: 'all', label: 'All time' },
               { value: 'today', label: 'Today' },

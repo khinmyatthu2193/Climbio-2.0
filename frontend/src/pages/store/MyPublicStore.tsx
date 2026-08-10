@@ -4,6 +4,7 @@ import { Check, Copy, ExternalLink, Facebook, Package, Power, Store, Upload } fr
 import { QRCodeSVG } from 'qrcode.react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
@@ -112,10 +113,10 @@ export function MyPublicStore() {
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold">{store.data.shopInfo.shopName}</h2>
                   <p className="mt-1 text-sm text-slate-500">{store.data.shopInfo.shopAddress || copy.noAddress}</p>
-                  <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-primary"><Package size={17} />{store.data.productCount} {copy.visibleProducts}</div>
+                  <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-primary"><IconLabel icon={Package}>{store.data.productCount} {copy.visibleProducts}</IconLabel></div>
                 </div>
                 <label className="cursor-pointer rounded-xl border px-3 py-2 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
-                  <span className="flex items-center gap-2"><Upload size={16} /> {copy.changeLogo}</span>
+                  <IconLabel icon={Upload}>{copy.changeLogo}</IconLabel>
                   <input className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) logoMutation.mutate(file);
@@ -130,7 +131,7 @@ export function MyPublicStore() {
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <div className="min-w-0 flex-1 truncate rounded-xl border bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">{store.data.publicUrl}</div>
                 <Button className="flex items-center justify-center gap-2" onClick={copyLink}>
-                  {copied ? <Check size={17} /> : <Copy size={17} />}{copied ? copy.copied : copy.copyLink}
+                  <IconLabel icon={copied ? Check : Copy}>{copied ? copy.copied : copy.copyLink}</IconLabel>
                 </Button>
                 <a
                   className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium text-white ${store.data.publicEnabled ? 'bg-slate-700 hover:opacity-90' : 'pointer-events-none bg-slate-300'}`}
@@ -138,12 +139,12 @@ export function MyPublicStore() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <ExternalLink size={17} /> {copy.openStore}
+                  <IconLabel icon={ExternalLink}>{copy.openStore}</IconLabel>
                 </a>
               </div>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <a className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 font-semibold text-white hover:opacity-90" href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" rel="noreferrer">
-                  <Facebook size={18} /> {copy.facebook}
+                  <IconLabel icon={Facebook}>{copy.facebook}</IconLabel>
                 </a>
                 <a className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 font-semibold text-white hover:opacity-90" href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noreferrer">
                   {copy.whatsapp}

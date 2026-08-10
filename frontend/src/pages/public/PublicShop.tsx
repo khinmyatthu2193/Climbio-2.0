@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, PackageOpen, Phone, Search, ShoppingBag, X } from 'lucide-react';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { publicShopService } from '@/services/publicShopService';
 import type { PublicShopProduct } from '@/types/publicShop';
 
@@ -54,12 +55,12 @@ export function PublicShop({ slug }: { slug: string }) {
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Climbio Shop</p>
               <h1 className="mt-1 text-3xl font-black md:text-4xl">{shop.shopName}</h1>
-              {shop.shopAddress && <p className="mt-2 flex items-center gap-1 text-sm text-slate-600"><MapPin size={15} />{shop.shopAddress}</p>}
+              {shop.shopAddress && <p className="mt-2 flex items-center gap-1 text-sm text-slate-600"><IconLabel icon={MapPin}>{shop.shopAddress}</IconLabel></p>}
             </div>
           </div>
           {shop.phone && (
             <a className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" href={`tel:${shop.phone}`}>
-              <Phone size={18} /> Contact seller
+              <IconLabel icon={Phone}>Contact seller</IconLabel>
             </a>
           )}
         </div>
@@ -140,7 +141,7 @@ export function PublicShop({ slug }: { slug: string }) {
                 </p>
                 {shop.phone ? (
                   <a className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white hover:opacity-90" href={`tel:${shop.phone}`}>
-                    <Phone size={18} /> Contact seller
+                    <IconLabel icon={Phone}>Contact seller</IconLabel>
                   </a>
                 ) : (
                   <p className="mt-7 rounded-xl bg-slate-100 p-3 text-center text-sm text-slate-500">Seller contact is unavailable.</p>

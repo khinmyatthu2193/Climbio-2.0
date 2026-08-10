@@ -8,6 +8,7 @@ import { InvoiceItemRow } from '@/components/invoices/InvoiceItemRow';
 import { InvoiceSummary } from '@/components/invoices/InvoiceSummary';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/button';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { Input } from '@/components/ui/input';
 import { invoiceService } from '@/services/invoiceService';
 import { inventoryService } from '@/services/inventoryService';
@@ -90,8 +91,7 @@ export function CreateInvoice() {
               <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Add products and set their quantities.</p>
             </div>
             <Button type="button" variant="outline" onClick={() => setItems((current) => [...current, { productId: '', quantity: 1 }])}>
-              <Plus size={16} aria-hidden="true" />
-              Add item
+              <IconLabel icon={Plus}>Add item</IconLabel>
             </Button>
           </div>
           {products.isError && <p className="text-sm text-red-500">Products could not be loaded.</p>}

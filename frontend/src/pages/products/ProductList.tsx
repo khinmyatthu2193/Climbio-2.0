@@ -56,9 +56,9 @@ function ProductActions({ product, busy, onAdjustStock, onDelete }: {
         <EllipsisVertical className="size-4" />
       </summary>
       <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl dark:border-slate-700 dark:bg-slate-800">
-        <a className={itemClass} href={`/products/${product.id}/edit`}><Pencil className="size-4" /> Edit product</a>
-        <button className={itemClass} type="button" disabled={busy} onClick={onAdjustStock}><SlidersHorizontal className="size-4" /> Adjust stock</button>
-        <button className={`${itemClass} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10`} type="button" disabled={busy} onClick={onDelete}><Trash2 className="size-4" /> Delete product</button>
+        <a className={itemClass} href={`/products/${product.id}/edit`}><IconLabel icon={Pencil}>Edit product</IconLabel></a>
+        <button className={itemClass} type="button" disabled={busy} onClick={onAdjustStock}><IconLabel icon={SlidersHorizontal}>Adjust stock</IconLabel></button>
+        <button className={`${itemClass} text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10`} type="button" disabled={busy} onClick={onDelete}><IconLabel icon={Trash2}>Delete product</IconLabel></button>
       </div>
     </details>
   );
@@ -198,8 +198,8 @@ export function ProductList() {
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
           <label className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">Low stock threshold <span className="block w-20"><input className="control min-h-9 py-1 text-center" type="number" min="1" max="999999" value={lowStockThreshold} onChange={(event) => changeThreshold(Number(event.target.value))} /></span></label>
           <div className="inline-flex w-fit rounded-xl bg-slate-100 p-1 dark:bg-slate-800" aria-label="Product view">
-            <button type="button" className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'list' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('list')}><List className="size-4" /> List</button>
-            <button type="button" className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'grid' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('grid')}><Grid2X2 className="size-4" /> Grid</button>
+            <button type="button" className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'list' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('list')}><IconLabel icon={List}>List</IconLabel></button>
+            <button type="button" className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'grid' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('grid')}><IconLabel icon={Grid2X2}>Grid</IconLabel></button>
           </div>
         </div>
       </Card>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Crop, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { IconLabel } from '@/components/ui/IconLabel';
 
 type Aspect = '1' | '4/3' | '16/9';
 
@@ -81,7 +82,7 @@ export function ImageCropper({ file, onCancel, onComplete }: ImageCropperProps) 
           <label className="text-sm font-medium">Horizontal position<input className="mt-3 w-full accent-violet-600" type="range" min="-100" max="100" value={x} onChange={(event) => setX(Number(event.target.value))} /></label>
           <label className="text-sm font-medium">Vertical position<input className="mt-3 w-full accent-violet-600" type="range" min="-100" max="100" value={y} onChange={(event) => setY(Number(event.target.value))} /></label>
         </div>
-        <div className="mt-5 flex flex-col-reverse gap-2 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3"><Button type="button" variant="outline" onClick={onCancel}>Cancel</Button><Button type="button" onClick={applyCrop}><Crop className="mr-2 size-4" />Apply crop</Button></div>
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3"><Button type="button" variant="outline" onClick={onCancel}>Cancel</Button><Button type="button" onClick={applyCrop}><IconLabel icon={Crop}>Apply crop</IconLabel></Button></div>
       </section>
     </div>
   );

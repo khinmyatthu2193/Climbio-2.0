@@ -5,6 +5,7 @@ import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/button';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { aiService } from '@/services/aiService';
 import { useLanguage } from '@/hooks/useLanguage';
 import { AIAnalysisWaiting } from '@/components/ai/AIAnalysisWaiting';
@@ -73,7 +74,7 @@ export function AIAdvisorPage() {
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300"><Bot className="size-7" /></span>
             <h2 className="mt-4 text-xl font-bold">Your business analysis is ready when you are</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Climbio will securely analyze your shop records and reply in your selected language. Your API key stays on the server.</p>
-            <Button className="mt-5" onClick={startAnalysis}><Sparkles className="size-4" /> Analyze My Business</Button>
+            <Button className="mt-5" onClick={startAnalysis}><IconLabel icon={Sparkles}>Analyze My Business</IconLabel></Button>
           </div>
         </Card>
       )}

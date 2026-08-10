@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { Bot, LoaderCircle, MessageSquareText, Plus, Send, Sparkles, Trash2 } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/button';
+import { IconLabel } from '@/components/ui/IconLabel';
 import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
 import { aiService } from '@/services/aiService';
@@ -79,7 +80,7 @@ export function AIChatPage() {
         <PageHeader eyebrow={text.eyebrow} title={text.title} description={text.description} />
         <div className="mt-6 grid gap-5 lg:grid-cols-[290px_minmax(0,1fr)]">
           <Card className="flex max-h-[720px] flex-col p-3 sm:p-4">
-            <Button className="w-full" onClick={startNewChat}><Plus className="size-4" /> {text.newChat}</Button>
+            <Button className="w-full" onClick={startNewChat}><IconLabel icon={Plus}>{text.newChat}</IconLabel></Button>
             <div className="mt-4 flex items-center justify-between px-1"><h2 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{text.history}</h2>{Boolean(history.data?.messages.length) && <button type="button" className="text-xs font-semibold text-red-600 hover:text-red-700" onClick={() => setDeleteTarget({ type: 'all' })}>{text.clear}</button>}</div>
             <div className="mt-2 min-h-0 flex-1 space-y-1 overflow-y-auto">
               {history.isLoading && <div className="flex justify-center py-10"><LoaderCircle className="size-5 animate-spin text-violet-500" /></div>}
@@ -108,7 +109,7 @@ export function AIChatPage() {
         </div>
       </div>
 
-      {deleteTarget && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900" role="alertdialog" aria-modal="true"><span className="grid size-11 place-items-center rounded-xl bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300"><Trash2 className="size-5" /></span><h2 className="mt-4 text-lg font-bold text-slate-950 dark:text-white">{deleteTarget.type === 'all' ? text.clearTitle : text.deleteTitle}</h2><p className="mt-2 text-sm leading-6 text-slate-500">{deleteTarget.type === 'all' ? text.clearHelp : text.deleteHelp}</p>{deleteChat.isError && <p className="mt-3 text-sm text-red-600">{text.deleteFailed}</p>}<div className="mt-6 flex justify-end gap-3"><Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteChat.isPending}>{text.cancel}</Button><Button variant="danger" onClick={() => deleteChat.mutate(deleteTarget)} disabled={deleteChat.isPending}>{deleteChat.isPending ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}{text.confirmDelete}</Button></div></div></div>}
+      {deleteTarget && <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900" role="alertdialog" aria-modal="true"><span className="grid size-11 place-items-center rounded-xl bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300"><Trash2 className="size-5" /></span><h2 className="mt-4 text-lg font-bold text-slate-950 dark:text-white">{deleteTarget.type === 'all' ? text.clearTitle : text.deleteTitle}</h2><p className="mt-2 text-sm leading-6 text-slate-500">{deleteTarget.type === 'all' ? text.clearHelp : text.deleteHelp}</p>{deleteChat.isError && <p className="mt-3 text-sm text-red-600">{text.deleteFailed}</p>}<div className="mt-6 flex justify-end gap-3"><Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteChat.isPending}>{text.cancel}</Button><Button variant="danger" onClick={() => deleteChat.mutate(deleteTarget)} disabled={deleteChat.isPending}><IconLabel icon={deleteChat.isPending ? LoaderCircle : Trash2}>{text.confirmDelete}</IconLabel></Button></div></div></div>}
     </main>
   );
 }
