@@ -110,7 +110,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="border-t border-slate-200 p-3 dark:border-slate-800/80">
         <div className={cn('mb-1 flex items-center rounded-xl py-2.5', compact ? 'justify-center px-1' : 'gap-3 px-3')}>
           <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30">
-            {user?.name?.charAt(0).toUpperCase()}
+            <span className="translate-y-px leading-none">{user?.name?.charAt(0).toUpperCase()}</span>
           </div>
           {!compact && <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>

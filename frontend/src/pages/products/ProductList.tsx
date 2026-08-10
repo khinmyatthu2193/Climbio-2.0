@@ -39,7 +39,7 @@ function ProductImage({ product, className }: { product: Product; className: str
   return product.image ? (
     <img className={`${className} border border-slate-200 object-cover object-center dark:border-slate-700`} src={product.image} alt={product.name} loading="lazy" />
   ) : (
-    <div className={`${className} grid shrink-0 place-items-center bg-violet-50 text-lg font-bold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300`}>{product.name.charAt(0).toUpperCase()}</div>
+    <div className={`${className} grid shrink-0 place-items-center bg-violet-50 text-lg font-bold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300`}><span className="translate-y-px leading-none">{product.name.charAt(0).toUpperCase()}</span></div>
   );
 }
 

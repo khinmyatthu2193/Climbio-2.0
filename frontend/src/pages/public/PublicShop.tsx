@@ -49,7 +49,7 @@ export function PublicShop({ slug }: { slug: string }) {
               <img className="h-20 w-20 rounded-3xl border-4 border-white object-cover shadow-md" src={shop.shopLogo} alt={`${shop.shopName} logo`} />
             ) : (
               <div className="grid h-20 w-20 place-items-center rounded-3xl bg-primary text-3xl font-black text-white shadow-md">
-                {shop.shopName.charAt(0).toUpperCase()}
+                <span className="translate-y-px leading-none">{shop.shopName.charAt(0).toUpperCase()}</span>
               </div>
             )}
             <div>

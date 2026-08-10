@@ -70,7 +70,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </nav>
       <div className="border-t border-slate-200 p-3 dark:border-slate-800/80">
         <div className={cn('mb-1 flex items-center rounded-xl py-2.5', compact ? 'justify-center px-1' : 'gap-3 px-3')}>
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30">{user?.name?.charAt(0).toUpperCase()}</div>
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30"><span className="translate-y-px leading-none">{user?.name?.charAt(0).toUpperCase()}</span></div>
           {!compact && <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p><p className="truncate text-xs text-slate-500">Administrator</p></div>}
         </div>
         <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out"><span className={cn('min-w-5', compact ? iconFrameClass : iconTextOpticalFrameClass)} aria-hidden="true"><LogOut className="block size-[18px] shrink-0" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}</Button>
