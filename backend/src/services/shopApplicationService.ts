@@ -9,6 +9,12 @@ const shopSelect = {
   accountStatus: true, approvalStatus: true, submittedAt: true, approvedAt: true, suspendedAt: true, applicationVersion: true,
 } as const;
 
+type ApplicationUpdate = {
+  name: string; shopName: string; businessCategory: string; businessDescription: string; businessPhone: string;
+  businessEmail?: string; shopAddress: string; cityTownship: string; ownerRole: string;
+  businessRegistrationNumber?: string; websiteUrl?: string; shopLogo?: string; verificationDocument?: string;
+};
+
 export const shopApplicationService = {
   async get(userId: string) {
     const shop = await prisma.user.findUnique({
@@ -24,11 +30,7 @@ export const shopApplicationService = {
     return shop;
   },
 
-  async create(userId: string, input: {
-    name: string; shopName: string; businessCategory: string; businessDescription: string; businessPhone: string;
-    businessEmail?: string; shopAddress: string; cityTownship: string; shopLogo: string; ownerRole: string;
-    businessRegistrationNumber?: string; verificationDocument: string; websiteUrl?: string;
-  }) {
+  async create(userId: string, input: ApplicationUpdate & { shopLogo: string; verificationDocument: string }) {
     const submittedAt = new Date();
     return prisma.$transaction(async (tx) => {
       const result = await tx.user.updateMany({
@@ -53,13 +55,20 @@ export const shopApplicationService = {
     });
   },
 
-  async update(userId: string, input: { name: string; shopName: string; phone?: string | null; shopAddress?: string | null }) {
+  async update(userId: string, input: ApplicationUpdate) {
     const found = await prisma.user.findUnique({ where: { id: userId }, select: { approvalStatus: true } });
     if (!found) throw new AppError('Application not found', 404);
-    if (!['PENDING', 'CHANGES_REQUESTED'].includes(found.approvalStatus)) {
-      throw new AppError('This application can no longer be edited', 403);
-    }
-    return prisma.user.update({ where: { id: userId }, data: input, select: shopSelect });
+    if (found.approvalStatus !== 'CHANGES_REQUESTED') throw new AppError('Only applications with requested changes can be edited', 403);
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...input,
+        businessEmail: input.businessEmail || null,
+        businessRegistrationNumber: input.businessRegistrationNumber || null,
+        websiteUrl: input.websiteUrl || null,
+      },
+      select: shopSelect,
+    });
   },
 
   async resubmit(userId: string) {

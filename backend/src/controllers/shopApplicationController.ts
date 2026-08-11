@@ -17,6 +17,17 @@ export const shopApplicationController = {
     ]);
     res.status(201).json(await shopApplicationService.create(req.user!.id, { ...req.body, shopLogo, verificationDocument }));
   },
-  update: async (req: Request, res: Response) => res.json(await shopApplicationService.update(req.user!.id, req.body)),
+  update: async (req: Request, res: Response) => {
+    const current = await shopApplicationService.get(req.user!.id);
+    if (current.approvalStatus !== 'CHANGES_REQUESTED') throw new AppError('Only applications with requested changes can be edited', 403);
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+    const logo = files?.shopLogo?.[0];
+    const proof = files?.verificationDocument?.[0];
+    const [shopLogo, verificationDocument] = await Promise.all([
+      logo ? storageService.uploadLogo(req.user!.id, logo) : undefined,
+      proof ? storageService.uploadVerificationDocument(req.user!.id, proof) : undefined,
+    ]);
+    res.json(await shopApplicationService.update(req.user!.id, { ...req.body, shopLogo, verificationDocument }));
+  },
   resubmit: async (req: Request, res: Response) => res.json(await shopApplicationService.resubmit(req.user!.id)),
 };

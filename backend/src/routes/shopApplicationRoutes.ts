@@ -5,14 +5,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
 import { applicationUpload } from '../middleware/upload.js';
 
-const applicationSchema = z.object({
-  name: z.string().trim().min(2).max(100),
-  shopName: z.string().trim().min(2).max(100),
-  phone: z.string().trim().max(30).nullable().optional(),
-  shopAddress: z.string().trim().max(500).nullable().optional(),
-}).strict();
-
-const createApplicationSchema = z.object({
+const applicationFields = {
   name: z.string().trim().min(2).max(100),
   shopName: z.string().trim().min(2).max(100),
   businessCategory: z.string().trim().min(2).max(100),
@@ -24,11 +17,14 @@ const createApplicationSchema = z.object({
   ownerRole: z.string().trim().min(2).max(80),
   businessRegistrationNumber: z.string().trim().max(100).optional(),
   websiteUrl: z.union([z.string().trim().url().max(500), z.literal('')]).optional(),
-}).strict();
+};
+
+const createApplicationSchema = z.object(applicationFields).strict();
+const updateApplicationSchema = z.object(applicationFields).strict();
 
 export const shopApplicationRoutes = Router();
 shopApplicationRoutes.use(requireAuth);
 shopApplicationRoutes.get('/', shopApplicationController.get);
 shopApplicationRoutes.post('/', applicationUpload.fields([{ name: 'shopLogo', maxCount: 1 }, { name: 'verificationDocument', maxCount: 1 }]), validateBody(createApplicationSchema), shopApplicationController.create);
-shopApplicationRoutes.put('/', validateBody(applicationSchema), shopApplicationController.update);
+shopApplicationRoutes.put('/', applicationUpload.fields([{ name: 'shopLogo', maxCount: 1 }, { name: 'verificationDocument', maxCount: 1 }]), validateBody(updateApplicationSchema), shopApplicationController.update);
 shopApplicationRoutes.post('/resubmit', shopApplicationController.resubmit);
