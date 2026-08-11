@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
@@ -13,6 +13,7 @@ import { LoadingState } from '@/components/common/LoadingState';
 import { PageHeader } from '@/components/common/PageHeader';
 import { shopApplicationService } from '@/services/shopApplicationService';
 import { useAuthStore } from '@/store/authStore';
+import type { ShopApplication } from '@/types/shopApplication';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -23,7 +24,7 @@ const requiredFile = (types: string[], requiredMessage: string, sizeMessage: str
   .refine((file) => !(file instanceof File) || file.size <= MAX_FILE_SIZE, sizeMessage)
   .refine((file) => !(file instanceof File) || types.includes(file.type), typeMessage);
 
-const applicationFormSchema = z.object({
+const applicationTextFields = {
   shopName: z.string().trim().min(2, 'Shop name is required.').max(100, 'Shop name must not exceed 100 characters.'),
   ownerName: z.string().trim().min(2, 'Owner / authorized representative is required.').max(100),
   businessDescription: z.string().trim().min(20, 'Business description must contain at least 20 characters.').max(1000, 'Business description must not exceed 1000 characters.'),
@@ -31,18 +32,35 @@ const applicationFormSchema = z.object({
   shopAddress: z.string().trim().min(5, 'Business address must contain at least 5 characters.').max(300),
   cityTownship: z.string().trim().min(2, 'City / township is required').max(100),
   businessRegistrationNumber: z.string().trim().max(100).optional(),
-  shopLogo: requiredFile(IMAGE_TYPES, 'Shop logo is required.', 'Logo must be smaller than 5 MB.', 'Only JPG, PNG, and WebP images are allowed.'),
   businessCategory: z.enum(['Retail', 'Wholesale', 'Fashion & Apparel', 'Food & Beverage', 'Beauty & Personal Care', 'Electronics & Technology', 'Home & Living', 'Services', 'Manufacturing', 'Other'], { required_error: 'Please select a business category.' }),
   otherCategory: z.string().trim().max(100).optional(),
   businessEmail: z.union([z.literal(''), z.string().trim().email('Enter a valid email address').max(255)]).optional(),
   ownerRole: z.string().trim().min(2, 'Your role in the business is required.').max(80),
   websiteUrl: z.union([z.literal(''), z.string().trim().url('Enter a valid URL, including https://').max(500)]).optional(),
-  verificationDocument: requiredFile(PROOF_TYPES, 'Business verification document is required.', 'Verification file must be smaller than 5 MB.', 'Only PDF, JPG, PNG, and WebP files are allowed.'),
-}).superRefine((values, context) => {
-  if (values.businessCategory === 'Other' && !values.otherCategory?.trim()) context.addIssue({ code: z.ZodIssueCode.custom, path: ['otherCategory'], message: 'Please specify the business category.' });
-});
+};
 
-type ApplicationFormValues = z.infer<typeof applicationFormSchema>;
+const validateOtherCategory = (values: { businessCategory: string; otherCategory?: string }, context: z.RefinementCtx) => {
+  if (values.businessCategory === 'Other' && !values.otherCategory?.trim()) context.addIssue({ code: z.ZodIssueCode.custom, path: ['otherCategory'], message: 'Please specify the business category.' });
+};
+
+const optionalFile = (types: string[], sizeMessage: string, typeMessage: string) => z.custom<File>((value) => value === undefined || value instanceof File)
+  .optional()
+  .refine((file) => !file || file.size <= MAX_FILE_SIZE, sizeMessage)
+  .refine((file) => !file || types.includes(file.type), typeMessage);
+
+const applicationFormSchema = z.object({
+  ...applicationTextFields,
+  shopLogo: requiredFile(IMAGE_TYPES, 'Shop logo is required.', 'Logo must be smaller than 5 MB.', 'Only JPG, PNG, and WebP images are allowed.'),
+  verificationDocument: requiredFile(PROOF_TYPES, 'Business verification document is required.', 'Verification file must be smaller than 5 MB.', 'Only PDF, JPG, PNG, and WebP files are allowed.'),
+}).superRefine(validateOtherCategory);
+
+const editApplicationSchema = z.object({
+  ...applicationTextFields,
+  shopLogo: optionalFile(IMAGE_TYPES, 'Logo must be smaller than 5 MB.', 'Only JPG, PNG, and WebP images are allowed.'),
+  verificationDocument: optionalFile(PROOF_TYPES, 'Verification file must be smaller than 5 MB.', 'Only PDF, JPG, PNG, and WebP files are allowed.'),
+}).superRefine(validateOtherCategory);
+
+type ApplicationFormValues = z.infer<typeof editApplicationSchema>;
 
 function FieldLabel({ children, required, tooltip }: { children: ReactNode; required?: boolean; tooltip?: string }) {
   return <span className="group relative mb-1.5 inline-flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -60,7 +78,7 @@ function FieldErrorMessage({ error }: { error?: FieldError }) {
   return error ? <p className="mt-1.5 text-xs font-medium text-red-600" role="alert">{error.message}</p> : null;
 }
 
-function FileField({ id, label, tooltip, accept, file, error, onChange }: { id: string; label: string; tooltip: string; accept: string; file?: File; error?: FieldError; onChange: (file?: File) => void }) {
+function FileField({ id, label, tooltip, accept, file, existingUrl, error, onChange }: { id: string; label: string; tooltip: string; accept: string; file?: File; existingUrl?: string | null; error?: FieldError; onChange: (file?: File) => void }) {
   const previewUrl = useMemo(() => file && IMAGE_TYPES.includes(file.type) && file.size <= MAX_FILE_SIZE ? URL.createObjectURL(file) : undefined, [file]);
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
   return <div>
@@ -74,6 +92,10 @@ function FileField({ id, label, tooltip, accept, file, error, onChange }: { id: 
       {previewUrl ? <img className="h-14 w-14 rounded-lg object-cover" src={previewUrl} alt="Selected file preview" /> : <FileText className="h-10 w-10 text-violet-500" aria-hidden="true" />}
       <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{file.name}</p><p className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p></div>
       <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-200 hover:text-red-600 dark:hover:bg-slate-700" type="button" onClick={() => onChange(undefined)} aria-label={`Remove ${label}`}><X className="h-4 w-4" /></button>
+    </div>}
+    {!file && existingUrl && <div className="mt-3 flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60">
+      {id === 'shopLogo' ? <img className="h-14 w-14 rounded-lg object-cover" src={existingUrl} alt="Current shop logo" /> : <FileText className="h-10 w-10 text-violet-500" aria-hidden="true" />}
+      <a className="min-w-0 flex-1 truncate text-sm font-medium text-violet-600 hover:underline" href={existingUrl} target="_blank" rel="noreferrer">Current {label}</a>
     </div>}
     <div id={`${id}-error`}><FieldErrorMessage error={error} /></div>
   </div>;
@@ -89,16 +111,32 @@ function applicationError(error: unknown) {
   return 'The application could not be submitted. Please try again.';
 }
 
-function ShopApplicationForm({ ownerName }: { ownerName: string }) {
+function ShopApplicationForm({ ownerName, application }: { ownerName: string; application?: ShopApplication }) {
+  const editing = Boolean(application);
+  const knownCategories = ['Retail', 'Wholesale', 'Fashion & Apparel', 'Food & Beverage', 'Beauty & Personal Care', 'Electronics & Technology', 'Home & Living', 'Services', 'Manufacturing'];
+  const currentCategory = application?.businessCategory ?? '';
+  const activeSchema = editing ? editApplicationSchema.superRefine((values, context) => {
+    if (!application?.shopLogo && !values.shopLogo) context.addIssue({ code: z.ZodIssueCode.custom, path: ['shopLogo'], message: 'Shop logo is required.' });
+    if (!application?.verificationDocument && !values.verificationDocument) context.addIssue({ code: z.ZodIssueCode.custom, path: ['verificationDocument'], message: 'Business verification document is required.' });
+  }) : applicationFormSchema;
   const { register, handleSubmit, setValue, watch, formState: { errors, isValid } } = useForm<ApplicationFormValues>({
-    resolver: zodResolver(applicationFormSchema), mode: 'onChange',
-    defaultValues: { shopName: '', ownerName, businessDescription: '', businessPhone: '', shopAddress: '', cityTownship: '', businessRegistrationNumber: '', businessEmail: '', ownerRole: '', websiteUrl: '', otherCategory: '' },
+    resolver: zodResolver(activeSchema), mode: 'onChange',
+    defaultValues: {
+      shopName: application?.shopName ?? '', ownerName: application?.name ?? ownerName,
+      businessDescription: application?.businessDescription ?? '', businessPhone: application?.businessPhone ?? '',
+      shopAddress: application?.shopAddress ?? '', cityTownship: application?.cityTownship ?? '',
+      businessRegistrationNumber: application?.businessRegistrationNumber ?? '', businessEmail: application?.businessEmail ?? '',
+      ownerRole: application?.ownerRole ?? '', websiteUrl: application?.websiteUrl ?? '',
+      businessCategory: currentCategory ? (knownCategories.includes(currentCategory) ? currentCategory as ApplicationFormValues['businessCategory'] : 'Other') : undefined,
+      otherCategory: currentCategory && !knownCategories.includes(currentCategory) ? currentCategory : '',
+    },
   });
   const shopLogo = watch('shopLogo');
   const verificationDocument = watch('verificationDocument');
   const description = watch('businessDescription');
   const category = watch('businessCategory');
   const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
   const create = useMutation({
     mutationFn: shopApplicationService.create,
     onSuccess: (application) => {
@@ -106,21 +144,33 @@ function ShopApplicationForm({ ownerName }: { ownerName: string }) {
       window.location.replace('/application');
     },
   });
-  const submit = (values: ApplicationFormValues) => {
+  const toFormData = (values: ApplicationFormValues) => {
     const data = new FormData();
     data.append('name', values.ownerName);
     data.append('shopName', values.shopName);
     data.append('businessCategory', values.businessCategory === 'Other' ? values.otherCategory!.trim() : values.businessCategory);
     const fields = ['businessDescription', 'businessPhone', 'businessEmail', 'shopAddress', 'cityTownship', 'ownerRole', 'businessRegistrationNumber', 'websiteUrl'] as const;
     fields.forEach((field) => data.append(field, values[field] ?? ''));
-    data.append('shopLogo', values.shopLogo);
-    data.append('verificationDocument', values.verificationDocument);
-    create.mutate(data);
+    if (values.shopLogo) data.append('shopLogo', values.shopLogo);
+    if (values.verificationDocument) data.append('verificationDocument', values.verificationDocument);
+    return data;
   };
+  const save = useMutation({
+    mutationFn: (values: ApplicationFormValues) => shopApplicationService.update(toFormData(values)),
+    onSuccess: async () => queryClient.invalidateQueries({ queryKey: ['shop-application'] }),
+  });
+  const resubmit = useMutation({
+    mutationFn: async (values: ApplicationFormValues) => { await shopApplicationService.update(toFormData(values)); return shopApplicationService.resubmit(); },
+    onSuccess: async (updated) => {
+      setUser({ ...useAuthStore.getState().user!, name: updated.name, shopName: updated.shopName, shopLogo: updated.shopLogo, shopAddress: updated.shopAddress, approvalStatus: updated.approvalStatus, submittedAt: updated.submittedAt });
+      await queryClient.invalidateQueries({ queryKey: ['shop-application'] });
+    },
+  });
+  const submit = (values: ApplicationFormValues) => editing ? save.mutate(values) : create.mutate(toFormData(values));
   const input = (name: Exclude<keyof ApplicationFormValues, 'shopLogo' | 'verificationDocument'>): UseFormRegisterReturn => register(name);
   return <main className="page-container max-w-4xl">
-    <PageHeader eyebrow="Step 2 of 2" title="Apply to Open Your Shop" description="Provide your business information below. Our admin team will review your application before your shop becomes active." />
-    <Alert className="mt-6" tone="info">Your shop will not be publicly available until the application is approved.</Alert>
+    <PageHeader eyebrow={editing ? 'Changes requested' : 'Step 2 of 2'} title={editing ? 'Update your application' : 'Apply to Open Your Shop'} description={editing ? 'Update the requested information, save your progress, then resubmit it for admin review.' : 'Provide your business information below. Our admin team will review your application before your shop becomes active.'} actions={application && <ApprovalStatusBadge status={application.approvalStatus} />} />
+    {!editing && <Alert className="mt-6" tone="info">Your shop will not be publicly available until the application is approved.</Alert>}
     <Card className="mt-6">
       <form className="grid gap-5 sm:grid-cols-2" onSubmit={handleSubmit(submit)} noValidate>
         <h2 className="border-b border-slate-200 pb-2 text-base font-bold dark:border-slate-700 sm:col-span-2">Business Information</h2>
@@ -128,7 +178,7 @@ function ShopApplicationForm({ ownerName }: { ownerName: string }) {
         <label><FieldLabel required tooltip="Select the category that best represents your primary business activity.">Business Category</FieldLabel><select className={fieldClass(errors.businessCategory)} defaultValue="" aria-required="true" aria-invalid={Boolean(errors.businessCategory)} {...input('businessCategory')}><option value="" disabled>Select a category</option>{['Retail', 'Wholesale', 'Fashion & Apparel', 'Food & Beverage', 'Beauty & Personal Care', 'Electronics & Technology', 'Home & Living', 'Services', 'Manufacturing', 'Other'].map((item) => <option key={item}>{item}</option>)}</select><FieldErrorMessage error={errors.businessCategory} /></label>
         {category === 'Other' && <label className="sm:col-span-2"><FieldLabel required>Specify Business Category</FieldLabel><input className={fieldClass(errors.otherCategory)} aria-required="true" aria-invalid={Boolean(errors.otherCategory)} {...input('otherCategory')} /><FieldErrorMessage error={errors.otherCategory} /></label>}
         <label className="sm:col-span-2"><FieldLabel required tooltip="Describe your business, products, or services so the admin can understand what your shop does.">Business Description</FieldLabel><textarea className={`${fieldClass(errors.businessDescription)} min-h-28 resize-y`} placeholder="Tell us briefly what your business sells or provides..." maxLength={1000} aria-required="true" aria-invalid={Boolean(errors.businessDescription)} {...input('businessDescription')} /><div className="flex justify-between"><FieldErrorMessage error={errors.businessDescription} /><span className="ml-auto mt-1.5 text-xs text-slate-500">{description?.length ?? 0} / 1000</span></div></label>
-        <FileField id="shopLogo" label="Shop logo" tooltip="Upload your shop logo. JPG, PNG, or WebP, max 5MB." accept="image/jpeg,image/png,image/webp" file={shopLogo} error={errors.shopLogo} onChange={(file) => setValue('shopLogo', file as File, { shouldValidate: true, shouldDirty: true })} />
+        <FileField id="shopLogo" label="Shop logo" tooltip="Upload your shop logo. JPG, PNG, or WebP, max 5MB." accept="image/jpeg,image/png,image/webp" file={shopLogo} existingUrl={application?.shopLogo} error={errors.shopLogo} onChange={(file) => setValue('shopLogo', file, { shouldValidate: true, shouldDirty: true })} />
         <h2 className="mt-2 border-b border-slate-200 pb-2 text-base font-bold dark:border-slate-700 sm:col-span-2">Owner &amp; Contact Information</h2>
         <label><FieldLabel required tooltip="Enter the name of the owner or person authorized to manage this shop.">Owner / Authorized Representative</FieldLabel><input className={fieldClass(errors.ownerName)} placeholder="Enter your full name" aria-required="true" aria-invalid={Boolean(errors.ownerName)} {...input('ownerName')} /><FieldErrorMessage error={errors.ownerName} /></label>
         <label><FieldLabel required tooltip="Enter your position or responsibility in this business.">Your Role in the Business</FieldLabel><input className={fieldClass(errors.ownerRole)} placeholder="e.g. Founder, Owner, Manager" aria-required="true" aria-invalid={Boolean(errors.ownerRole)} {...input('ownerRole')} /><FieldErrorMessage error={errors.ownerRole} /></label>
@@ -140,40 +190,44 @@ function ShopApplicationForm({ ownerName }: { ownerName: string }) {
         <h2 className="mt-2 border-b border-slate-200 pb-2 text-base font-bold dark:border-slate-700 sm:col-span-2">Verification Information</h2>
         <label><FieldLabel tooltip="If your business has a DICA or other official registration number, enter it here.">Business Registration Number <span className="font-normal text-slate-500">(Optional)</span></FieldLabel><input className={fieldClass(errors.businessRegistrationNumber)} placeholder="Enter registration number" aria-invalid={Boolean(errors.businessRegistrationNumber)} {...input('businessRegistrationNumber')} /><FieldErrorMessage error={errors.businessRegistrationNumber} /></label>
         <label><FieldLabel tooltip="Add your official Facebook Page or website so the admin can verify your business presence.">Facebook Page / Website <span className="font-normal text-slate-500">(Optional)</span></FieldLabel><input className={fieldClass(errors.websiteUrl)} type="url" placeholder="https://facebook.com/yourshop or https://yourshop.com" aria-invalid={Boolean(errors.websiteUrl)} {...input('websiteUrl')} /><FieldErrorMessage error={errors.websiteUrl} /></label>
-        <div className="sm:col-span-2"><FileField id="verificationDocument" label="Business Verification" tooltip="Upload a license, registration document, storefront photo, or other reasonable proof that this business is genuine." accept="application/pdf,image/jpeg,image/png,image/webp" file={verificationDocument} error={errors.verificationDocument} onChange={(file) => setValue('verificationDocument', file as File, { shouldValidate: true, shouldDirty: true })} /></div>
-        {create.isError && <Alert className="sm:col-span-2" tone="error">{applicationError(create.error)}</Alert>}
-        <div className="sm:col-span-2"><Button className="min-h-12 w-full sm:w-auto" disabled={!isValid || create.isPending}>{create.isPending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}{create.isPending ? 'Submitting...' : 'Submit for admin review'}</Button></div>
+        <div className="sm:col-span-2"><FileField id="verificationDocument" label="Business Verification" tooltip="Upload a license, registration document, storefront photo, or other reasonable proof that this business is genuine." accept="application/pdf,image/jpeg,image/png,image/webp" file={verificationDocument} existingUrl={application?.verificationDocument} error={errors.verificationDocument} onChange={(file) => setValue('verificationDocument', file, { shouldValidate: true, shouldDirty: true })} /></div>
+        {(create.isError || save.isError || resubmit.isError) && <Alert className="sm:col-span-2" tone="error">{applicationError(create.error ?? save.error ?? resubmit.error)}</Alert>}
+        {save.isSuccess && <Alert className="sm:col-span-2" tone="success">Changes saved. Your application remains in Changes Requested until you resubmit it.</Alert>}
+        <div className="flex flex-wrap gap-3 sm:col-span-2">
+          {editing && <Button type="submit" variant="outline" className="min-h-12" disabled={!isValid || save.isPending || resubmit.isPending}>{save.isPending ? 'Saving...' : 'Save changes'}</Button>}
+          <Button type={editing ? 'button' : 'submit'} className="min-h-12 w-full sm:w-auto" disabled={!isValid || create.isPending || save.isPending || resubmit.isPending} onClick={editing ? handleSubmit((values) => resubmit.mutate(values)) : undefined}>{(create.isPending || resubmit.isPending) && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}{create.isPending || resubmit.isPending ? 'Submitting...' : 'Submit for admin review'}</Button>
+        </div>
       </form>
     </Card>
+    {application && <Card className="mt-6"><h2 className="text-lg font-bold">Admin feedback &amp; history</h2>{application.reviewsReceived.length ? <div className="mt-4 space-y-4">{application.reviewsReceived.map((review) => <div className="border-l-2 border-violet-300 pl-4" key={review.id}><div className="flex flex-wrap items-center gap-2"><ApprovalStatusBadge status={(review.nextStatus ?? application.approvalStatus)} /><span className="text-xs text-slate-500">{new Date(review.createdAt).toLocaleString()}</span></div>{review.feedback && <p className="mt-2 text-sm leading-6">{review.feedback}</p>}</div>)}</div> : <p className="mt-3 text-sm text-slate-500">No feedback has been recorded yet.</p>}</Card>}
   </main>;
 }
 
 export function ApplicationStatusPage() {
-  const queryClient = useQueryClient();
   const application = useQuery({ queryKey: ['shop-application'], queryFn: shopApplicationService.get, refetchInterval: (query) => query.state.data?.submittedAt ? 15_000 : false });
-  const [form, setForm] = useState({ name: '', shopName: '', phone: '', shopAddress: '' });
   const setUser = useAuthStore((state) => state.setUser);
-  useEffect(() => { if (application.data) setForm({ name: application.data.name, shopName: application.data.shopName, phone: application.data.phone ?? '', shopAddress: application.data.shopAddress ?? '' }); }, [application.data]);
   useEffect(() => {
     if (application.data?.accountStatus === 'ACTIVE' && application.data.approvalStatus === 'APPROVED') {
       setUser({ ...useAuthStore.getState().user!, accountStatus: application.data.accountStatus, approvalStatus: application.data.approvalStatus, approvedAt: application.data.approvedAt });
       window.location.replace('/');
     }
   }, [application.data?.accountStatus, application.data?.approvalStatus, application.data?.approvedAt, setUser]);
-  const update = useMutation({ mutationFn: shopApplicationService.update, onSuccess: async () => queryClient.invalidateQueries({ queryKey: ['shop-application'] }) });
-  const resubmit = useMutation({ mutationFn: shopApplicationService.resubmit, onSuccess: async (data) => { setUser({ ...useAuthStore.getState().user!, approvalStatus: data.approvalStatus, submittedAt: data.submittedAt }); await queryClient.invalidateQueries({ queryKey: ['shop-application'] }); } });
   if (application.isLoading) return <main className="page-container"><Card className="mt-8 p-0"><LoadingState label="Loading application" /></Card></main>;
   if (!application.data) return <main className="page-container"><Alert className="mt-8" tone="error">Could not load your application.</Alert></main>;
   if (!application.data.submittedAt) return <ShopApplicationForm ownerName={application.data.name} />;
-  const editable = application.data.approvalStatus === 'CHANGES_REQUESTED';
+  if (application.data.approvalStatus === 'CHANGES_REQUESTED') return <ShopApplicationForm ownerName={application.data.name} application={application.data} />;
   const feedback = application.data.reviewsReceived.filter((review) => review.feedback);
   return <main className="page-container max-w-4xl"><PageHeader eyebrow="Shop application" title="Application status" description="You can sign in while your application is reviewed. Business tools become available after approval." actions={<ApprovalStatusBadge status={application.data.approvalStatus} />} />
     {application.data.approvalStatus === 'DECLINED' && <Alert className="mt-6" tone="error">This application was declined. Please contact support if you need assistance.</Alert>}
     {application.data.approvalStatus === 'SUSPENDED' && <Alert className="mt-6" tone="error">This shop is suspended. Please contact support for further information.</Alert>}
     <Card className="mt-6"><h2 className="text-lg font-bold">Application details</h2><p className="mt-1 text-sm text-slate-500">Submitted {new Date(application.data.submittedAt).toLocaleString()}</p>
-      <div className="mt-5 grid gap-4 sm:grid-cols-2"><label><span className="mb-1 block text-sm font-medium">Owner name</span><input className="control" disabled={!editable} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label><label><span className="mb-1 block text-sm font-medium">Shop name</span><input className="control" disabled={!editable} value={form.shopName} onChange={(e) => setForm({ ...form, shopName: e.target.value })} /></label><label><span className="mb-1 block text-sm font-medium">Phone</span><input className="control" disabled={!editable} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label><label><span className="mb-1 block text-sm font-medium">Address</span><input className="control" disabled={!editable} value={form.shopAddress} onChange={(e) => setForm({ ...form, shopAddress: e.target.value })} /></label></div>
-      {editable && <div className="mt-5 flex flex-wrap gap-3"><Button variant="outline" disabled={update.isPending} onClick={() => update.mutate({ ...form, phone: form.phone || null, shopAddress: form.shopAddress || null })}>{update.isPending ? 'Saving…' : 'Save changes'}</Button><Button disabled={resubmit.isPending} onClick={() => resubmit.mutate()}>{resubmit.isPending ? 'Resubmitting…' : 'Resubmit application'}</Button></div>}
-      {(update.isError || resubmit.isError) && <Alert className="mt-4" tone="error">Your application could not be updated. Please try again.</Alert>}
+      <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+        {[['Shop name', application.data.shopName], ['Owner name', application.data.name], ['Business category', application.data.businessCategory], ['Business phone', application.data.businessPhone], ['Business email', application.data.businessEmail], ['Owner role', application.data.ownerRole], ['City / township', application.data.cityTownship], ['Registration number', application.data.businessRegistrationNumber]].map(([label, value]) => <div key={label}><dt className="text-slate-500">{label}</dt><dd className="font-semibold">{value || 'Not provided'}</dd></div>)}
+        <div className="sm:col-span-2"><dt className="text-slate-500">Business description</dt><dd className="font-semibold">{application.data.businessDescription}</dd></div>
+        <div className="sm:col-span-2"><dt className="text-slate-500">Business address</dt><dd className="font-semibold">{application.data.shopAddress}</dd></div>
+        <div><dt className="text-slate-500">Facebook / website</dt><dd>{application.data.websiteUrl ? <a className="font-semibold text-violet-600 hover:underline" href={application.data.websiteUrl} target="_blank" rel="noreferrer">Open link</a> : 'Not provided'}</dd></div>
+        <div><dt className="text-slate-500">Files</dt><dd className="flex gap-3">{application.data.shopLogo && <a className="font-semibold text-violet-600 hover:underline" href={application.data.shopLogo} target="_blank" rel="noreferrer">Shop logo</a>}{application.data.verificationDocument && <a className="font-semibold text-violet-600 hover:underline" href={application.data.verificationDocument} target="_blank" rel="noreferrer">Verification</a>}</dd></div>
+      </dl>
     </Card>
     <Card className="mt-6"><h2 className="text-lg font-bold">Admin feedback & history</h2>{feedback.length ? <div className="mt-4 space-y-4">{application.data.reviewsReceived.map((review) => <div className="border-l-2 border-violet-300 pl-4" key={review.id}><div className="flex flex-wrap items-center gap-2"><ApprovalStatusBadge status={(review.nextStatus ?? application.data.approvalStatus)} /><span className="text-xs text-slate-500">{new Date(review.createdAt).toLocaleString()}</span></div>{review.feedback && <p className="mt-2 text-sm leading-6">{review.feedback}</p>}</div>)}</div> : <p className="mt-3 text-sm text-slate-500">No feedback has been recorded yet.</p>}</Card>
   </main>;
