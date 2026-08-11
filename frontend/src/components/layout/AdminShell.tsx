@@ -58,7 +58,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {!compact && <button className="hidden shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white lg:block" onClick={toggleCollapsed} aria-label="Collapse sidebar" title="Collapse sidebar"><PanelLeftClose className="size-5" /></button>}
         <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X className="size-5" /></button>
       </div>
-      <nav className="flex-1 space-y-1.5 p-3" aria-label="Admin navigation">
+      <nav className="sidebar-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3" aria-label="Admin navigation">
         {!compact && <p className="px-3 pb-2 pt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Administration</p>}
         {navigation.map(({ href, label, icon: Icon }) => (
           <a key={href} href={href} title={compact ? label : undefined} aria-current={isCurrent(href) ? 'page' : undefined} className={cn('group relative flex h-[52px] items-center rounded-xl text-sm font-semibold transition', compact ? 'justify-center px-2' : 'gap-3 px-4', isCurrent(href) ? 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-200 dark:bg-violet-500/20 dark:text-white dark:ring-violet-400/30' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-white')}>

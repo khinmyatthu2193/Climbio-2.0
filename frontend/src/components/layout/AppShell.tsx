@@ -85,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <X className="size-5" />
         </button>
       </div>
-      <nav className="flex-1 space-y-1.5 p-3" aria-label="Primary navigation">
+      <nav className="sidebar-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3" aria-label="Primary navigation">
         {!compact && <p className="px-3 pb-2 pt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Workspace</p>}
         {navigation.map(({ label, href, icon: Icon }) => (
           <a

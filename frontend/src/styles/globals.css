@@ -48,6 +48,13 @@
   .tab-control { @apply inline-flex items-center justify-center leading-5; }
   .checkbox-label { @apply flex items-center leading-5; }
   .control-text { display: inline-block; line-height: 1.25rem; transform: translateY(var(--control-text-optical-offset)); }
+
+  .sidebar-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar { display: none; }
   .ui-button > span:not([aria-hidden="true"]):not(.icon-text-control) { transform: translateY(var(--control-text-optical-offset)); }
   .tab-control > span:not(.icon-text-control) { transform: translateY(var(--control-text-optical-offset)); }
 }
