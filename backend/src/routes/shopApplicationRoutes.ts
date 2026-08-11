@@ -13,14 +13,15 @@ const applicationSchema = z.object({
 }).strict();
 
 const createApplicationSchema = z.object({
+  name: z.string().trim().min(2).max(100),
   shopName: z.string().trim().min(2).max(100),
   businessCategory: z.string().trim().min(2).max(100),
-  businessDescription: z.string().trim().min(20).max(2000),
-  businessPhone: z.string().trim().min(5).max(30),
+  businessDescription: z.string().trim().min(20).max(1000),
+  businessPhone: z.string().trim().min(7).max(30).regex(/^\+?[0-9\s()-]+$/).refine((value) => value.replace(/\D/g, '').length >= 7),
   businessEmail: z.union([z.string().trim().email().max(255), z.literal('')]).optional(),
-  shopAddress: z.string().trim().min(5).max(500),
+  shopAddress: z.string().trim().min(5).max(300),
   cityTownship: z.string().trim().min(2).max(100),
-  ownerRole: z.string().trim().min(2).max(100),
+  ownerRole: z.string().trim().min(2).max(80),
   businessRegistrationNumber: z.string().trim().max(100).optional(),
   websiteUrl: z.union([z.string().trim().url().max(500), z.literal('')]).optional(),
 }).strict();

@@ -25,7 +25,7 @@ export const shopApplicationService = {
   },
 
   async create(userId: string, input: {
-    shopName: string; businessCategory: string; businessDescription: string; businessPhone: string;
+    name: string; shopName: string; businessCategory: string; businessDescription: string; businessPhone: string;
     businessEmail?: string; shopAddress: string; cityTownship: string; shopLogo: string; ownerRole: string;
     businessRegistrationNumber?: string; verificationDocument: string; websiteUrl?: string;
   }) {
