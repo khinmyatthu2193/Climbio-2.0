@@ -35,13 +35,13 @@ async function issueSession(user: { id: string; email: string; role: Role }) {
 }
 
 export const authService = {
-  async register(input: { email: string; password: string; name: string; shopName: string; phone?: string }) {
+  async register(input: { email: string; password: string; confirmPassword: string; name: string; phone: string; termsAccepted: true }) {
     const email = input.email.trim().toLowerCase();
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) throw new AppError('An account with this email already exists', 409);
     const password = await bcrypt.hash(input.password, 12);
     const user = await prisma.user.create({
-      data: { ...input, email, password, role: 'SHOP_OWNER', accountStatus: 'ACTIVE', approvalStatus: 'PENDING', publicEnabled: false, setting: { create: {} } },
+      data: { email, password, name: input.name, phone: input.phone, shopName: input.name, role: 'SHOP_OWNER', accountStatus: 'ACTIVE', approvalStatus: 'PENDING', submittedAt: null, publicEnabled: false, setting: { create: {} } },
       select: publicUser,
     });
     return { user, ...await issueSession(user) };

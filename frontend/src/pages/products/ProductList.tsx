@@ -39,7 +39,7 @@ function ProductImage({ product, className }: { product: Product; className: str
   return product.image ? (
     <img className={`${className} border border-slate-200 object-cover object-center dark:border-slate-700`} src={product.image} alt={product.name} loading="lazy" />
   ) : (
-    <div className={`${className} grid shrink-0 place-items-center bg-violet-50 text-lg font-bold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300`}><span className="translate-y-px leading-none">{product.name.charAt(0).toUpperCase()}</span></div>
+    <div className={`${className} grid shrink-0 place-items-center bg-violet-50 text-lg font-bold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300`}><span className="leading-none">{product.name.charAt(0).toUpperCase()}</span></div>
   );
 }
 
@@ -188,7 +188,7 @@ export function ProductList() {
       <Card className="mt-6 p-4">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <label className="relative block h-11 min-w-0 md:col-span-2 xl:col-span-1">
-            <span className="sr-only">Search products</span><Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <span className="sr-only">Search products</span><span className="input-icon-frame left-3.5 w-4"><Search className="size-4" /></span>
             <input className="control pl-10" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products..." />
           </label>
           <div><select className="control" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} aria-label="Filter by category"><option value="all">All categories</option>{categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
@@ -196,10 +196,10 @@ export function ProductList() {
           <div><select className="control" value={sort} onChange={(event) => setSort(event.target.value as SortOption)} aria-label="Sort products"><option value="recent">Recently added</option><option value="name-asc">Product name A–Z</option><option value="name-desc">Product name Z–A</option><option value="price-high">Highest price</option><option value="price-low">Lowest price</option><option value="stock-high">Highest stock</option><option value="stock-low">Lowest stock</option></select></div>
         </div>
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
-          <label className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">Low stock threshold <span className="block w-20"><input className="control min-h-9 py-1 text-center" type="number" min="1" max="999999" value={lowStockThreshold} onChange={(event) => changeThreshold(Number(event.target.value))} /></span></label>
+          <label className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">Low stock threshold <span className="block w-20"><input className="control h-9 min-h-9 text-center" type="number" min="1" max="999999" value={lowStockThreshold} onChange={(event) => changeThreshold(Number(event.target.value))} /></span></label>
           <div className="inline-flex w-fit rounded-xl bg-slate-100 p-1 dark:bg-slate-800" aria-label="Product view">
-            <button type="button" className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'list' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('list')}><IconLabel icon={List}>List</IconLabel></button>
-            <button type="button" className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'grid' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('grid')}><IconLabel icon={Grid2X2}>Grid</IconLabel></button>
+            <button type="button" className={`tab-control gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'list' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('list')}><IconLabel icon={List}>List</IconLabel></button>
+            <button type="button" className={`tab-control gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${view === 'grid' ? 'bg-white text-violet-600 shadow-sm dark:bg-slate-700 dark:text-violet-300' : 'text-slate-500'}`} onClick={() => changeView('grid')}><IconLabel icon={Grid2X2}>Grid</IconLabel></button>
           </div>
         </div>
       </Card>

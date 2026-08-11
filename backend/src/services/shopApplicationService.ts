@@ -4,6 +4,8 @@ import { AppError } from '../utils/AppError.js';
 
 const shopSelect = {
   id: true, email: true, name: true, shopName: true, phone: true, shopLogo: true, shopAddress: true,
+  businessCategory: true, businessDescription: true, businessPhone: true, businessEmail: true, cityTownship: true,
+  ownerRole: true, businessRegistrationNumber: true, verificationDocument: true, websiteUrl: true,
   accountStatus: true, approvalStatus: true, submittedAt: true, approvedAt: true, suspendedAt: true, applicationVersion: true,
 } as const;
 
@@ -20,6 +22,35 @@ export const shopApplicationService = {
     });
     if (!shop) throw new AppError('Application not found', 404);
     return shop;
+  },
+
+  async create(userId: string, input: {
+    shopName: string; businessCategory: string; businessDescription: string; businessPhone: string;
+    businessEmail?: string; shopAddress: string; cityTownship: string; shopLogo: string; ownerRole: string;
+    businessRegistrationNumber?: string; verificationDocument: string; websiteUrl?: string;
+  }) {
+    const submittedAt = new Date();
+    return prisma.$transaction(async (tx) => {
+      const result = await tx.user.updateMany({
+        where: { id: userId, role: 'SHOP_OWNER', submittedAt: null },
+        data: {
+          ...input,
+          businessEmail: input.businessEmail || null,
+          businessRegistrationNumber: input.businessRegistrationNumber || null,
+          websiteUrl: input.websiteUrl || null,
+          approvalStatus: 'PENDING',
+          submittedAt,
+          publicEnabled: false,
+        },
+      });
+      if (result.count !== 1) throw new AppError('A shop application has already been submitted for this account', 409);
+      await tx.setting.upsert({
+        where: { userId },
+        create: { userId, companyName: input.shopName, companyLogo: input.shopLogo },
+        update: { companyName: input.shopName, companyLogo: input.shopLogo },
+      });
+      return tx.user.findUniqueOrThrow({ where: { id: userId }, select: shopSelect });
+    });
   },
 
   async update(userId: string, input: { name: string; shopName: string; phone?: string | null; shopAddress?: string | null }) {

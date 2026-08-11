@@ -49,7 +49,7 @@ export function PublicShop({ slug }: { slug: string }) {
               <img className="h-20 w-20 rounded-3xl border-4 border-white object-cover shadow-md" src={shop.shopLogo} alt={`${shop.shopName} logo`} />
             ) : (
               <div className="grid h-20 w-20 place-items-center rounded-3xl bg-primary text-3xl font-black text-white shadow-md">
-                <span className="translate-y-px leading-none">{shop.shopName.charAt(0).toUpperCase()}</span>
+                <span className="leading-none">{shop.shopName.charAt(0).toUpperCase()}</span>
               </div>
             )}
             <div>
@@ -69,9 +69,9 @@ export function PublicShop({ slug }: { slug: string }) {
       <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
         <section className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:flex-row">
           <label className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <span className="input-icon-frame left-3 w-[18px]"><Search size={18} /></span>
             <input
-              className="control bg-slate-50 py-3 pl-10"
+              className="control bg-slate-50 pl-10"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products"

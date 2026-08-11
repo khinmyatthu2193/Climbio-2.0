@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
+import { Children, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -22,17 +22,19 @@ const sizes = {
   lg: 'min-h-12 px-5 text-base',
 };
 
-export function Button({ className, variant = 'primary', size = 'md', type, ...props }: ButtonProps) {
+export function Button({ children, className, variant = 'primary', size = 'md', type, ...props }: ButtonProps) {
   return (
     <button
       type={type}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold leading-5 transition [&>svg]:shrink-0 [&>svg]:self-center active:translate-y-px disabled:pointer-events-none disabled:opacity-50',
+        'ui-button inline-flex items-center justify-center gap-2 rounded-xl font-semibold leading-5 transition [&_svg]:block [&_svg]:shrink-0 disabled:pointer-events-none disabled:opacity-50',
         variants[variant],
         sizes[size],
         className,
       )}
       {...props}
-    />
+    >
+      {Children.map(children, (child) => typeof child === 'string' || typeof child === 'number' ? <span className="control-text">{child}</span> : child)}
+    </button>
   );
 }

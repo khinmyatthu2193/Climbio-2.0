@@ -22,7 +22,7 @@ export interface User {
   role: Role;
   accountStatus: AccountStatus;
   approvalStatus: ShopApprovalStatus;
-  submittedAt: string;
+  submittedAt: string | null;
   approvedAt: string | null;
   setting: ShopSetting | null;
 }

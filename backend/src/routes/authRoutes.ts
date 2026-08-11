@@ -10,9 +10,13 @@ const registerSchema = z.object({
   email: z.string().email().max(255),
   password,
   name: z.string().trim().min(2).max(100),
-  shopName: z.string().trim().min(2).max(100),
-  phone: z.string().trim().max(30).optional(),
-}).strict();
+  phone: z.string().trim().min(5).max(30),
+  confirmPassword: z.string().min(1).max(72),
+  termsAccepted: z.literal(true, { errorMap: () => ({ message: 'You must accept the Terms and Privacy Policy' }) }),
+}).strict().refine((value) => value.password === value.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(1).max(72) }).strict();
 const nullableText = (max: number) => z.string().trim().max(max).nullable().optional();
 const profileSchema = z.object({

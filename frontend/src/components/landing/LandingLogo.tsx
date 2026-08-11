@@ -1,4 +1,4 @@
-import climbioLogo from '@/assets/branding/climbio-for-sidenavbar.png';
+import climbioLogo from '@/assets/branding/climbio-logo.png';
 
 export function LandingLogo({ footer = false }: { footer?: boolean }) {
   return (

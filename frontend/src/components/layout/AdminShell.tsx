@@ -9,7 +9,7 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
 import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
-import { iconFrameClass, iconTextOpticalFrameClass } from '@/components/ui/IconLabel';
+import { iconFrameClass } from '@/components/ui/IconLabel';
 
 const navigation = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -63,17 +63,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {navigation.map(({ href, label, icon: Icon }) => (
           <a key={href} href={href} title={compact ? label : undefined} aria-current={isCurrent(href) ? 'page' : undefined} className={cn('group relative flex h-[52px] items-center rounded-xl text-sm font-semibold transition', compact ? 'justify-center px-2' : 'gap-3 px-4', isCurrent(href) ? 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-200 dark:bg-violet-500/20 dark:text-white dark:ring-violet-400/30' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-white')}>
             {isCurrent(href) && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-violet-500 dark:bg-violet-400" />}
-            <span className={cn('min-w-5', compact ? iconFrameClass : iconTextOpticalFrameClass)} aria-hidden="true"><Icon className={cn('block size-[18px] shrink-0 transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} /></span>
+            <span className={cn('min-w-5', iconFrameClass)} aria-hidden="true"><Icon className={cn('size-[18px] transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} /></span>
             {!compact && <span className={sidebarLabelClass}>{label}</span>}
           </a>
         ))}
       </nav>
       <div className="border-t border-slate-200 p-3 dark:border-slate-800/80">
         <div className={cn('mb-1 flex items-center rounded-xl py-2.5', compact ? 'justify-center px-1' : 'gap-3 px-3')}>
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30"><span className="translate-y-px leading-none">{user?.name?.charAt(0).toUpperCase()}</span></div>
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30"><span className="leading-none">{user?.name?.charAt(0).toUpperCase()}</span></div>
           {!compact && <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p><p className="truncate text-xs text-slate-500">Administrator</p></div>}
         </div>
-        <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out"><span className={cn('min-w-5', compact ? iconFrameClass : iconTextOpticalFrameClass)} aria-hidden="true"><LogOut className="block size-[18px] shrink-0" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}</Button>
+        <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out"><span className={cn('min-w-5', iconFrameClass)} aria-hidden="true"><LogOut className="size-[18px]" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}</Button>
       </div>
     </>
   );

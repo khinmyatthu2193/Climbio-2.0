@@ -21,7 +21,7 @@ export function StatusBadge({ status, className }: { status: InvoiceStatus; clas
   return (
     <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold', styles[status], className)}>
       <span className={cn('h-1.5 w-1.5 rounded-full', dots[status])} aria-hidden="true" />
-      <span className="translate-y-px leading-none">{status}</span>
+      <span className="leading-4">{status}</span>
     </span>
   );
 }

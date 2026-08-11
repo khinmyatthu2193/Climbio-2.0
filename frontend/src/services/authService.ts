@@ -4,9 +4,10 @@ import type { AuthResponse, ChangePasswordInput, UpdateProfileInput, User } from
 export interface RegisterInput {
   email: string;
   password: string;
+  confirmPassword: string;
   name: string;
-  shopName: string;
-  phone?: string;
+  phone: string;
+  termsAccepted: true;
 }
 
 export const authService = {

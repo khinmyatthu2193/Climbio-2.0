@@ -205,7 +205,7 @@ export function InvoiceList() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <label className="relative w-full min-w-0 flex-1">
             <span className="sr-only">Search invoices</span>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <span className="input-icon-frame left-3.5 w-4"><Search className="size-4" /></span>
             <input className="control pl-10" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search invoices or customers..." />
           </label>
           <div className="w-full shrink-0 sm:w-48">
