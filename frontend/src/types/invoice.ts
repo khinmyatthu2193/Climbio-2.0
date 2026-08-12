@@ -16,6 +16,10 @@ export interface Invoice {
   invoiceNumber: string;
   customerName: string;
   customerPhone: string | null;
+  customerEmail?: string | null;
+  shippingAddress?: string | null;
+  deliveryFee?: string | number | null;
+  notes?: string | null;
   subtotal: string;
   discount: string;
   total: string;

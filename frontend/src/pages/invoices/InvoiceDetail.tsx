@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Download, Share2 } from 'lucide-react';
 import { Card } from '@/components/common/Card';
-import { InvoiceSummary } from '@/components/invoices/InvoiceSummary';
+import { InvoiceTemplate } from '@/components/invoices/InvoiceTemplate';
 import { StatusUpdate } from '@/components/invoices/StatusUpdate';
 import { ShareInvoiceModal } from '@/components/invoices/ShareInvoiceModal';
 import { Alert } from '@/components/ui/Alert';
@@ -12,8 +12,6 @@ import { useAuthStore } from '@/store/authStore';
 
 export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
   const user = useAuthStore((state) => state.user);
-  const currency = user?.setting?.currency ?? 'MMK';
-  const money = new Intl.NumberFormat(undefined, { style: 'currency', currency });
   const invoice = useQuery({ queryKey: ['invoices', invoiceId], queryFn: () => invoiceService.get(invoiceId) });
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
@@ -58,11 +56,7 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
 
         <div className="mt-6"><StatusUpdate invoiceId={invoiceId} currentStatus={invoice.data.status} orderType={invoice.data.orderType} /></div>
 
-        <div ref={invoiceExportRef} className="bg-white pb-1 dark:bg-slate-950"><Card className="mt-4 p-4 sm:p-5"><div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-200 pb-4 dark:border-slate-700"><div><p className="text-lg font-black text-violet-700 dark:text-violet-300">INVOICE</p><p className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">{invoice.data.invoiceNumber}</p></div><p className="text-right text-xs text-slate-500">{new Date(invoice.data.createdAt).toLocaleDateString()}</p></div><h2 className="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">Customer</h2><p className="mt-3 font-semibold text-slate-900 dark:text-slate-100">{invoice.data.customerName}</p><p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{invoice.data.customerPhone || 'No phone number'}</p></Card>
-
-        <Card className="mt-4 overflow-hidden p-0"><div className="overflow-x-auto"><table className="w-full min-w-[600px] text-left"><thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400"><tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4 text-right">Total</th></tr></thead><tbody className="divide-y divide-slate-200 dark:divide-slate-800">{invoice.data.items?.map((item, index) => <tr className={index % 2 ? 'bg-slate-50/70 dark:bg-slate-800/20' : undefined} key={item.id}><td className="px-5 py-4 font-medium text-slate-900 dark:text-slate-100">{item.productName}</td><td className="px-5 py-4 text-slate-600 dark:text-slate-300">{money.format(Number(item.price))}</td><td className="px-5 py-4 text-slate-600 dark:text-slate-300">{item.quantity}</td><td className="px-5 py-4 text-right font-semibold text-slate-950 dark:text-white">{money.format(Number(item.price) * item.quantity)}</td></tr>)}</tbody></table></div></Card>
-
-        <div className="mt-4 ml-auto w-full max-w-md"><InvoiceSummary subtotal={Number(invoice.data.subtotal)} discount={Number(invoice.data.discount)} total={Number(invoice.data.total)} money={money} discountPercentage={Number(invoice.data.subtotal) > 0 ? Number(invoice.data.discount) / Number(invoice.data.subtotal) * 100 : 0} /></div></div>
+        <div className="mt-5"><InvoiceTemplate ref={invoiceExportRef} invoice={invoice.data} publicUrl={`${window.location.origin}/invoice/${invoice.data.id}`} shop={{ name: user?.shopName || 'Climbio', logo: user?.shopLogo, phone: user?.phone, address: user?.shopAddress, currency: user?.setting?.currency ?? 'MMK' }} /></div>
         {downloadError && <Alert className="mt-3" tone="error">PDF could not be generated. Check the shop logo URL and try again.</Alert>}
       </div>
       <ShareInvoiceModal open={shareOpen} onClose={() => setShareOpen(false)} invoice={invoice.data} invoiceRef={invoiceExportRef} />
