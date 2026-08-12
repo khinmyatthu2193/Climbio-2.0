@@ -6,8 +6,6 @@ CREATE TYPE "InvoiceStatus" AS ENUM (
   'PROCESSING',
   'SHIPPED',
   'DELIVERED',
-  'READY_FOR_PICKUP',
-  'PICKED_UP',
   'PAID',
   'CANCELLED'
 );
@@ -26,8 +24,3 @@ ALTER TABLE "invoices"
   ALTER COLUMN "status" SET DEFAULT 'PENDING';
 
 DROP TYPE "InvoiceStatus_legacy";
-
-CREATE TYPE "OrderType" AS ENUM ('DELIVERY', 'PICKUP');
-
-ALTER TABLE "invoices"
-  ADD COLUMN "order_type" "OrderType" NOT NULL DEFAULT 'DELIVERY';
