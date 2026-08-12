@@ -32,7 +32,7 @@ const burmese: Record<string, string> = {
   'Total invoices': 'ဘောင်ချာ စုစုပေါင်း', 'Paid invoices': 'ပေးချေပြီး ဘောင်ချာများ', 'Pending / Draft': 'စောင့်ဆိုင်း / မူကြမ်း', 'Total sales amount': 'အရောင်းပမာဏ စုစုပေါင်း',
   'No invoices yet': 'ဘောင်ချာ မရှိသေးပါ', 'No matching invoices': 'ကိုက်ညီသော ဘောင်ချာ မရှိပါ', 'No phone': 'ဖုန်းနံပါတ် မရှိပါ',
   'Loading invoices': 'ဘောင်ချာများ ဖွင့်နေသည်', 'Loading products': 'ကုန်ပစ္စည်းများ ဖွင့်နေသည်', 'Loading...': 'ဖွင့်နေသည်...',
-  'PAID': 'ပေးချေပြီး', 'PENDING': 'စောင့်ဆိုင်းနေသည်', 'DRAFT': 'မူကြမ်း', 'SENT': 'ပို့ပြီး', 'OVERDUE': 'ငွေပေးချေရန်ကျော်လွန်', 'CANCELLED': 'ပယ်ဖျက်ပြီး',
+  'PAID': 'ပေးချေပြီး', 'PENDING': 'စောင့်ဆိုင်းနေသည်', 'PROCESSING': 'ပြင်ဆင်နေသည်', 'SHIPPED': 'ပို့ဆောင်ပြီး', 'DELIVERED': 'လက်ခံရရှိပြီး', 'READY_FOR_PICKUP': 'လာယူရန်အသင့်ဖြစ်သည်', 'PICKED_UP': 'လာယူပြီး', 'CANCELLED': 'ပယ်ဖျက်ပြီး',
   'Update status': 'အခြေအနေပြောင်းရန်', 'Updating...': 'ပြောင်းလဲနေသည်...', 'Download PDF': 'PDF ဒေါင်းလုဒ်လုပ်ရန်', 'Preparing...': 'ပြင်ဆင်နေသည်...',
   'Invoice status updated': 'ဘောက်ချာအခြေအနေ ပြောင်းပြီးပါပြီ', 'Status could not be updated': 'အခြေအနေကို မပြောင်းနိုင်ပါ', 'Please try again.': 'ထပ်မံကြိုးစားပါ။',
   'Product name': 'ကုန်ပစ္စည်းအမည်', 'Description': 'ဖော်ပြချက်', 'Price': 'ဈေးနှုန်း', 'Quantity': 'အရေအတွက်', 'Category': 'အမျိုးအစား',

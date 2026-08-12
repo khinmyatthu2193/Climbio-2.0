@@ -8,11 +8,19 @@ datasource db {
 }
 
 enum InvoiceStatus {
-  DRAFT
-  SENT
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  READY_FOR_PICKUP
+  PICKED_UP
   PAID
-  OVERDUE
   CANCELLED
+}
+
+enum OrderType {
+  DELIVERY
+  PICKUP
 }
 
 enum Currency {
@@ -167,7 +175,8 @@ model Invoice {
   subtotal      Decimal       @db.Decimal(14, 2)
   discount      Decimal       @default(0) @db.Decimal(14, 2)
   total         Decimal       @db.Decimal(14, 2)
-  status        InvoiceStatus @default(DRAFT)
+  status        InvoiceStatus @default(PENDING)
+  orderType     OrderType     @default(DELIVERY) @map("order_type")
   createdAt     DateTime      @default(now()) @map("created_at")
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items         InvoiceItem[]

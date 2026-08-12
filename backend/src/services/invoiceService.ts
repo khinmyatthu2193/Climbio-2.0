@@ -1,12 +1,14 @@
 import crypto from 'node:crypto';
-import { Prisma, type InvoiceStatus } from '@prisma/client';
+import { Prisma, type InvoiceStatus, type OrderType } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
+import { canTransition } from '../utils/invoiceStatus.js';
 
 export interface CreateInvoiceInput {
   customerName: string;
   customerPhone?: string | null;
   discount: number;
+  orderType: OrderType;
   items: Array<{ productId: string; quantity: number }>;
 }
 
@@ -77,6 +79,7 @@ export const invoiceService = {
           customerPhone: input.customerPhone,
           subtotal,
           discount,
+          orderType: input.orderType,
           total: subtotal.minus(discount),
           items: {
             create: input.items.map((item) => {
@@ -96,8 +99,11 @@ export const invoiceService = {
   },
 
   async updateStatus(userId: string, id: string, status: InvoiceStatus) {
-    const invoice = await prisma.invoice.findFirst({ where: { id, userId }, select: { id: true } });
+    const invoice = await prisma.invoice.findFirst({ where: { id, userId }, select: { id: true, status: true, orderType: true } });
     if (!invoice) throw new AppError('Invoice not found', 404);
+    if (!canTransition(invoice.status, status, invoice.orderType)) {
+      throw new AppError(`Invoice cannot move from ${invoice.status} to ${status}`, 422);
+    }
     return prisma.invoice.update({ where: { id }, data: { status }, include: detailInclude });
   },
 

@@ -30,9 +30,13 @@ type SortOption = 'newest' | 'oldest' | 'highest' | 'lowest';
 
 const statusOptions: Array<{ value: 'ALL' | InvoiceStatus; label: string }> = [
   { value: 'ALL', label: 'All statuses' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'PROCESSING', label: 'Processing' },
+  { value: 'SHIPPED', label: 'Shipped' },
+  { value: 'DELIVERED', label: 'Delivered' },
+  { value: 'READY_FOR_PICKUP', label: 'Ready for pickup' },
+  { value: 'PICKED_UP', label: 'Picked up' },
   { value: 'PAID', label: 'Paid' },
-  { value: 'DRAFT', label: 'Draft' },
-  { value: 'SENT', label: 'Sent' },
   { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
@@ -100,7 +104,7 @@ export function InvoiceList() {
     return {
       total: data.length,
       paid: data.filter((invoice) => invoice.status === 'PAID').length,
-      pending: data.filter((invoice) => invoice.status === 'DRAFT' || invoice.status === 'SENT').length,
+      pending: data.filter((invoice) => ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'READY_FOR_PICKUP', 'PICKED_UP'].includes(invoice.status)).length,
       sales: data.filter((invoice) => invoice.status === 'PAID').reduce((sum, invoice) => sum + Number(invoice.total), 0),
     };
   }, [invoices.data]);

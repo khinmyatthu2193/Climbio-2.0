@@ -17,6 +17,7 @@ const createInvoiceSchema = z.object({
     z.string().trim().max(30).nullable().optional(),
   ),
   discount: z.coerce.number().finite().min(0).max(999_999_999_999.99).default(0),
+  orderType: z.enum(['DELIVERY', 'PICKUP']).default('DELIVERY'),
   items: z.array(itemSchema).min(1).max(100),
 }).strict().superRefine((value, context) => {
   const ids = value.items.map((item) => item.productId);
@@ -25,7 +26,7 @@ const createInvoiceSchema = z.object({
   }
 });
 const statusSchema = z.object({
-  status: z.enum(['DRAFT', 'SENT', 'PAID', 'OVERDUE', 'CANCELLED']),
+  status: z.enum(['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'READY_FOR_PICKUP', 'PICKED_UP', 'PAID', 'CANCELLED']),
 }).strict();
 
 export const invoiceRoutes = Router();

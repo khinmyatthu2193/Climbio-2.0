@@ -65,8 +65,8 @@ export function CreateInvoice() {
 
   const createInvoice = useMutation({
     mutationFn: async () => {
-      const invoice = await invoiceService.create({ customerName: customerName.trim(), customerPhone: customerPhone.trim(), discount: discountAmount, items });
-      if (action !== 'draft') await invoiceService.updateStatus(invoice.id, 'SENT');
+      const invoice = await invoiceService.create({ customerName: customerName.trim(), customerPhone: customerPhone.trim(), discount: discountAmount, orderType: deliveryMethod === 'delivery' ? 'DELIVERY' : 'PICKUP', items });
+      if (action !== 'draft') await invoiceService.updateStatus(invoice.id, deliveryMethod === 'delivery' ? 'PROCESSING' : 'READY_FOR_PICKUP');
       return invoice;
     },
     onSuccess: async (invoice) => {
