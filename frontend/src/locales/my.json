@@ -149,5 +149,17 @@
   "Delivery method": "ပစ္စည်းလက်ခံမည့်နည်းလမ်း",
   "Order notes": "မှာယူမှု မှတ်ချက်",
   "Thank you for your purchase!": "ဝယ်ယူအားပေးမှုအတွက် ကျေးဇူးတင်ပါသည်။",
-  "Scan the QR code to view the latest invoice status.": "နောက်ဆုံးငွေတောင်းခံလွှာ အခြေအနေကို ကြည့်ရန် QR ကုဒ်ကို စကင်ဖတ်ပါ။"
+  "Scan the QR code to view the latest invoice status.": "နောက်ဆုံးငွေတောင်းခံလွှာ အခြေအနေကို ကြည့်ရန် QR ကုဒ်ကို စကင်ဖတ်ပါ။",
+  "User preferences": "အသုံးပြုသူ စိတ်ကြိုက်ဆက်တင်များ",
+  "All preferences": "စိတ်ကြိုက်ဆက်တင်အားလုံး",
+  "Light mode": "အလင်းရောင်ပုံစံ",
+  "Dark mode": "အမှောင်ပုံစံ",
+  "Light": "အလင်း",
+  "Dark": "အမှောင်",
+  "Administrator": "စီမံခန့်ခွဲသူ",
+  "Currency": "ငွေကြေးအမျိုးအစား",
+  "Password & security": "စကားဝှက်နှင့် လုံခြုံရေး",
+  "Update password": "စကားဝှက် အသစ်ပြောင်းမည်",
+  "Password updated": "စကားဝှက် ပြောင်းပြီးပါပြီ",
+  "Your new password has been saved successfully.": "စကားဝှက်အသစ်ကို အောင်မြင်စွာ သိမ်းပြီးပါပြီ။"
 }

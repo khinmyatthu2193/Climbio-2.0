@@ -149,5 +149,17 @@
   "Delivery method": "Delivery method",
   "Order notes": "Order notes",
   "Thank you for your purchase!": "Thank you for your purchase!",
-  "Scan the QR code to view the latest invoice status.": "Scan the QR code to view the latest invoice status."
+  "Scan the QR code to view the latest invoice status.": "Scan the QR code to view the latest invoice status.",
+  "User preferences": "User preferences",
+  "All preferences": "All preferences",
+  "Light mode": "Light mode",
+  "Dark mode": "Dark mode",
+  "Light": "Light",
+  "Dark": "Dark",
+  "Administrator": "Administrator",
+  "Currency": "Currency",
+  "Password & security": "Password & security",
+  "Update password": "Update password",
+  "Password updated": "Password updated",
+  "Your new password has been saved successfully.": "Your new password has been saved successfully."
 }

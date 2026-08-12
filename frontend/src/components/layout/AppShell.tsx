@@ -1,17 +1,14 @@
 import { useState, type ReactNode } from 'react';
 import { useIsFetching } from '@tanstack/react-query';
-import { BookOpen, ExternalLink, FileText, LayoutDashboard, LoaderCircle, LogOut, Menu, MessageSquareText, Package, PanelLeftClose, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
-import { authService } from '@/services/authService';
+import { BookOpen, FileText, LayoutDashboard, LoaderCircle, Menu, MessageSquareText, Package, PanelLeftClose, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
+import { ProfileMenu } from '@/components/layout/ProfileMenu';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
 import { useLanguage } from '@/hooks/useLanguage';
 import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
-import { IconLabel, iconFrameClass } from '@/components/ui/IconLabel';
+import { iconFrameClass } from '@/components/ui/IconLabel';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -35,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { language } = useLanguage();
   const aiAnalysisRunning = useIsFetching({ queryKey: ['ai-business-analysis'] }) > 0;
-  const { user, clearSession } = useAuthStore();
+  const { user } = useAuthStore();
   const currentPage = navigation.find((item) => isCurrent(item.href)) ?? navigation[0];
 
   const toggleCollapsed = () => {
@@ -44,13 +41,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       localStorage.setItem('climbio-sidebar-collapsed', String(next));
       return next;
     });
-  };
-
-  const logout = async () => {
-    try { await authService.logout(); } finally {
-      clearSession();
-      window.location.replace('/account/login');
-    }
   };
 
   const sidebar = (compact = false) => (
@@ -107,20 +97,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </a>
         ))}
       </nav>
-      <div className="border-t border-slate-200 p-3 dark:border-slate-800/80">
-        <div className={cn('mb-1 flex items-center rounded-xl py-2.5', compact ? 'justify-center px-1' : 'gap-3 px-3')}>
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30">
-            <span className="leading-none">{user?.name?.charAt(0).toUpperCase()}</span>
-          </div>
-          {!compact && <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>
-            <p className="truncate text-xs text-slate-500">{user?.shopName}</p>
-          </div>}
-        </div>
-        <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out">
-          <span className={cn('min-w-5', iconFrameClass)} aria-hidden="true"><LogOut className="size-[18px]" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}
-        </Button>
-      </div>
     </>
   );
 
@@ -151,9 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {language === 'my' ? 'AI သုံးသပ်နေဆဲ' : 'AI analysis running'}
               </a>
             )}
-            <LanguageToggle />
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            <a className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:border-violet-300 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-violet-500 dark:hover:bg-slate-700" href="/my-store"><IconLabel icon={ExternalLink}>View store</IconLabel></a>
+            <ProfileMenu theme={theme} onToggleTheme={toggleTheme} />
           </div>
         </header>
         {children}

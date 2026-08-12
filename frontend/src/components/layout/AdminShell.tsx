@@ -1,12 +1,8 @@
 import { useState, type ReactNode } from 'react';
-import { BarChart3, ClipboardList, FileClock, LogOut, Menu, PanelLeftClose, Store, Users, X } from 'lucide-react';
-import { authService } from '@/services/authService';
-import { useAuthStore } from '@/store/authStore';
+import { BarChart3, ClipboardList, FileClock, Menu, PanelLeftClose, Store, Users, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useTheme } from '@/hooks/useTheme';
+import { ProfileMenu } from '@/components/layout/ProfileMenu';
 import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
 import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
 import { iconFrameClass } from '@/components/ui/IconLabel';
@@ -27,7 +23,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('climbio-admin-sidebar-collapsed') === 'true');
   const { theme, toggleTheme } = useTheme();
-  const { user, clearSession } = useAuthStore();
   const currentPage = navigation.find((item) => isCurrent(item.href)) ?? navigation[0];
 
   const toggleCollapsed = () => setCollapsed((current) => {
@@ -35,13 +30,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
     localStorage.setItem('climbio-admin-sidebar-collapsed', String(next));
     return next;
   });
-
-  const logout = async () => {
-    try { await authService.logout(); } finally {
-      clearSession();
-      window.location.replace('/account/login');
-    }
-  };
 
   const sidebar = (compact = false) => (
     <>
@@ -68,13 +56,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </a>
         ))}
       </nav>
-      <div className="border-t border-slate-200 p-3 dark:border-slate-800/80">
-        <div className={cn('mb-1 flex items-center rounded-xl py-2.5', compact ? 'justify-center px-1' : 'gap-3 px-3')}>
-          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-violet-950/30"><span className="leading-none">{user?.name?.charAt(0).toUpperCase()}</span></div>
-          {!compact && <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p><p className="truncate text-xs text-slate-500">Administrator</p></div>}
-        </div>
-        <Button className={cn('h-[52px] w-full gap-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white', compact ? 'justify-center px-0' : 'justify-start px-4')} variant="ghost" onClick={logout} title={compact ? 'Log out' : undefined} aria-label="Log out"><span className={cn('min-w-5', iconFrameClass)} aria-hidden="true"><LogOut className="size-[18px]" /></span>{!compact && <span className={sidebarLabelClass}>Log out</span>}</Button>
-      </div>
     </>
   );
 
@@ -86,7 +67,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 sm:px-6 lg:px-8">
           <button className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="size-5" /></button>
           <div className="hidden items-center gap-3 lg:flex"><div><p className="text-xs font-medium text-slate-500 dark:text-slate-400">Platform <span className="mx-1 text-slate-300 dark:text-slate-600">/</span> Administration</p><p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">{currentPage.label}</p></div></div>
-          <div className="flex items-center gap-2"><LanguageToggle /><ThemeToggle theme={theme} onToggle={toggleTheme} /></div>
+          <ProfileMenu theme={theme} onToggleTheme={toggleTheme} admin />
         </header>
         {children}
       </div>
