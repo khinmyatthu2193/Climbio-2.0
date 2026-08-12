@@ -9,8 +9,11 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import type { Currency } from '@/types/auth';
+import { Languages } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export function ProfilePage() {
+  const { language, setLanguage, translate } = useLanguage();
   const user = useAuthStore((state) => state.user)!;
   const setUser = useAuthStore((state) => state.setUser);
   const clearSession = useAuthStore((state) => state.clearSession);
@@ -63,6 +66,10 @@ export function ProfilePage() {
             </form>
           </Card>
           <div className="space-y-6">
+            <Card>
+              <div className="flex items-start gap-3"><span className="rounded-xl bg-violet-50 p-2.5 text-violet-600 dark:bg-violet-500/10 dark:text-violet-300"><Languages size={19} /></span><div><h2 className="text-lg font-bold">{translate('Application language')}</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{translate('Choose the language used throughout your workspace.')}</p></div></div>
+              <div className="mt-4 grid grid-cols-2 gap-3" role="group" aria-label={translate('Language')}>{(['en', 'my'] as const).map((option) => <button key={option} type="button" onClick={() => setLanguage(option)} className={`rounded-xl border p-3 text-sm font-bold transition ${language === option ? 'border-violet-500 bg-violet-50 text-violet-700 ring-1 ring-violet-500 dark:bg-violet-500/10 dark:text-violet-300' : 'border-slate-200 text-slate-600 hover:border-violet-300 dark:border-slate-700 dark:text-slate-300'}`}>{option === 'en' ? translate('English') : translate('Myanmar')}</button>)}</div>
+            </Card>
             <Card>
               <h2 className="mb-4 text-lg font-bold">Shop logo</h2>
               {user.shopLogo && <img className="mb-4 h-20 w-20 rounded-xl object-cover" src={user.shopLogo} alt="Shop logo" />}

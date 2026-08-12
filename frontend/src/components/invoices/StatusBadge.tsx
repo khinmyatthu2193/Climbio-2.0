@@ -1,6 +1,7 @@
 import { Banknote, Box, CheckCircle2, CircleDashed, Clock3, XCircle, type LucideIcon } from 'lucide-react';
 import type { InvoiceStatus } from '@/types/invoice';
 import { cn } from '@/utils/cn';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const statusDesign: Record<InvoiceStatus, { icon: LucideIcon; label: string; className: string }> = {
   PENDING: { icon: Clock3, label: 'Pending', className: 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/30 dark:bg-yellow-500/15 dark:text-yellow-300' },
@@ -14,7 +15,8 @@ const statusDesign: Record<InvoiceStatus, { icon: LucideIcon; label: string; cla
 };
 
 export function StatusBadge({ status, className }: { status: InvoiceStatus; className?: string }) {
+  const { translate } = useLanguage();
   const design = statusDesign[status];
   const Icon = design.icon;
-  return <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold', design.className, className)}><Icon size={13} aria-hidden="true" /><span className="leading-4">{design.label}</span></span>;
+  return <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold', design.className, className)}><Icon size={13} aria-hidden="true" /><span className="leading-4">{translate(status)}</span></span>;
 }
