@@ -8,7 +8,8 @@ export const invoiceWorkflows: Record<OrderType, readonly InvoiceStatus[]> = {
 export const allInvoiceStatuses: readonly InvoiceStatus[] = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'READY_FOR_PICKUP', 'PICKED_UP', 'PAID', 'CANCELLED'];
 
 export function canTransition(from: InvoiceStatus, to: InvoiceStatus, orderType: OrderType): boolean {
-  if (to === 'CANCELLED') return from !== 'CANCELLED';
+  if (from === 'PAID' || from === 'CANCELLED') return false;
+  if (to === 'CANCELLED') return true;
   const workflow = invoiceWorkflows[orderType];
   const currentIndex = workflow.indexOf(from);
   return currentIndex >= 0 && workflow[currentIndex + 1] === to;

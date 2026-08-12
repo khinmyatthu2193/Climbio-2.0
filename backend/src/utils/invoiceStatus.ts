@@ -6,7 +6,8 @@ const workflows: Record<OrderType, readonly InvoiceStatus[]> = {
 };
 
 export function canTransition(from: InvoiceStatus, to: InvoiceStatus, orderType: OrderType): boolean {
-  if (to === 'CANCELLED') return from !== 'CANCELLED';
+  if (from === 'PAID' || from === 'CANCELLED') return false;
+  if (to === 'CANCELLED') return true;
   const workflow = workflows[orderType];
   const currentIndex = workflow.indexOf(from);
   return currentIndex >= 0 && workflow[currentIndex + 1] === to;
