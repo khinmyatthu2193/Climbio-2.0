@@ -33,3 +33,15 @@ export interface CreateInvoiceInput {
   orderType: OrderType;
   items: Array<{ productId: string; quantity: number }>;
 }
+
+export interface PublicInvoiceResponse {
+  invoice: Omit<Invoice, 'userId'>;
+  shop: {
+    shopName: string;
+    shopLogo: string | null;
+    shopAddress: string | null;
+    phone: string | null;
+    currency: 'MMK' | 'USD' | 'THB';
+    invoiceFooter: string | null;
+  };
+}

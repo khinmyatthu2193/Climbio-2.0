@@ -10,6 +10,7 @@ import { CreateInvoice } from '@/pages/invoices/CreateInvoice';
 import { InvoiceDetail } from '@/pages/invoices/InvoiceDetail';
 import { InvoiceList } from '@/pages/invoices/InvoiceList';
 import { PublicShop } from '@/pages/public/PublicShop';
+import { PublicInvoice } from '@/pages/public/PublicInvoice';
 import { MyPublicStore } from '@/pages/store/MyPublicStore';
 import { AppShell } from '@/components/layout/AppShell';
 import { useTheme } from '@/hooks/useTheme';
@@ -73,6 +74,8 @@ export default function App() {
   if (path === '/' && initialized && !user) return <LandingPage />;
   const publicShop = path.match(/^\/shop\/([a-z0-9-]+)$/i);
   if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
+  const publicInvoice = path.match(/^\/invoice\/([0-9a-f-]+)$/i);
+  if (publicInvoice) return <PublicInvoice invoiceId={publicInvoice[1]} />;
   const protectedPage = (page: React.ReactNode, roles?: Role[], requireApproved = false) => (
     <ProtectedRoute roles={roles} requireApproved={requireApproved}><AppShell>{page}</AppShell></ProtectedRoute>
   );

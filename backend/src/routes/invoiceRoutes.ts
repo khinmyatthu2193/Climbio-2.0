@@ -30,6 +30,7 @@ const statusSchema = z.object({
 }).strict();
 
 export const invoiceRoutes = Router();
+invoiceRoutes.get('/public/:id', validateParams(idParams), invoiceController.getPublic);
 invoiceRoutes.use(requireAuth, requireApprovedShop);
 invoiceRoutes.get('/', invoiceController.list);
 invoiceRoutes.get('/:id', validateParams(idParams), invoiceController.get);

@@ -23,6 +23,27 @@ function invoiceNumber() {
 }
 
 export const invoiceService = {
+  async getPublic(id: string) {
+    const invoice = await prisma.invoice.findFirst({
+      where: { id, user: { approvalStatus: 'APPROVED', accountStatus: 'ACTIVE' } },
+      include: {
+        ...detailInclude,
+        user: {
+          select: {
+            shopName: true,
+            shopLogo: true,
+            shopAddress: true,
+            phone: true,
+            setting: { select: { currency: true, invoiceFooter: true } },
+          },
+        },
+      },
+    });
+    if (!invoice) throw new AppError('Invoice not found', 404);
+    const { user, userId: _userId, ...publicInvoice } = invoice;
+    return { invoice: publicInvoice, shop: { ...user, currency: user.setting?.currency ?? 'MMK', invoiceFooter: user.setting?.invoiceFooter ?? null, setting: undefined } };
+  },
+
   list(userId: string) {
     return prisma.invoice.findMany({
       where: { userId },

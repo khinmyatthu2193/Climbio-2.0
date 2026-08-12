@@ -3,6 +3,9 @@ import type { InvoiceStatus } from '@prisma/client';
 import { invoiceService } from '../services/invoiceService.js';
 
 export const invoiceController = {
+  getPublic: async (req: Request, res: Response) =>
+    res.json(await invoiceService.getPublic(req.params.id as string)),
+
   list: async (req: Request, res: Response) => res.json(await invoiceService.list(req.user!.id)),
 
   get: async (req: Request, res: Response) =>
