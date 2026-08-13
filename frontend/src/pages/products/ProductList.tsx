@@ -27,6 +27,7 @@ import type { Product, ProductInput } from '@/types/inventory';
 
 type ViewMode = 'list' | 'grid';
 type StockFilter = 'all' | 'in' | 'low' | 'out';
+type VisibilityFilter = 'all' | 'active' | 'inactive';
 type SortOption = 'recent' | 'name-asc' | 'name-desc' | 'price-high' | 'price-low' | 'stock-high' | 'stock-low';
 
 function stockState(quantity: number, lowStockThreshold: number) {
@@ -72,6 +73,7 @@ export function ProductList() {
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('all');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
+  const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>('all');
   const [sort, setSort] = useState<SortOption>('recent');
   const [view, setView] = useState<ViewMode>(() => localStorage.getItem('climbio-product-view') === 'grid' ? 'grid' : 'list');
   const [lowStockThreshold, setLowStockThreshold] = useState(() => {
@@ -96,6 +98,7 @@ export function ProductList() {
       costPrice: product.costPrice,
       quantity: String(quantity),
       categoryId: product.categoryId ?? '',
+      isActive: product.isActive,
     }),
     onSuccess: refreshProducts,
   });
@@ -119,7 +122,10 @@ export function ProductList() {
         || (stockFilter === 'out' && product.quantity === 0)
         || (stockFilter === 'low' && product.quantity > 0 && product.quantity <= lowStockThreshold)
         || (stockFilter === 'in' && product.quantity > lowStockThreshold);
-      return matchesSearch && matchesCategory && matchesStock;
+      const matchesVisibility = visibilityFilter === 'all'
+        || (visibilityFilter === 'active' && product.isActive)
+        || (visibilityFilter === 'inactive' && !product.isActive);
+      return matchesSearch && matchesCategory && matchesStock && matchesVisibility;
     }).sort((left, right) => {
       if (sort === 'name-asc') return left.name.localeCompare(right.name);
       if (sort === 'name-desc') return right.name.localeCompare(left.name);
@@ -129,7 +135,7 @@ export function ProductList() {
       if (sort === 'stock-low') return left.quantity - right.quantity;
       return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
     });
-  }, [categoryId, lowStockThreshold, products.data, search, sort, stockFilter]);
+  }, [categoryId, lowStockThreshold, products.data, search, sort, stockFilter, visibilityFilter]);
 
   const changeView = (nextView: ViewMode) => {
     setView(nextView);
@@ -154,8 +160,8 @@ export function ProductList() {
     adjustStock.mutate({ product, quantity });
   };
   const busy = removeProduct.isPending || adjustStock.isPending;
-  const hasFilters = search || categoryId !== 'all' || stockFilter !== 'all';
-  const clearFilters = () => { setSearch(''); setCategoryId('all'); setStockFilter('all'); };
+  const hasFilters = search || categoryId !== 'all' || stockFilter !== 'all' || visibilityFilter !== 'all';
+  const clearFilters = () => { setSearch(''); setCategoryId('all'); setStockFilter('all'); setVisibilityFilter('all'); };
 
   return (
     <main className="page-container">
@@ -186,13 +192,14 @@ export function ProductList() {
       )}
 
       <Card className="mt-6 p-4">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           <label className="relative block h-11 min-w-0 md:col-span-2 xl:col-span-1">
             <span className="sr-only">Search products</span><span className="input-icon-frame left-3.5 w-4"><Search className="size-4" /></span>
             <input className="control pl-10" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products..." />
           </label>
           <div><select className="control" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} aria-label="Filter by category"><option value="all">All categories</option>{categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
           <div><select className="control" value={stockFilter} onChange={(event) => setStockFilter(event.target.value as StockFilter)} aria-label="Filter by stock"><option value="all">All stock</option><option value="in">In Stock</option><option value="low">Low Stock</option><option value="out">Out of Stock</option></select></div>
+          <div><select className="control" value={visibilityFilter} onChange={(event) => setVisibilityFilter(event.target.value as VisibilityFilter)} aria-label="Filter by visibility"><option value="all">All visibility</option><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
           <div><select className="control" value={sort} onChange={(event) => setSort(event.target.value as SortOption)} aria-label="Sort products"><option value="recent">Recently added</option><option value="name-asc">Product name A–Z</option><option value="name-desc">Product name Z–A</option><option value="price-high">Highest price</option><option value="price-low">Lowest price</option><option value="stock-high">Highest stock</option><option value="stock-low">Lowest stock</option></select></div>
         </div>
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
@@ -214,7 +221,7 @@ export function ProductList() {
             const stock = stockState(product.quantity, lowStockThreshold);
             return (
               <Card className="flex h-full flex-col overflow-visible p-0" key={product.id}>
-                <div className="relative h-56 overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800"><ProductImage product={product} className="h-full w-full rounded-t-2xl" /><div className="absolute right-3 top-3"><Badge className={stock.className}>{stock.label}</Badge></div></div>
+                <div className="relative h-56 overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800"><ProductImage product={product} className="h-full w-full rounded-t-2xl" /><div className="absolute right-3 top-3 flex gap-2"><Badge className={product.isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-700'}>{product.isActive ? 'Active' : 'Inactive'}</Badge><Badge className={stock.className}>{stock.label}</Badge></div></div>
                 <div className="flex flex-1 flex-col p-4">
                   <div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-bold">{product.name}</h2><p className="mt-1 text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div>
                   <div className="mt-auto grid grid-cols-2 gap-3 border-t border-slate-200 pt-3 text-sm dark:border-slate-700"><div><p className="text-xs text-slate-500">Selling price</p><p className="mt-1 font-semibold">{money.format(Number(product.price))}</p></div><div><p className="text-xs text-slate-500">Cost price</p><p className="mt-1 font-semibold">{money.format(Number(product.costPrice))}</p></div></div>
@@ -231,15 +238,15 @@ export function ProductList() {
           <div className="divide-y dark:divide-slate-800 sm:hidden">
             {filteredProducts.map((product) => {
               const stock = stockState(product.quantity, lowStockThreshold);
-              return <article className="p-4" key={product.id}><div className="flex gap-3"><ProductImage product={product} className="size-16 rounded-xl" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-semibold">{product.name}</h2><p className="text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div><div className="mt-3 flex items-center justify-between"><div><p className="font-semibold">{money.format(Number(product.price))}</p><p className="text-xs text-slate-500">Cost {money.format(Number(product.costPrice))}</p></div><div className="text-right"><Badge className={stock.className}>{stock.label}</Badge><p className="mt-1 text-xs text-slate-500">Qty {product.quantity}</p></div></div></div></div></article>;
+              return <article className="p-4" key={product.id}><div className="flex gap-3"><ProductImage product={product} className="size-16 rounded-xl" /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="truncate font-semibold">{product.name}</h2><p className="text-xs text-slate-500">{product.category?.name ?? 'Uncategorized'}</p></div><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div><div className="mt-3 flex items-center justify-between"><div><p className="font-semibold">{money.format(Number(product.price))}</p><p className="text-xs text-slate-500">Cost {money.format(Number(product.costPrice))}</p></div><div className="text-right"><div className="flex gap-1"><Badge className={product.isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-700'}>{product.isActive ? 'Active' : 'Inactive'}</Badge><Badge className={stock.className}>{stock.label}</Badge></div><p className="mt-1 text-xs text-slate-500">Qty {product.quantity}</p></div></div></div></div></article>;
             })}
           </div>
           <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[920px] text-left">
-              <thead className="border-b bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-400"><tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Category</th><th className="px-5 py-4">Selling price</th><th className="px-5 py-4">Cost price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4">Status</th><th className="px-5 py-4 text-right">Actions</th></tr></thead>
+              <thead className="border-b bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-400"><tr><th className="px-5 py-4">Product</th><th className="px-5 py-4">Category</th><th className="px-5 py-4">Selling price</th><th className="px-5 py-4">Cost price</th><th className="px-5 py-4">Quantity</th><th className="px-5 py-4">Visibility</th><th className="px-5 py-4">Stock status</th><th className="px-5 py-4 text-right">Actions</th></tr></thead>
               <tbody className="divide-y dark:divide-slate-800">
                 {filteredProducts.map((product) => { const stock = stockState(product.quantity, lowStockThreshold); return (
-                  <tr key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50"><td className="px-5 py-4"><div className="flex items-center gap-3"><ProductImage product={product} className="size-12 rounded-xl" /><div><p className="font-semibold">{product.name}</p><p className="max-w-52 truncate text-xs text-slate-500">{product.description || 'No description'}</p></div></div></td><td className="px-5 py-4 text-sm">{product.category?.name ?? 'Uncategorized'}</td><td className="px-5 py-4 font-semibold">{money.format(Number(product.price))}</td><td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{money.format(Number(product.costPrice))}</td><td className="px-5 py-4 font-semibold">{product.quantity}</td><td className="px-5 py-4"><Badge className={stock.className}>{stock.label}</Badge></td><td className="px-5 py-4"><div className="flex justify-end"><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div></td></tr>
+                  <tr key={product.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50"><td className="px-5 py-4"><div className="flex items-center gap-3"><ProductImage product={product} className="size-12 rounded-xl" /><div><p className="font-semibold">{product.name}</p><p className="max-w-52 truncate text-xs text-slate-500">{product.description || 'No description'}</p></div></div></td><td className="px-5 py-4 text-sm">{product.category?.name ?? 'Uncategorized'}</td><td className="px-5 py-4 font-semibold">{money.format(Number(product.price))}</td><td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{money.format(Number(product.costPrice))}</td><td className="px-5 py-4 font-semibold">{product.quantity}</td><td className="px-5 py-4"><Badge className={product.isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-700'}>{product.isActive ? 'Active' : 'Inactive'}</Badge></td><td className="px-5 py-4"><Badge className={stock.className}>{stock.label}</Badge></td><td className="px-5 py-4"><div className="flex justify-end"><ProductActions product={product} busy={busy} onAdjustStock={() => handleAdjustStock(product)} onDelete={() => handleDelete(product)} /></div></td></tr>
                 ); })}
               </tbody>
             </table>

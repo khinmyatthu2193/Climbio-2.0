@@ -14,6 +14,7 @@ export interface Product {
   price: string;
   costPrice: string;
   quantity: number;
+  isActive: boolean;
   categoryId: string | null;
   category: Pick<Category, 'id' | 'name'> | null;
   createdAt: string;
@@ -26,6 +27,7 @@ export interface ProductInput {
   price: string;
   costPrice: string;
   quantity: string;
+  isActive: boolean;
   categoryId: string;
   image?: File;
 }

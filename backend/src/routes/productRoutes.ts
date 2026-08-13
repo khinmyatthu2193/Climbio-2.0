@@ -21,6 +21,7 @@ const productSchema = z.object({
   costPrice: money,
   quantity: z.coerce.number().int().min(0).max(2_147_483_647),
   categoryId: nullableUuid,
+  isActive: z.preprocess((value) => value === 'true' ? true : value === 'false' ? false : value, z.boolean().default(true)),
 }).strict();
 
 export const productRoutes = Router();

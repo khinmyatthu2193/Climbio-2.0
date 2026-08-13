@@ -17,9 +17,9 @@ type DiscountType = 'amount' | 'percentage';
 type FormErrors = Partial<Record<'customerName' | 'customerPhone' | 'email' | 'address' | 'city' | 'deliveryDate' | 'items', string>>;
 
 const sampleProducts: Product[] = [
-  { id: '10000000-0000-4000-8000-000000000001', userId: 'sample', name: 'Classic Climbing Tee', description: null, image: null, price: '28000', costPrice: '18000', quantity: 18, categoryId: null, category: null, createdAt: '', updatedAt: '' },
-  { id: '10000000-0000-4000-8000-000000000002', userId: 'sample', name: 'Chalk Bag — Sandstone', description: null, image: null, price: '35000', costPrice: '22000', quantity: 9, categoryId: null, category: null, createdAt: '', updatedAt: '' },
-  { id: '10000000-0000-4000-8000-000000000003', userId: 'sample', name: 'Climbio Water Bottle', description: null, image: null, price: '22000', costPrice: '14000', quantity: 24, categoryId: null, category: null, createdAt: '', updatedAt: '' },
+  { id: '10000000-0000-4000-8000-000000000001', userId: 'sample', name: 'Classic Climbing Tee', description: null, image: null, price: '28000', costPrice: '18000', quantity: 18, isActive: true, categoryId: null, category: null, createdAt: '', updatedAt: '' },
+  { id: '10000000-0000-4000-8000-000000000002', userId: 'sample', name: 'Chalk Bag — Sandstone', description: null, image: null, price: '35000', costPrice: '22000', quantity: 9, isActive: true, categoryId: null, category: null, createdAt: '', updatedAt: '' },
+  { id: '10000000-0000-4000-8000-000000000003', userId: 'sample', name: 'Climbio Water Bottle', description: null, image: null, price: '22000', costPrice: '14000', quantity: 24, isActive: true, categoryId: null, category: null, createdAt: '', updatedAt: '' },
 ];
 
 const cities = ['Yangon', 'Mandalay', 'Naypyidaw', 'Bago', 'Mawlamyine', 'Taunggyi'];

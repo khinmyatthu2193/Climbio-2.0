@@ -8,6 +8,7 @@ export interface ProductInput {
   costPrice: number;
   quantity: number;
   categoryId?: string | null;
+  isActive: boolean;
 }
 
 const includeCategory = { category: { select: { id: true, name: true } } } as const;

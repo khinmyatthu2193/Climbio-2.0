@@ -120,17 +120,31 @@ export const invoiceService = {
   },
 
   async updateStatus(userId: string, id: string, status: InvoiceStatus) {
-    const invoice = await prisma.invoice.findFirst({ where: { id, userId }, select: { id: true, status: true, orderType: true } });
-    if (!invoice) throw new AppError('Invoice not found', 404);
-    if (!canTransition(invoice.status, status, invoice.orderType)) {
-      throw new AppError(`Invoice cannot move from ${invoice.status} to ${status}`, 422);
-    }
-    return prisma.invoice.update({ where: { id }, data: { status }, include: detailInclude });
+    return prisma.$transaction(async (transaction) => {
+      const invoice = await transaction.invoice.findFirst({ where: { id, userId }, select: { id: true, status: true, orderType: true, items: { select: { productId: true, quantity: true } } } });
+      if (!invoice) throw new AppError('Invoice not found', 404);
+      if (!canTransition(invoice.status, status, invoice.orderType)) {
+        throw new AppError(`Invoice cannot move from ${invoice.status} to ${status}`, 422);
+      }
+      if (status === 'CANCELLED') {
+        for (const item of invoice.items) {
+          if (item.productId) await transaction.product.updateMany({ where: { id: item.productId, userId }, data: { quantity: { increment: item.quantity } } });
+        }
+      }
+      return transaction.invoice.update({ where: { id }, data: { status }, include: detailInclude });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   },
 
   async remove(userId: string, id: string) {
-    const invoice = await prisma.invoice.findFirst({ where: { id, userId }, select: { id: true } });
-    if (!invoice) throw new AppError('Invoice not found', 404);
-    await prisma.invoice.delete({ where: { id } });
+    await prisma.$transaction(async (transaction) => {
+      const invoice = await transaction.invoice.findFirst({ where: { id, userId }, select: { id: true, status: true, items: { select: { productId: true, quantity: true } } } });
+      if (!invoice) throw new AppError('Invoice not found', 404);
+      if (invoice.status !== 'CANCELLED') {
+        for (const item of invoice.items) {
+          if (item.productId) await transaction.product.updateMany({ where: { id: item.productId, userId }, data: { quantity: { increment: item.quantity } } });
+        }
+      }
+      await transaction.invoice.delete({ where: { id } });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   },
 };

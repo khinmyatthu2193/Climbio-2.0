@@ -8,6 +8,7 @@ function productFormData(input: ProductInput) {
   data.append('price', input.price);
   data.append('costPrice', input.costPrice);
   data.append('quantity', input.quantity);
+  data.append('isActive', String(input.isActive));
   data.append('categoryId', input.categoryId);
   if (input.image) data.append('image', input.image);
   return data;

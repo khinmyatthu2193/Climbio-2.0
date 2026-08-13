@@ -27,6 +27,7 @@ const emptyForm: ProductFormState = {
   pricingMethod: 'fixed',
   markupPercentage: null,
   sellingPrice: 0,
+  isActive: true,
 };
 
 const calculateSellingPrice = (costPrice: string, markupPercentage: number | null) => {
@@ -67,6 +68,7 @@ export function ProductForm({ productId }: { productId?: string }) {
       description: product.data.description ?? '',
       costPrice: product.data.costPrice,
       quantity: String(product.data.quantity),
+      isActive: product.data.isActive,
       categoryId: product.data.categoryId ?? '',
       pricingMethod: 'fixed',
       markupPercentage: null,
@@ -116,6 +118,7 @@ export function ProductForm({ productId }: { productId?: string }) {
       price: String(form.sellingPrice),
       costPrice: form.costPrice,
       quantity: form.quantity,
+      isActive: form.isActive,
       categoryId: form.categoryId,
       image: form.image,
     };
@@ -182,6 +185,10 @@ export function ProductForm({ productId }: { productId?: string }) {
                     <option value="">Uncategorized</option>
                     {categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                   </select>
+                </label>
+                <label className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3 dark:border-slate-700">
+                  <span><span className="block text-sm font-semibold">Public visibility</span><span className="mt-1 block text-xs text-slate-500">Active products appear in your public store.</span></span>
+                  <input className="size-5 accent-violet-600" type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} aria-label="Show product in public store" />
                 </label>
                 <fieldset className="md:col-span-2">
                   <legend className="mb-2 text-sm font-medium">Selling price method</legend>
@@ -298,6 +305,16 @@ export function ProductForm({ productId }: { productId?: string }) {
                     onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (!file) return;
+                      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                        window.alert('Product image must be JPG, PNG, or WebP.');
+                        event.target.value = '';
+                        return;
+                      }
+                      if (file.size > 2 * 1024 * 1024) {
+                        window.alert('Image must be 2 MB or smaller.');
+                        event.target.value = '';
+                        return;
+                      }
                       setImageToCrop(file);
                       event.target.value = '';
                     }}
