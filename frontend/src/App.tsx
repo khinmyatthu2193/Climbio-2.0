@@ -76,6 +76,10 @@ export default function App() {
   if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
   const publicInvoice = path.match(/^\/invoice\/([0-9a-f-]+)$/i);
   if (publicInvoice) return <PublicInvoice invoiceId={publicInvoice[1]} />;
+  if (initialized && user?.role === 'ADMIN' && !path.startsWith('/admin')) {
+    window.location.replace('/admin/dashboard');
+    return null;
+  }
   const protectedPage = (page: React.ReactNode, roles?: Role[], requireApproved = false) => (
     <ProtectedRoute roles={roles} requireApproved={requireApproved}><AppShell>{page}</AppShell></ProtectedRoute>
   );
