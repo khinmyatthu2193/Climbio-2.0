@@ -6,7 +6,7 @@ const themeKey = 'climbio-theme';
 function initialTheme(): Theme {
   const saved = localStorage.getItem(themeKey);
   if (saved === 'light' || saved === 'dark') return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light';
 }
 
 export function useTheme() {

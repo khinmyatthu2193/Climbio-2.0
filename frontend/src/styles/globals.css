@@ -36,6 +36,33 @@
   .landing-section { scroll-margin-top: 76px; }
 }
 
+@media (max-width: 639px) {
+  .landing-nav { padding: 0.625rem 0.625rem 0; }
+  .landing-nav nav { height: 3.5rem; gap: 0.5rem; padding-inline: 0.75rem; }
+  .landing-nav-logo { height: 2rem; max-width: 9.375rem; object-fit: contain; object-position: left; }
+  .landing-nav ~ section { padding-block: 4rem; }
+
+  #top { padding-top: 6rem; padding-bottom: 3.5rem; }
+  #top > div:nth-child(2) { padding-inline: 1rem; }
+  #top h1 { margin-top: 1.5rem; font-size: clamp(2.25rem, 11vw, 2.8rem); line-height: 1.06; }
+  #top h1 br { display: none; }
+  #top h1 + p { margin-top: 1.25rem; font-size: 0.9375rem; line-height: 1.75rem; }
+  #top h1 ~ div:last-of-type { display: grid; justify-content: center; gap: 0.5rem; text-align: left; }
+  #top [class*="min-h-[500px]"] { min-height: 27rem; grid-template-columns: 3rem minmax(0, 1fr); }
+  #top aside { padding: 0.375rem; }
+  #top aside + div { padding: 0.875rem; }
+  #top aside + div h2 { font-size: 1.05rem; line-height: 1.35; }
+  #top aside + div > div:nth-child(2) { grid-template-columns: 1fr; }
+  #top aside + div > div:nth-child(2) > div { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.25rem 0.625rem; }
+  #top aside + div > div:nth-child(2) svg { grid-row: span 2; }
+  #top aside + div > div:nth-child(2) p { margin-top: 0; }
+
+  #product, #workflow, #ai, #security { padding-block: 4rem; }
+  #product h2 br, #ai h2 br { display: none; }
+  #product h2, #workflow h2, #ai h2, #security h2 { font-size: 2rem; line-height: 1.12; }
+  #product h2 + p, #workflow h2 + p, #ai h2 + p { margin-top: 1rem; font-size: 1rem; line-height: 1.75rem; }
+}
+
 @layer components {
   main > .min-h-screen > footer { @apply -mt-8 sm:-mt-10; }
   .page-container { @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8; }
