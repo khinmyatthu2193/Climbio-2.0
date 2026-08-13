@@ -82,10 +82,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <header className="sticky top-0 z-40 flex h-[72px] items-center border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
+    <div className="min-h-screen bg-slate-100 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+      <header className="sticky top-0 z-40 flex h-[72px] items-center border-b border-slate-300/80 bg-slate-50/95 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
         {desktopSidebarOpen && (
-          <div className="hidden h-full w-[272px] shrink-0 items-center border-r border-slate-200/80 px-5 dark:border-slate-800 lg:flex">
+          <div className="hidden h-full w-[272px] shrink-0 items-center border-r border-slate-300/80 px-5 dark:border-slate-800 lg:flex">
             <Brand />
           </div>
         )}
@@ -133,7 +133,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       {desktopSidebarOpen && (
-        <aside id="dashboard-sidebar" className="fixed bottom-0 left-0 top-[72px] z-30 hidden w-[272px] flex-col bg-white shadow-[1px_0_0_0_rgb(226_232_240)] dark:bg-slate-950 dark:shadow-none lg:flex">
+        <aside id="dashboard-sidebar" className="fixed bottom-0 left-0 top-[72px] z-30 hidden w-[272px] flex-col border-r border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 lg:flex">
           {sidebar()}
         </aside>
       )}
@@ -141,7 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />
-          <aside id="mobile-dashboard-sidebar" className="relative flex h-full w-[min(82vw,18rem)] flex-col bg-white shadow-2xl dark:bg-slate-950">
+          <aside id="mobile-dashboard-sidebar" className="relative flex h-full w-[min(82vw,18rem)] flex-col bg-slate-50 shadow-2xl dark:bg-slate-950">
             <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
               <Brand />
               <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" onClick={() => setMobileOpen(false)} aria-label="Close navigation">
