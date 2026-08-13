@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -50,13 +50,15 @@ const salesChartViews: Array<{ value: SalesChartView; label: string }> = [
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const { language, translate } = useLanguage();
-  const [salesRange, setSalesRange] = useState<SalesRange>('6m');
-  const [salesChartView, setSalesChartView] = useState<SalesChartView>('bar');
+  const [salesRange, setSalesRange] = useState<SalesRange>('7d');
+  const [salesChartView, setSalesChartView] = useState<SalesChartView>('line');
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
-  const selectedSalesRange = salesRanges.find((range) => range.value === salesRange) ?? salesRanges[2];
+  const selectedSalesRange = salesRanges.find((range) => range.value === salesRange) ?? salesRanges[0];
   const dashboard = useQuery({
     queryKey: ['dashboard', 'summary', salesRange],
     queryFn: () => dashboardService.summary(salesRange),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
   const currency = user?.setting?.currency ?? 'MMK';
   const currencyFormatter = new Intl.NumberFormat(undefined, {
@@ -70,8 +72,21 @@ export function DashboardPage() {
     notation: 'compact',
     maximumFractionDigits: 1,
   });
-  const maxStock = Math.max(...(dashboard.data?.productStock.map((product) => product.quantity) ?? [0]), 1);
   const today = new Intl.DateTimeFormat(language === 'my' ? 'my-MM' : undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+  const revenueTrend = dashboard.data?.revenueTrend ?? 'FLAT';
+  const revenueChange = dashboard.data?.revenueChangePercent;
+  const revenueRatio = dashboard.data && dashboard.data.previousPeriodRevenue > 0
+    ? dashboard.data.currentPeriodRevenue / dashboard.data.previousPeriodRevenue
+    : null;
+  const trendMessage = revenueTrend === 'NEW'
+    ? 'New revenue compared with the previous period'
+    : revenueTrend === 'UP'
+      ? Math.abs(revenueChange ?? 0) >= 1000 && revenueRatio
+        ? `Revenue is ${revenueRatio.toFixed(1)}× the previous period`
+        : `Revenue increased ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
+      : revenueTrend === 'DOWN'
+        ? `Revenue decreased ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
+        : 'Revenue is unchanged from the previous period';
 
   const downloadPdfReport = async () => {
     if (!dashboard.data || !user) return;
@@ -171,8 +186,8 @@ export function DashboardPage() {
         ))}
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <Card className="min-w-0 p-0">
+      <section className="mt-6 grid items-start gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card className="min-w-0 self-start p-0 xl:h-[580px]">
           <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
             <div>
               <h2 className="font-bold text-slate-950 dark:text-white">Sales overview</h2>
@@ -208,6 +223,18 @@ export function DashboardPage() {
               </div>
             </div>
           </div>
+          {dashboard.data && (
+            <div className="mx-5 mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60 sm:mx-6">
+              <div><p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Revenue this period</p><p className="mt-0.5 text-lg font-black text-slate-950 dark:text-white">{currencyFormatter.format(dashboard.data.currentPeriodRevenue)}</p></div>
+              <div className="text-right">
+                <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${revenueTrend === 'UP' || revenueTrend === 'NEW' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : revenueTrend === 'DOWN' ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                  {revenueTrend === 'UP' || revenueTrend === 'NEW' ? <ArrowUpRight className="size-4" /> : revenueTrend === 'DOWN' ? <ArrowDownRight className="size-4" /> : <ArrowRight className="size-4" />}
+                  {trendMessage}
+                </div>
+                <p className="mt-1.5 text-[11px] font-medium text-slate-400">Previous equivalent period: {currencyFormatter.format(dashboard.data.previousPeriodRevenue)}</p>
+              </div>
+            </div>
+          )}
           {dashboard.isLoading ? (
             <div className="m-6 h-72 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
           ) : dashboard.data?.salesOverview.every((item) => Number(item.revenue) === 0) ? (
@@ -256,43 +283,44 @@ export function DashboardPage() {
           )}
         </Card>
 
-        <Card className="min-w-0 p-0">
+        <Card className="min-w-0 self-start overflow-hidden p-0 xl:flex xl:h-[580px] xl:flex-col">
           <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
             <div>
               <h2 className="font-bold text-slate-950 dark:text-white">Inventory levels</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Ranked stock position by product</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Items needing attention appear first</p>
             </div>
-            <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Stock</span>
+            <div className="text-right"><span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Stock</span><p className="mt-2 text-[10px] font-medium text-slate-400">Updates every minute</p></div>
           </div>
           {dashboard.isLoading ? (
             <div className="m-6 h-72 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
           ) : dashboard.data?.productStock.length === 0 ? (
             <ChartEmptyState icon={ShoppingBag} title="No inventory yet" description="Add products to start monitoring stock levels here." actionLabel="Add a product" actionHref="/products/new" />
           ) : (
-            <div className="space-y-4 px-5 py-6 sm:px-6">
+            <div className="max-h-[440px] divide-y divide-slate-100 overflow-y-auto px-5 py-2 dark:divide-slate-800 sm:px-6 xl:min-h-0 xl:flex-1">
               {(dashboard.data?.productStock ?? []).slice(0, 7).map((product, index) => {
-                const percent = Math.max((product.quantity / maxStock) * 100, product.quantity > 0 ? 5 : 0);
+                const isOut = product.quantity === 0;
                 const isLow = product.quantity <= 5;
+                const status = isOut ? 'Out of stock' : isLow ? 'Low stock' : 'In stock';
+                const statusTone = isOut
+                  ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300'
+                  : isLow
+                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300'
+                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300';
                 return (
-                  <div key={product.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 dark:border-slate-800 dark:bg-slate-900/60">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="grid size-6 shrink-0 place-items-center rounded-lg bg-white text-xs font-black text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300">{index + 1}</span>
-                          <p className="truncate text-sm font-bold text-slate-900 dark:text-white" title={product.name}>{product.name}</p>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-sm font-black text-slate-950 dark:text-white">{product.quantity}</p>
-                        <p className={`text-[11px] font-bold ${isLow ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-300'}`}>{isLow ? 'Low' : 'Healthy'}</p>
-                      </div>
+                  <div key={product.id} className="flex items-center gap-3 py-3.5">
+                    <span className={`size-2.5 shrink-0 rounded-full ${isOut ? 'bg-red-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold text-slate-900 dark:text-white" title={product.name}>{product.name}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">Priority {index + 1}</p>
                     </div>
-                    <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800" aria-label={`${product.name} stock level`}>
-                      <div className={`h-full rounded-full ${isLow ? 'bg-amber-500' : 'bg-gradient-to-r from-violet-600 to-fuchsia-500'}`} style={{ width: `${percent}%` }} />
+                    <div className="shrink-0 text-right">
+                      <p className="text-base font-black tabular-nums text-slate-950 dark:text-white">{product.quantity} <span className="text-[10px] font-semibold uppercase text-slate-400">units</span></p>
+                      <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${statusTone}`}>{status}</span>
                     </div>
                   </div>
                 );
               })}
+              <a href="/products" className="flex items-center justify-between py-3.5 text-sm font-bold text-violet-700 hover:text-violet-800 dark:text-violet-300">View all inventory <ArrowUpRight className="size-4" /></a>
             </div>
           )}
         </Card>
