@@ -4,6 +4,8 @@ export interface DashboardSummary {
   totalProducts: number;
   totalStock: number;
   lowStockCount: number;
+  invoiceCount: number;
+  publicStoreStatus: 'ACTIVE' | 'INACTIVE';
   totalRevenue: number;
   currentPeriodRevenue: number;
   previousPeriodRevenue: number;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ShoppingBag, Store, WalletCards } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ReceiptText, ShoppingBag, Store, WalletCards } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -23,6 +23,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { IconLabel } from '@/components/ui/IconLabel';
 import { download, downloadFinancialReportExcel } from '@/utils/financialReportExport';
+import { getReportTranslations } from '@/utils/reportTranslations';
 
 const chartTooltip = {
   backgroundColor: 'hsl(var(--background))',
@@ -50,6 +51,7 @@ const salesChartViews: Array<{ value: SalesChartView; label: string }> = [
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const { language, translate } = useLanguage();
+  const reportText = getReportTranslations(language);
   const [salesRange, setSalesRange] = useState<SalesRange>('7d');
   const [salesChartView, setSalesChartView] = useState<SalesChartView>('line');
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
@@ -79,14 +81,14 @@ export function DashboardPage() {
     ? dashboard.data.currentPeriodRevenue / dashboard.data.previousPeriodRevenue
     : null;
   const trendMessage = revenueTrend === 'NEW'
-    ? 'New revenue compared with the previous period'
+    ? reportText.newSales
     : revenueTrend === 'UP'
       ? Math.abs(revenueChange ?? 0) >= 1000 && revenueRatio
-        ? `Revenue is ${revenueRatio.toFixed(1)}× the previous period`
-        : `Revenue increased ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
+        ? `${reportText.increased} ${revenueRatio.toFixed(1)} ${reportText.times}`
+        : `${reportText.increased} ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
       : revenueTrend === 'DOWN'
-        ? `Revenue decreased ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
-        : 'Revenue is unchanged from the previous period';
+        ? `${reportText.decreased} ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
+        : reportText.unchanged;
 
   const downloadPdfReport = async () => {
     if (!dashboard.data || !user) return;
@@ -97,16 +99,16 @@ export function DashboardPage() {
         import('@/components/reports/FinancialReportPdfDocument'),
       ]);
       const createdAt = new Date();
-      const blob = await pdf(<FinancialReportPdfDocument report={dashboard.data} shop={user} range={salesRange} createdAt={createdAt} />).toBlob();
+      const blob = await pdf(<FinancialReportPdfDocument report={dashboard.data} shop={user} range={salesRange} createdAt={createdAt} language={language} />).toBlob();
       download(blob, `financial-report-${createdAt.toISOString().slice(0, 10)}.pdf`);
     } finally {
       setIsDownloadingPdf(false);
     }
   };
 
-  const downloadExcelReport = () => {
+  const downloadExcelReport = async () => {
     if (!dashboard.data || !user) return;
-    downloadFinancialReportExcel({ report: dashboard.data, shopName: user.shopName, currency, range: salesRange, createdAt: new Date() });
+    await downloadFinancialReportExcel({ report: dashboard.data, shopName: user.shopName, currency, range: salesRange, createdAt: new Date(), language });
   };
 
   const cards = [
@@ -118,25 +120,39 @@ export function DashboardPage() {
       tone: 'bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300',
     },
     {
-      label: 'Stock on hand',
+      label: reportText.stockAvailable,
       helper: 'Units ready to sell',
       value: dashboard.data?.totalStock,
       icon: Boxes,
       tone: 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300',
     },
     {
-      label: 'Low stock',
+      label: reportText.itemsRunningLow,
       helper: 'Products needing attention',
       value: dashboard.data?.lowStockCount,
       icon: AlertTriangle,
       tone: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
     },
     {
-      label: 'Paid revenue',
+      label: reportText.salesReceived,
       helper: 'Total from paid invoices',
       value: dashboard.data ? currencyFormatter.format(dashboard.data.totalRevenue) : undefined,
       icon: WalletCards,
       tone: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+    },
+    {
+      label: 'Invoices',
+      helper: 'Invoices created',
+      value: dashboard.data?.invoiceCount,
+      icon: ReceiptText,
+      tone: 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-500/10 dark:text-fuchsia-300',
+    },
+    {
+      label: 'Public store',
+      helper: dashboard.data?.publicStoreStatus === 'ACTIVE' ? 'Customers can view your catalog' : 'Your catalog is not public',
+      value: dashboard.data?.publicStoreStatus === 'ACTIVE' ? 'Active' : 'Inactive',
+      icon: Store,
+      tone: dashboard.data?.publicStoreStatus === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
     },
   ];
 
@@ -168,7 +184,7 @@ export function DashboardPage() {
 
       {dashboard.isError && <Alert className="mt-6" tone="error">Dashboard data could not be loaded. Please refresh and try again.</Alert>}
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Business summary">
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6" aria-label="Business summary">
         {cards.map(({ label, helper, value, icon: Icon, tone }) => (
           <Card key={label} className="group relative overflow-hidden p-5 transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg hover:shadow-slate-900/5 dark:hover:border-violet-500/40">
             <div className="flex items-start justify-between gap-4">
@@ -225,13 +241,13 @@ export function DashboardPage() {
           </div>
           {dashboard.data && (
             <div className="mx-5 mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60 sm:mx-6">
-              <div><p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Revenue this period</p><p className="mt-0.5 text-lg font-black text-slate-950 dark:text-white">{currencyFormatter.format(dashboard.data.currentPeriodRevenue)}</p></div>
+              <div><p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{reportText.salesDuringPeriod}</p><p className="mt-0.5 text-lg font-black text-slate-950 dark:text-white">{currencyFormatter.format(dashboard.data.currentPeriodRevenue)}</p></div>
               <div className="text-right">
                 <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${revenueTrend === 'UP' || revenueTrend === 'NEW' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : revenueTrend === 'DOWN' ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
                   {revenueTrend === 'UP' || revenueTrend === 'NEW' ? <ArrowUpRight className="size-4" /> : revenueTrend === 'DOWN' ? <ArrowDownRight className="size-4" /> : <ArrowRight className="size-4" />}
                   {trendMessage}
                 </div>
-                <p className="mt-1.5 text-[11px] font-medium text-slate-400">Previous equivalent period: {currencyFormatter.format(dashboard.data.previousPeriodRevenue)}</p>
+                <p className="mt-1.5 text-[11px] font-medium text-slate-400">{reportText.comparedWithPrevious}: {currencyFormatter.format(dashboard.data.previousPeriodRevenue)}</p>
               </div>
             </div>
           )}
@@ -286,7 +302,7 @@ export function DashboardPage() {
         <Card className="min-w-0 self-start overflow-hidden p-0 xl:flex xl:h-[580px] xl:flex-col">
           <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
             <div>
-              <h2 className="font-bold text-slate-950 dark:text-white">Inventory levels</h2>
+              <h2 className="font-bold text-slate-950 dark:text-white">{reportText.stockStatus}</h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Items needing attention appear first</p>
             </div>
             <div className="text-right"><span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Stock</span><p className="mt-2 text-[10px] font-medium text-slate-400">Updates every minute</p></div>
@@ -300,7 +316,7 @@ export function DashboardPage() {
               {(dashboard.data?.productStock ?? []).slice(0, 7).map((product, index) => {
                 const isOut = product.quantity === 0;
                 const isLow = product.quantity <= 5;
-                const status = isOut ? 'Out of stock' : isLow ? 'Low stock' : 'In stock';
+                const status = isOut ? reportText.outOfStock : isLow ? reportText.lowStock : reportText.available;
                 const statusTone = isOut
                   ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300'
                   : isLow

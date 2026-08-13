@@ -52,7 +52,7 @@ export const reportService = {
     const now = new Date();
     const previousSalesStart = new Date(salesStart.getTime() - (now.getTime() - salesStart.getTime()));
 
-    const [productTotals, lowStockCount, revenue, productStock, recentSales, previousRevenue] = await Promise.all([
+    const [productTotals, lowStockCount, revenue, invoiceCount, shopStatus, productStock, recentSales, previousRevenue] = await Promise.all([
       prisma.product.aggregate({
         where: { userId },
         _count: { id: true },
@@ -65,6 +65,8 @@ export const reportService = {
         where: { userId, status: 'PAID' },
         _sum: { total: true },
       }),
+      prisma.invoice.count({ where: { userId } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { publicEnabled: true, approvalStatus: true, accountStatus: true } }),
       prisma.product.findMany({
         where: { userId },
         select: { id: true, name: true, quantity: true },
@@ -101,6 +103,8 @@ export const reportService = {
       totalProducts: productTotals._count.id,
       totalStock: productTotals._sum.quantity ?? 0,
       lowStockCount,
+      invoiceCount,
+      publicStoreStatus: shopStatus?.publicEnabled && shopStatus.approvalStatus === 'APPROVED' && shopStatus.accountStatus === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
       totalRevenue: revenue._sum.total?.toNumber() ?? 0,
       currentPeriodRevenue,
       previousPeriodRevenue,
