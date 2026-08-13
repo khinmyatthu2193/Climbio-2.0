@@ -1,6 +1,6 @@
 import { ArrowRight, Bot, Check, KeyRound, LockKeyhole, Search, ShieldCheck, Sparkles, Store, UserCheck } from 'lucide-react';
 import type { LandingAuthMode } from '@/pages/LandingPage';
-import climbioLogo from '@/assets/branding/climbio-logo.png';
+import climbioLogo from '@/assets/branding/climbio-logo-new.png';
 import { LandingButtonLabel, landingIconTextFrameClass } from '@/components/landing/LandingButtonLabel';
 
 export function AISection() {
@@ -27,7 +27,7 @@ export function FinalCTA({ onOpenAuth }: { onOpenAuth: (mode: LandingAuthMode) =
 }
 
 export function LandingFooter({ onOpenAuth }: { onOpenAuth: (mode: LandingAuthMode) => void }) {
-  return <footer className="border-t border-slate-200 bg-white py-12 dark:border-white/10 dark:bg-[#080b16]"><div className="mx-auto grid max-w-7xl gap-10 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.5fr_1fr_1fr]"><div><a href="/#top" className="inline-flex rounded-lg" aria-label="Climbio home"><img src={climbioLogo} alt="Climbio" className="h-11 w-auto dark:brightness-0 dark:invert" /></a><p className="mt-3 text-sm text-slate-500">Smart business tools for growing SMEs.</p></div><FooterGroup title="Explore" links={[['Product', 'product'], ['Workflow', 'workflow'], ['AI', 'ai'], ['Security', 'security']]} /><div><h2 className="text-xs font-black uppercase tracking-wider dark:text-white">Account</h2><div className="mt-4 grid justify-items-start gap-3 text-sm text-slate-500"><button type="button" onClick={() => onOpenAuth('login')} className="hover:text-violet-600">Sign in</button><button type="button" onClick={() => onOpenAuth('signup')} className="hover:text-violet-600">Create account</button></div></div></div><div className="mx-auto mt-10 max-w-7xl border-t border-slate-100 px-5 pt-6 text-sm text-slate-400 dark:border-white/10 sm:px-8">© 2026 Climbio</div></footer>;
+  return <footer className="border-t border-slate-200 bg-white py-12 dark:border-white/10 dark:bg-[#080b16]"><div className="mx-auto grid max-w-7xl gap-10 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.5fr_1fr_1fr]"><div><a href="/#top" className="inline-flex rounded-lg" aria-label="Climbio home"><img src={climbioLogo} alt="Climbio" className="h-11 w-auto" /></a><p className="mt-3 text-sm text-slate-500">Smart business tools for growing SMEs.</p></div><FooterGroup title="Explore" links={[['Product', 'product'], ['Workflow', 'workflow'], ['AI', 'ai'], ['Security', 'security']]} /><div><h2 className="text-xs font-black uppercase tracking-wider dark:text-white">Account</h2><div className="mt-4 grid justify-items-start gap-3 text-sm text-slate-500"><button type="button" onClick={() => onOpenAuth('login')} className="hover:text-violet-600">Sign in</button><button type="button" onClick={() => onOpenAuth('signup')} className="hover:text-violet-600">Create account</button></div></div></div><div className="mx-auto mt-10 max-w-7xl border-t border-slate-100 px-5 pt-6 text-sm text-slate-400 dark:border-white/10 sm:px-8">© 2026 Climbio</div></footer>;
 }
 
 function FooterGroup({ title, links }: { title: string; links: string[][] }) { return <div><h2 className="text-xs font-black uppercase tracking-wider dark:text-white">{title}</h2><div className="mt-4 grid gap-3 text-sm text-slate-500">{links.map(([label, id]) => <a key={id} href={`/#${id}`} className="hover:text-violet-600">{label}</a>)}</div></div>; }
