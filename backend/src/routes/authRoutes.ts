@@ -27,6 +27,7 @@ const profileSchema = z.object({
   currency: z.enum(['MMK', 'USD', 'THB']),
   invoiceFooter: nullableText(500),
   invoiceThemeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invoice theme color must be a valid hex color.'),
+  shopPrimaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Store primary color must be a valid hex color.'),
   watermarkType: z.enum(['NONE', 'LOGO', 'EMOJI', 'IMAGE']),
   watermarkEmoji: z.string().trim().max(20).nullable().optional(),
   watermarkOpacity: z.number().int().min(0, 'Watermark opacity cannot be below 0%.').max(30, 'Watermark opacity cannot exceed 30%.'),

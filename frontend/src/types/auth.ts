@@ -10,6 +10,7 @@ export interface ShopSetting {
   currency: Currency;
   invoiceFooter: string | null;
   invoiceThemeColor: string;
+  shopPrimaryColor: string;
   watermarkType: InvoiceWatermarkType;
   watermarkImageUrl: string | null;
   watermarkEmoji: string | null;
@@ -51,6 +52,7 @@ export interface UpdateProfileInput {
   currency: Currency;
   invoiceFooter: string | null;
   invoiceThemeColor: string;
+  shopPrimaryColor: string;
   watermarkType: InvoiceWatermarkType;
   watermarkEmoji: string | null;
   watermarkOpacity: number;

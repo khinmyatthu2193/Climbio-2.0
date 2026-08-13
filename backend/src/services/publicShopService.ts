@@ -19,7 +19,7 @@ export const publicShopService = {
         phone: true,
         businessPhone: true, businessEmail: true, facebookPageUrl: true, messengerUrl: true,
         viberContact: true, telegramContact: true, tiktokProfileUrl: true,
-        setting: { select: { currency: true } },
+        setting: { select: { currency: true, shopPrimaryColor: true } },
         products: {
           where: { isActive: true },
           select: {
@@ -42,7 +42,7 @@ export const publicShopService = {
           publicEnabled: true, slug: true, shopName: true, shopLogo: true, shopAddress: true, phone: true,
           businessPhone: true, businessEmail: true, facebookPageUrl: true, messengerUrl: true,
           viberContact: true, telegramContact: true, tiktokProfileUrl: true,
-          setting: { select: { currency: true } },
+          setting: { select: { currency: true, shopPrimaryColor: true } },
           products: { where: { isActive: true }, select: { id: true, name: true, description: true, image: true, price: true, quantity: true, category: { select: { id: true, name: true } } }, orderBy: [{ quantity: 'desc' }, { name: 'asc' }] },
           accountStatus: true, approvalStatus: true,
         } } },
@@ -57,7 +57,7 @@ export const publicShopService = {
     ).sort((a, b) => a.name.localeCompare(b.name));
 
     return {
-      shop: { ...shopInfo, currency: setting?.currency ?? 'MMK' },
+      shop: { ...shopInfo, currency: setting?.currency ?? 'MMK', primaryColor: setting?.shopPrimaryColor ?? '#7c3aed' },
       canonicalSlug: shop.slug,
       categories,
       products,

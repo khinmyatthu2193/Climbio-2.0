@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, Facebook, Mail, MapPin, MessageCircle, Music2, PackageOpen, Phone, Search, Send, ShoppingBag, X } from 'lucide-react';
+import { ExternalLink, Facebook, Mail, MapPin, MessageCircle, Moon, Music2, PackageOpen, Phone, Search, Send, ShoppingBag, Sun, X } from 'lucide-react';
 import { IconLabel } from '@/components/ui/IconLabel';
 import { publicShopService } from '@/services/publicShopService';
 import type { PublicShopProduct } from '@/types/publicShop';
@@ -13,6 +13,15 @@ export function PublicShop({ slug }: { slug: string }) {
   const [contactOpen, setContactOpen] = useState(false);
   const contactCloseRef = useRef<HTMLButtonElement>(null);
   const contactTriggerRef = useRef<HTMLButtonElement>(null);
+  const [publicTheme, setPublicTheme] = useState<'light' | 'dark'>(() => localStorage.getItem('climbio-public-theme') === 'dark' ? 'dark' : 'light');
+
+  useEffect(() => {
+    const applyTheme = () => { document.documentElement.classList.toggle('dark', publicTheme === 'dark'); document.documentElement.style.colorScheme = publicTheme; };
+    applyTheme();
+    const frame = window.requestAnimationFrame(applyTheme);
+    localStorage.setItem('climbio-public-theme', publicTheme);
+    return () => window.cancelAnimationFrame(frame);
+  }, [publicTheme]);
 
   useEffect(() => {
     const canonicalSlug = catalog.data?.canonicalSlug;
@@ -50,6 +59,13 @@ export function PublicShop({ slug }: { slug: string }) {
   }
 
   const { shop } = catalog.data;
+  const hex = shop.primaryColor.replace('#', '');
+  const red = Number.parseInt(hex.slice(0, 2), 16) / 255; const green = Number.parseInt(hex.slice(2, 4), 16) / 255; const blue = Number.parseInt(hex.slice(4, 6), 16) / 255;
+  const max = Math.max(red, green, blue); const min = Math.min(red, green, blue); const delta = max - min;
+  let hue = delta === 0 ? 0 : max === red ? ((green - blue) / delta) % 6 : max === green ? (blue - red) / delta + 2 : (red - green) / delta + 4;
+  hue = Math.round(hue * 60); if (hue < 0) hue += 360;
+  const lightness = (max + min) / 2; const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+  const brandStyle = { '--primary': `${hue} ${Math.round(saturation * 100)}% ${Math.round(lightness * 100)}%` } as CSSProperties;
   const money = new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: shop.currency,
@@ -70,8 +86,8 @@ export function PublicShop({ slug }: { slug: string }) {
   ].filter(Boolean) as Array<{ label: string; href: string; icon: typeof Phone; external: boolean }>;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="border-b bg-[radial-gradient(circle_at_top_left,#ede9fe,transparent_55%)] dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_left,rgba(109,40,217,0.22),transparent_55%)]">
+    <main style={brandStyle} className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <header className="border-b border-slate-200 dark:border-slate-800" style={{ backgroundImage: `radial-gradient(circle at top left, ${shop.primaryColor}${publicTheme === 'dark' ? '38' : '24'}, transparent 58%)` }}>
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:flex-row sm:items-center sm:justify-between md:px-8 md:py-12">
           <div className="flex items-center gap-4">
             {shop.shopLogo ? (
@@ -87,9 +103,9 @@ export function PublicShop({ slug }: { slug: string }) {
               {shop.shopAddress && <p className="mt-2 flex items-center gap-1 text-sm text-slate-600"><IconLabel icon={MapPin}>{shop.shopAddress}</IconLabel></p>}
             </div>
           </div>
-          <button ref={contactTriggerRef} className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" onClick={() => setContactOpen(true)}>
+          <div className="flex items-center gap-2"><button type="button" className="grid size-11 place-items-center rounded-xl border border-slate-200 bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:border-primary dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200" onClick={() => setPublicTheme((current) => current === 'light' ? 'dark' : 'light')} aria-label={`Switch to ${publicTheme === 'light' ? 'dark' : 'light'} mode`}>{publicTheme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</button><button ref={contactTriggerRef} className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" onClick={() => setContactOpen(true)}>
             <IconLabel icon={Phone}>Contact seller</IconLabel>
-          </button>
+          </button></div>
         </div>
       </header>
 

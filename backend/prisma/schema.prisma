@@ -240,6 +240,7 @@ model Setting {
   currency          Currency @default(MMK)
   invoiceFooter     String?  @map("invoice_footer")
   invoiceThemeColor String   @default("#7c3aed") @map("invoice_theme_color") @db.VarChar(7)
+  shopPrimaryColor  String   @default("#7c3aed") @map("shop_primary_color") @db.VarChar(7)
   watermarkType     String   @default("NONE") @map("watermark_type") @db.VarChar(20)
   watermarkImageUrl String?  @map("watermark_image_url")
   watermarkEmoji    String?  @map("watermark_emoji") @db.VarChar(20)

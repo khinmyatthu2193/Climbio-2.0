@@ -24,6 +24,7 @@ export interface PublicShopResponse {
     telegramContact: string | null;
     tiktokProfileUrl: string | null;
     currency: 'MMK' | 'USD' | 'THB';
+    primaryColor: string;
   };
   categories: Array<{ id: string; name: string }>;
   products: PublicShopProduct[];
