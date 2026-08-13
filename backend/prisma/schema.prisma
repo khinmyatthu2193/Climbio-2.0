@@ -67,6 +67,11 @@ enum AIInsightType {
   INVENTORY_ALERT
 }
 
+enum PromptStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model User {
   id                         String             @id @default(uuid()) @db.Uuid
   email                      String             @unique @db.VarChar(255)
@@ -291,4 +296,35 @@ model AIChatHistory {
 
   @@index([shopId, createdAt])
   @@map("ai_chat_history")
+}
+
+model PromptCategory {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique @db.VarChar(100)
+  icon        String?    @db.VarChar(20)
+  description String?
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  prompts     AIPrompt[]
+
+  @@index([isActive, name])
+  @@map("prompt_categories")
+}
+
+model AIPrompt {
+  id              String         @id @default(uuid()) @db.Uuid
+  title           String         @db.VarChar(160)
+  categoryId      String         @map("category_id") @db.Uuid
+  content         String
+  aiTools         String[]       @map("ai_tools")
+  exampleImageUrl String?        @map("example_image_url") @db.VarChar(1000)
+  status          PromptStatus   @default(DRAFT)
+  usageCount      Int            @default(0) @map("usage_count")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  category        PromptCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([status, categoryId, createdAt])
+  @@map("ai_prompts")
 }

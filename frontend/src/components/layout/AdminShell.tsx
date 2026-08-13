@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { BarChart3, ClipboardList, FileClock, Menu, PanelLeftClose, PanelLeftOpen, Store, Users, X } from 'lucide-react';
+import { BarChart3, ClipboardList, FileClock, Images, Menu, PanelLeftClose, PanelLeftOpen, Store, Users, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useTheme } from '@/hooks/useTheme';
 import { ProfileMenu } from '@/components/layout/ProfileMenu';
@@ -12,6 +12,7 @@ const navigation = [
   { href: '/admin/applications', label: 'Applications', icon: ClipboardList },
   { href: '/admin/shops', label: 'Shops', icon: Store },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/prompts', label: 'AI Prompt Gallery', icon: Images },
   { href: '/admin/audit-logs', label: 'Audit logs', icon: FileClock },
 ];
 

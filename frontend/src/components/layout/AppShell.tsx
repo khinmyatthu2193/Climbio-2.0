@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
-import { BookOpen, FileText, LayoutDashboard, LoaderCircle, Menu, MessageSquareText, Package, PanelLeftClose, PanelLeftOpen, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
+import { BookOpen, FileText, Images, LayoutDashboard, LoaderCircle, Menu, MessageSquareText, Package, PanelLeftClose, PanelLeftOpen, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useTheme } from '@/hooks/useTheme';
 import { ProfileMenu } from '@/components/layout/ProfileMenu';
@@ -15,6 +15,7 @@ const navigation = [
   { label: 'Invoices', href: '/invoices', icon: FileText },
   { label: 'AI Advisor', href: '/ai-advisor', icon: Sparkles },
   { label: 'Climbio Chat', href: '/ai-chat', icon: MessageSquareText },
+  { label: 'AI Prompt Gallery', href: '/prompt-gallery', icon: Images },
   { label: 'Public store', href: '/my-store', icon: ShoppingBag },
   { label: 'User manual', href: '/user-manual', icon: BookOpen },
   { label: 'Settings', href: '/profile', icon: Settings },

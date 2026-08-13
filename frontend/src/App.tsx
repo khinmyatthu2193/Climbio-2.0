@@ -24,6 +24,8 @@ import { AdminApplicationDetailPage } from '@/pages/admin/AdminApplicationDetail
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
 import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage';
 import { UserManualPage } from '@/pages/UserManualPage';
+import { PromptGalleryPage } from '@/pages/PromptGalleryPage';
+import { AdminPromptsPage } from '@/pages/admin/AdminPromptsPage';
 import type { Role } from '@/types/auth';
 import { useAuthStore } from '@/store/authStore';
 
@@ -89,6 +91,7 @@ export default function App() {
   if (path === '/admin/shops') return adminPage(<AdminApplicationsPage mode="shops" />);
   if (path === '/admin/users') return adminPage(<AdminUsersPage />);
   if (path === '/admin/audit-logs') return adminPage(<AdminAuditLogsPage />);
+  if (path === '/admin/prompts') return adminPage(<AdminPromptsPage />);
   const adminApplication = path.match(/^\/admin\/applications\/([0-9a-f-]+)$/i);
   if (adminApplication) return adminPage(<AdminApplicationDetailPage shopId={adminApplication[1]} />);
   if (path === '/application') return <ProtectedRoute><ApplicationStatusPage /></ProtectedRoute>;
@@ -96,6 +99,7 @@ export default function App() {
   if (path === '/my-store') return protectedPage(<MyPublicStore />, undefined, true);
   if (path === '/ai-advisor') return protectedPage(<AIAdvisorPage />, undefined, true);
   if (path === '/ai-chat') return protectedPage(<AIChatPage />, undefined, true);
+  if (path === '/prompt-gallery') return protectedPage(<PromptGalleryPage />, undefined, true);
   if (path === '/user-manual') return protectedPage(<UserManualPage />, undefined, true);
   if (path === '/products') return protectedPage(<ProductList />, undefined, true);
   if (path === '/products/new') return protectedPage(<ProductForm />, undefined, true);

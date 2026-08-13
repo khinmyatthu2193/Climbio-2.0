@@ -8,6 +8,7 @@ import { publicShopRoutes } from './publicShopRoutes.js';
 import { aiRoutes } from './aiRoutes.js';
 import { adminRoutes } from './adminRoutes.js';
 import { shopApplicationRoutes } from './shopApplicationRoutes.js';
+import { promptGalleryRoutes } from './promptGalleryRoutes.js';
 
 export const apiRoutes = Router();
 apiRoutes.use('/auth', authRoutes);
@@ -19,3 +20,4 @@ apiRoutes.use('/shop', publicShopRoutes);
 apiRoutes.use('/ai', aiRoutes);
 apiRoutes.use('/shop-application', shopApplicationRoutes);
 apiRoutes.use('/admin', adminRoutes);
+apiRoutes.use('/prompt-gallery', promptGalleryRoutes);
