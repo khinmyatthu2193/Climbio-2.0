@@ -52,7 +52,6 @@ export interface MyPublicStore {
 }
 
 export interface UpdatePublicStoreInput {
-  slug: string;
   shopName: string;
   phone: string | null;
   businessPhone: string | null;

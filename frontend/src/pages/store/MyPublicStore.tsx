@@ -16,10 +16,9 @@ import { useAuthStore } from '@/store/authStore';
 import { useLanguage } from '@/hooks/useLanguage';
 import { getPublicShopUrl } from '@/utils/publicShopUrl';
 
-const validSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const validPhone = /^\+?[0-9\s()-]+$/;
 
-type StoreForm = { slug: string; shopName: string; phone: string; shopAddress: string; businessPhone: string; businessEmail: string; facebookPageUrl: string; messengerUrl: string; viberContact: string; telegramContact: string; tiktokProfileUrl: string };
+type StoreForm = { shopName: string; phone: string; shopAddress: string; businessPhone: string; businessEmail: string; facebookPageUrl: string; messengerUrl: string; viberContact: string; telegramContact: string; tiktokProfileUrl: string };
 type FieldErrors = Partial<Record<keyof StoreForm, string>>;
 
 function matchesUrl(value: string, hosts: string[], pathPattern: RegExp) {
@@ -32,7 +31,6 @@ function matchesUrl(value: string, hosts: string[], pathPattern: RegExp) {
 function validateStoreForm(form: StoreForm): FieldErrors {
   const errors: FieldErrors = {};
   const phoneIsInvalid = (value: string) => value !== '' && (!validPhone.test(value) || value.replace(/\D/g, '').length < 7);
-  if (!validSlug.test(form.slug)) errors.slug = 'Use lowercase letters, numbers, and single hyphens only.';
   if (phoneIsInvalid(form.phone)) errors.phone = 'Please enter a valid phone number.';
   if (phoneIsInvalid(form.businessPhone)) errors.businessPhone = 'Please enter a valid business phone number.';
   if (form.businessEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.businessEmail)) errors.businessEmail = 'Please enter a valid business email address.';
@@ -70,13 +68,12 @@ export function MyPublicStore() {
   const [messengerCopied, setMessengerCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
-  const [form, setForm] = useState<StoreForm>({ slug: '', shopName: '', phone: '', shopAddress: '', businessPhone: '', businessEmail: '', facebookPageUrl: '', messengerUrl: '', viberContact: '', telegramContact: '', tiktokProfileUrl: '' });
+  const [form, setForm] = useState<StoreForm>({ shopName: '', phone: '', shopAddress: '', businessPhone: '', businessEmail: '', facebookPageUrl: '', messengerUrl: '', viberContact: '', telegramContact: '', tiktokProfileUrl: '' });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     if (!store.data) return;
     setForm({
-      slug: store.data.slug,
       shopName: store.data.shopInfo.shopName,
       phone: store.data.shopInfo.phone ?? '',
       shopAddress: store.data.shopInfo.shopAddress ?? '',
@@ -135,7 +132,6 @@ export function MyPublicStore() {
     setFieldErrors(errors);
     if (Object.keys(errors).length) return;
     detailsMutation.mutate({
-      slug: form.slug.trim(),
       shopName: form.shopName,
       phone: form.phone || null,
       shopAddress: form.shopAddress || null,
@@ -164,8 +160,6 @@ export function MyPublicStore() {
   if (store.isError || !store.data) return <main className="page-container"><Alert tone="error">{copy.loadError}</Alert></main>;
 
   const publicUrl = getPublicShopUrl(store.data.slug, store.data.publicUrl);
-  const previewUrl = getPublicShopUrl(form.slug.trim(), store.data.publicUrl);
-  const slugError = fieldErrors.slug;
   const shareMessage = `Check out ${store.data.shopInfo.shopName} on Climbio.`;
   const shareText = encodeURIComponent(`${shareMessage} ${publicUrl}`);
   const shareUrl = encodeURIComponent(publicUrl);
@@ -288,12 +282,10 @@ export function MyPublicStore() {
                   <span className="mb-1 block text-sm font-medium">{copy.shopName}</span>
                   <Input value={form.shopName} maxLength={100} onChange={(event) => updateField('shopName', event.target.value)} required />
                 </label>
-                <label>
-                  <span className="mb-1 block text-sm font-medium">{copy.slug}</span>
-                  <Input className={slugError ? 'border-red-500 focus:border-red-500 focus:ring-red-100 dark:border-red-500 dark:focus:ring-red-500/20' : ''} value={form.slug} maxLength={120} aria-invalid={Boolean(slugError)} onChange={(event) => updateField('slug', event.target.value)} required />
-                  {slugError && <p className="mt-1 text-xs font-medium text-red-600">⚠ {slugError}</p>}
-                  <p className="mt-2 text-xs text-slate-500"><span className="font-semibold">{copy.slugPreview}</span> <span className="break-all">{previewUrl}</span></p>
-                </label>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 dark:border-slate-700 dark:bg-slate-800/60">
+                  <span className="block text-sm font-medium">{copy.slugPreview}</span>
+                  <span className="mt-1 block break-all text-xs text-slate-500 dark:text-slate-400">{publicUrl}</span>
+                </div>
                 <label>
                   <span className="mb-1 block text-sm font-medium">{copy.phone}</span>
                   <Input className={fieldErrors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-100 dark:border-red-500' : ''} value={form.phone} maxLength={30} aria-invalid={Boolean(fieldErrors.phone)} onChange={(event) => updateField('phone', event.target.value)} />

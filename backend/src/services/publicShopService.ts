@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
-import { isShopSlugAvailable } from '../utils/shopSlug.js';
+import { createUniqueShopSlug } from '../utils/shopSlug.js';
 
 const publicStoreWhere = { publicEnabled: true, approvalStatus: 'APPROVED' as const, accountStatus: 'ACTIVE' as const };
 const publicFrontendUrl = env.FRONTEND_URL.split(',')[0]!.trim().replace(/\/$/, '');
@@ -111,7 +111,6 @@ export const publicShopService = {
   },
 
   async updateMyStore(userId: string, input: {
-    slug: string;
     shopName: string;
     phone?: string | null;
     businessPhone?: string | null; businessEmail?: string | null; facebookPageUrl?: string | null;
@@ -121,15 +120,13 @@ export const publicShopService = {
     await prisma.$transaction(async (tx) => {
       const current = await tx.user.findUnique({ where: { id: userId }, select: { slug: true } });
       if (!current) throw new AppError('Shop not found', 404);
-      if (!(await isShopSlugAvailable(tx, input.slug, userId))) {
-        throw new AppError('This public URL is already in use. Please choose another slug.', 409);
-      }
-      if (current.slug !== input.slug) {
-        await tx.shopSlugHistory.deleteMany({ where: { shopId: userId, slug: input.slug } });
+      const slug = await createUniqueShopSlug(tx, input.shopName, userId);
+      if (current.slug !== slug) {
+        await tx.shopSlugHistory.deleteMany({ where: { shopId: userId, slug } });
         await tx.shopSlugHistory.upsert({ where: { slug: current.slug }, create: { shopId: userId, slug: current.slug }, update: { shopId: userId } });
       }
       await tx.user.update({ where: { id: userId }, data: {
-        slug: input.slug,
+        slug,
         shopName: input.shopName,
         phone: input.phone,
         businessPhone: input.businessPhone,

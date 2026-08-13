@@ -19,7 +19,6 @@ const phoneContact = z.string().trim().max(30).regex(/^\+?[0-9\s()-]+$/, 'Please
 const telegramContact = z.string().trim().max(500).refine((value) => /^@[a-zA-Z0-9_]{5,32}$/.test(value) || /^https:\/\/(?:t\.me|telegram\.me)\/[a-zA-Z0-9_]{5,32}\/?$/.test(value), 'Telegram username or link is invalid.').nullable().optional();
 const viberContact = z.string().trim().max(500).refine((value) => /^\+?[0-9]{7,15}$/.test(value) || /^viber:\/\/(?:chat|add)\?/.test(value), 'Enter a Viber phone number or deep link').nullable().optional();
 const storeSchema = z.object({
-  slug: z.string().trim().min(3).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers, and single hyphens only'),
   shopName: z.string().trim().min(2).max(100),
   phone: phoneContact,
   businessPhone: phoneContact,
