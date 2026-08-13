@@ -3,7 +3,8 @@ import { BarChart3, ClipboardList, FileClock, Menu, PanelLeftClose, Store, Users
 import { cn } from '@/utils/cn';
 import { useTheme } from '@/hooks/useTheme';
 import { ProfileMenu } from '@/components/layout/ProfileMenu';
-import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
+import climbioSidebarLogo from '@/assets/branding/climbio-logo-new.png';
+import climbioMark from '@/assets/branding/climbio-mark-new.png';
 import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
 import { iconFrameClass } from '@/components/ui/IconLabel';
 
@@ -36,11 +37,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className={cn('flex h-[76px] items-center border-b border-slate-200 pt-4 transition-all dark:border-slate-800/80', compact ? 'justify-center px-2' : 'justify-between gap-3 px-4')}>
         {compact ? (
           <button className="flex w-9 min-w-0 items-center overflow-hidden rounded-xl transition-all" onClick={toggleCollapsed} aria-label="Expand sidebar" title="Expand sidebar">
-            <span className="relative block size-9 overflow-hidden"><img src={climbioSidebarLogo} alt="" className="absolute -left-3 -top-[23px] w-[135px] max-w-none dark:brightness-0 dark:invert" /></span>
+            <span className="block size-9"><img src={climbioMark} alt="" className="size-full object-contain" /></span>
           </button>
         ) : (
           <a className="flex w-[184px] min-w-0 items-center overflow-hidden rounded-xl" href="/admin/dashboard" aria-label="Climbio administration">
-            <span className="relative block h-[52px] w-[184px] overflow-hidden"><img src={climbioSidebarLogo} alt="Climbio" className="absolute -left-6 -top-[54px] w-60 max-w-none dark:brightness-0 dark:invert" /></span>
+            <span className="block h-[52px] w-[184px]"><img src={climbioSidebarLogo} alt="Climbio" className="h-full w-full object-contain object-left" /></span>
           </a>
         )}
         {!compact && <button className="hidden shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-violet-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white lg:block" onClick={toggleCollapsed} aria-label="Collapse sidebar" title="Collapse sidebar"><PanelLeftClose className="size-5" /></button>}

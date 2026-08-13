@@ -4,7 +4,7 @@ import { BookOpen, FileText, LayoutDashboard, LoaderCircle, Menu, MessageSquareT
 import { cn } from '@/utils/cn';
 import { useTheme } from '@/hooks/useTheme';
 import { ProfileMenu } from '@/components/layout/ProfileMenu';
-import climbioSidebarLogo from '@/assets/branding/climbio-for-sidenavbar.png';
+import climbioSidebarLogo from '@/assets/branding/climbio-logo-new.png';
 import { useLanguage } from '@/hooks/useLanguage';
 import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
 import { iconFrameClass } from '@/components/ui/IconLabel';
@@ -27,11 +27,11 @@ function isCurrent(href: string) {
 
 function Brand({ mobile = false }: { mobile?: boolean }) {
   return (
-    <a className={cn('relative block shrink-0 overflow-hidden', mobile ? 'h-10 w-36' : 'h-[52px] w-[184px]')} href="/" aria-label="Climbio dashboard">
+    <a className={cn('block shrink-0', mobile ? 'h-10 w-36' : 'h-[52px] w-[184px]')} href="/" aria-label="Climbio dashboard">
       <img
         src={climbioSidebarLogo}
         alt="Climbio"
-        className={cn('absolute max-w-none dark:brightness-0 dark:invert', mobile ? '-left-5 -top-[43px] w-48' : '-left-6 -top-[54px] w-60')}
+        className="h-full w-full object-contain object-left"
       />
     </a>
   );
