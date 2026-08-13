@@ -5,6 +5,10 @@ export interface DashboardSummary {
   totalStock: number;
   lowStockCount: number;
   totalRevenue: number;
+  currentPeriodRevenue: number;
+  previousPeriodRevenue: number;
+  revenueTrend: 'UP' | 'DOWN' | 'FLAT' | 'NEW';
+  revenueChangePercent: number | null;
   productStock: Array<{ id: string; name: string; quantity: number }>;
   salesOverview: Array<{ label: string; revenue: number }>;
 }
