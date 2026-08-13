@@ -27,7 +27,7 @@ export function LandingAuthDialog({ mode, onClose, onChangeMode }: { mode: Landi
           <X className="size-4" />
         </button>
         {mode === 'login' ? <LoginForm /> : <RegisterForm />}
-        <p className="mt-4 text-center text-sm text-stone-400">{mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}<button type="button" onClick={() => onChangeMode(mode === 'login' ? 'signup' : 'login')} className="font-medium text-violet-300 hover:underline">{mode === 'login' ? 'Create account' : 'Sign in'}</button></p>
+        <p className="mt-4 text-center text-sm text-slate-700 dark:text-stone-400">{mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}<button type="button" onClick={() => onChangeMode(mode === 'login' ? 'signup' : 'login')} className="font-semibold text-violet-700 hover:underline dark:text-violet-300">{mode === 'login' ? 'Create account' : 'Sign in'}</button></p>
       </div>
     </div>
   );
