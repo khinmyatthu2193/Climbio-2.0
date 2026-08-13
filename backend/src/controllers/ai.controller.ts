@@ -23,13 +23,14 @@ function normalizeResponse(rawContent: string, marker: string, firstHeading: str
 }
 
 function resolveLanguage(value: unknown, question = ''): AIResponseLanguage {
+  if (/[\u1000-\u109F\uAA60-\uAA7F]/u.test(question)) return 'my';
   if (value === 'my') return 'my';
   if (value === 'en') return 'en';
-  return /[\u1000-\u109F\uAA60-\uAA7F]/u.test(question) ? 'my' : 'en';
+  return 'en';
 }
 
-function ensureCompleteResponse(content: string, headings: string[], minimumLength: number) {
-  if (content.length < minimumLength || !headings.every((heading) => content.includes(heading))) {
+function ensureCompleteResponse(content: string, minimumLength: number) {
+  if (content.trim().length < minimumLength) {
     throw new AppError('AI provider returned an incomplete business response. Please try again.', 502);
   }
 }
@@ -49,7 +50,7 @@ async function enforceResponseLanguage(content: string, language: AIResponseLang
     maxTokens: 1_600,
   });
   const translated = normalizeResponse(rawTranslation, 'TRANSLATED_RESPONSE_START', headings[0]!);
-  ensureCompleteResponse(translated, headings, 100);
+  ensureCompleteResponse(translated, 60);
   if (!isSubstantiallyMyanmar(translated)) {
     throw new AppError('AI provider could not produce a Myanmar-language response. Please try again.', 502);
   }
@@ -65,8 +66,8 @@ export const aiController = {
     const requiredHeadings = analysisHeadings[language];
     const rawContent = await askAI(createBusinessAdvisorPrompt(overview, language));
     const normalizedContent = normalizeResponse(rawContent, 'FINAL_REPORT_START', requiredHeadings[0]!);
-    ensureCompleteResponse(normalizedContent, requiredHeadings, language === 'my' ? 150 : 300);
     const content = await enforceResponseLanguage(normalizedContent, language, requiredHeadings);
+    ensureCompleteResponse(content, 100);
     const insight = await prisma.aIInsight.create({
       data: { shopId, type: 'SALES_ANALYSIS', content },
       select: { id: true, type: true, content: true, createdAt: true },
@@ -86,8 +87,8 @@ export const aiController = {
     const requiredHeadings = chatHeadings[language];
     const rawAnswer = await askAI({ ...createBusinessConsultantPrompt(context, question, language), maxTokens: 1_200 });
     const normalizedAnswer = normalizeResponse(rawAnswer, 'CHAT_RESPONSE_START', requiredHeadings[0]!);
-    ensureCompleteResponse(normalizedAnswer, requiredHeadings, language === 'my' ? 100 : 180);
     const answer = await enforceResponseLanguage(normalizedAnswer, language, requiredHeadings);
+    ensureCompleteResponse(answer, 60);
     const message = await prisma.aIChatHistory.create({
       data: { shopId, question, answer },
       select: { id: true, question: true, answer: true, createdAt: true },

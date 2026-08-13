@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import { Bot, LoaderCircle, MessageSquareText, Plus, Send, Sparkles, Trash2 } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
@@ -35,8 +35,14 @@ export function AIChatPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const selectedMessage = useMemo(() => history.data?.messages.find((message) => message.id === selectedId), [history.data?.messages, selectedId]);
+  const pendingQuestions = useMutationState<string>({
+    filters: { mutationKey: ['ai-chat'], status: 'pending' },
+    select: (mutation) => mutation.state.variables as string,
+  });
+  const pendingQuestion = pendingQuestions.at(-1);
 
   const chat = useMutation({
+    mutationKey: ['ai-chat'],
     mutationFn: (value: string) => aiService.chat({ question: value, language }),
     onSuccess: ({ message }) => {
       queryClient.setQueryData<AIChatHistoryResponse>(['ai-chat-history'], (current) => ({ messages: [...(current?.messages ?? []), message] }));
@@ -44,6 +50,7 @@ export function AIChatPage() {
       setQuestion('');
     },
   });
+  const chatPending = Boolean(pendingQuestion) || chat.isPending;
   const deleteChat = useMutation({
     mutationFn: (target: DeleteTarget) => target.type === 'all' ? aiService.clearChatHistory() : aiService.deleteChatMessage(target.id),
     onSuccess: (_, target) => {
@@ -61,7 +68,7 @@ export function AIChatPage() {
   const submit = (event?: FormEvent) => {
     event?.preventDefault();
     const value = question.trim();
-    if (value.length >= 3 && !chat.isPending) chat.mutate(value);
+    if (value.length >= 3 && !chatPending) chat.mutate(value);
   };
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -97,14 +104,14 @@ export function AIChatPage() {
 
           <Card className="flex min-h-[620px] flex-col overflow-hidden p-0">
             <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8">
-              {!selectedMessage && !chat.isPending && (
+              {!selectedMessage && !chatPending && (
                 <div className="mx-auto grid min-h-[390px] max-w-2xl place-items-center text-center"><div><span className="mx-auto grid size-16 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"><Bot className="size-8" /></span><h2 className="mt-5 text-2xl font-bold text-slate-950 dark:text-white">{text.welcome}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">{text.welcomeHelp}</p><div className="mt-6 grid gap-2 sm:grid-cols-2">{text.suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => setQuestion(suggestion)} className="rounded-xl border border-slate-200 p-3 text-left text-sm font-medium text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">{suggestion}</button>)}</div></div></div>
               )}
               {selectedMessage && <div className="mx-auto max-w-3xl space-y-5"><div className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-violet-600 px-4 py-3 text-sm font-medium leading-6 text-white">{selectedMessage.question}</div><div className="rounded-2xl rounded-bl-md border border-slate-200 bg-slate-50 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/60"><div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300"><Sparkles className="size-3.5" /> {text.assistant}</div><ChatMarkdown content={selectedMessage.answer} /></div></div>}
-              {chat.isPending && <div className="mx-auto max-w-3xl space-y-5"><div className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-violet-600 px-4 py-3 text-sm font-medium text-white">{question.trim()}</div><div className="flex w-fit items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800"><LoaderCircle className="size-4 animate-spin text-violet-500" /> {text.thinking}</div></div>}
+              {chatPending && <div className="mx-auto max-w-3xl space-y-5"><div className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-violet-600 px-4 py-3 text-sm font-medium text-white">{pendingQuestion ?? question.trim()}</div><div className="flex w-fit items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800"><LoaderCircle className="size-4 animate-spin text-violet-500" /> {text.thinking}</div></div>}
               {chat.isError && <Alert className="mx-auto mt-5 max-w-3xl" tone="error">{text.responseError}</Alert>}
             </div>
-            <form className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:p-5" onSubmit={submit}><div className="mx-auto max-w-3xl"><div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-100 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-violet-500/10"><textarea className="max-h-36 min-h-12 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-400" rows={1} maxLength={500} value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={handleKeyDown} placeholder={text.placeholder} disabled={chat.isPending} /><Button type="submit" className="size-11 shrink-0 px-0" aria-label={text.send} disabled={chat.isPending || question.trim().length < 3}><Send className="size-4" /></Button></div><p className="mt-2 text-center text-[11px] text-slate-400">{text.promptHelp}</p></div></form>
+            <form className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:p-5" onSubmit={submit}><div className="mx-auto max-w-3xl"><div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-100 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-violet-500/10"><textarea className="max-h-36 min-h-12 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-400" rows={1} maxLength={500} value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={handleKeyDown} placeholder={text.placeholder} disabled={chatPending} /><Button type="submit" className="size-11 shrink-0 px-0" aria-label={text.send} disabled={chatPending || question.trim().length < 3}><Send className="size-4" /></Button></div><p className="mt-2 text-center text-[11px] text-slate-400">{text.promptHelp}</p></div></form>
           </Card>
         </div>
       </div>

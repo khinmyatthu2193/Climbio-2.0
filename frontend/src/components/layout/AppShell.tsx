@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { useIsFetching } from '@tanstack/react-query';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { BookOpen, FileText, LayoutDashboard, LoaderCircle, Menu, MessageSquareText, Package, PanelLeftClose, PanelLeftOpen, Settings, ShoppingBag, Sparkles, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useTheme } from '@/hooks/useTheme';
@@ -45,6 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { language } = useLanguage();
   const aiAnalysisRunning = useIsFetching({ queryKey: ['ai-business-analysis'] }) > 0;
+  const aiChatRunning = useIsMutating({ mutationKey: ['ai-chat'] }) > 0;
   const currentPage = navigation.find((item) => isCurrent(item.href)) ?? navigation[0];
 
   const toggleDesktopSidebar = () => {
@@ -118,6 +119,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               <a href="/ai-advisor" className="hidden min-h-11 items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 text-xs font-bold text-violet-700 shadow-sm sm:inline-flex dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
                 <LoaderCircle className="size-4 animate-spin" />
                 {language === 'my' ? 'AI ဆန်းစစ်နေဆဲ' : 'AI analysis running'}
+              </a>
+            )}
+            {aiChatRunning && (
+              <a href="/ai-chat" className="hidden min-h-11 items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 text-xs font-bold text-violet-700 shadow-sm sm:inline-flex dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
+                <LoaderCircle className="size-4 animate-spin" />
+                {language === 'my' ? 'Chat အဖြေပြင်ဆင်နေသည်' : 'Chat response running'}
               </a>
             )}
             <ProfileMenu theme={theme} onToggleTheme={toggleTheme} />
