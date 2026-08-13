@@ -61,6 +61,21 @@
   #product h2 br, #ai h2 br { display: none; }
   #product h2, #workflow h2, #ai h2, #security h2 { font-size: 2rem; line-height: 1.12; }
   #product h2 + p, #workflow h2 + p, #ai h2 + p { margin-top: 1rem; font-size: 1rem; line-height: 1.75rem; }
+
+  .ai-chat-page, .ai-advisor-page { overflow-x: hidden; padding-inline: 0.75rem; padding-top: 1.25rem; }
+  .ai-chat-page > div > div:nth-child(2) { margin-top: 1.25rem; gap: 1rem; }
+  .ai-chat-history { max-height: 18rem; }
+  .ai-chat-conversation { min-height: 32rem; }
+  .ai-chat-conversation > div:first-child { padding: 1rem; }
+  .ai-chat-conversation [class*="max-w-[88%]"] { max-width: 94%; overflow-wrap: anywhere; }
+  .ai-chat-conversation pre, .ai-chat-conversation code { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ai-chat-page [role="alertdialog"] > div:last-child { flex-direction: column-reverse; }
+  .ai-chat-page [role="alertdialog"] > div:last-child button { width: 100%; }
+  .ai-advisor-page > header > div:last-child { width: 100%; }
+  .ai-advisor-action { width: 100%; }
+  .ai-advisor-page .grid { min-width: 0; }
+  .ai-advisor-page .grid > * { min-width: 0; }
+  .ai-advisor-page p, .ai-advisor-page strong { overflow-wrap: anywhere; }
 }
 
 @layer components {

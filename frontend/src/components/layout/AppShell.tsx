@@ -14,10 +14,10 @@ const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
   { label: 'Products', href: '/products', icon: Package },
   { label: 'Invoices', href: '/invoices', icon: FileText },
+  { label: 'Public store', href: '/my-store', icon: ShoppingBag },
   { label: 'AI Advisor', href: '/ai-advisor', icon: Sparkles },
   { label: 'Climbio Chat', href: '/ai-chat', icon: MessageSquareText },
   { label: 'AI Prompt Gallery', href: '/prompt-gallery', icon: Images },
-  { label: 'Public store', href: '/my-store', icon: ShoppingBag },
   { label: 'User manual', href: '/user-manual', icon: BookOpen },
   { label: 'Settings', href: '/profile', icon: Settings },
 ];

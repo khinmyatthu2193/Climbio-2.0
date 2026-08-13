@@ -82,11 +82,11 @@ export function AIChatPage() {
   };
 
   return (
-    <main className="page-container">
+    <main className="ai-chat-page page-container">
       <div className="mx-auto max-w-7xl">
         <PageHeader eyebrow={text.eyebrow} title={text.title} description={text.description} />
         <div className="mt-6 grid gap-5 lg:grid-cols-[290px_minmax(0,1fr)]">
-          <Card className="flex max-h-[720px] flex-col p-3 sm:p-4">
+          <Card className="ai-chat-history flex max-h-[720px] min-w-0 flex-col p-3 sm:p-4">
             <Button className="w-full" onClick={startNewChat}><IconLabel icon={Plus}>{text.newChat}</IconLabel></Button>
             <div className="mt-4 flex items-center justify-between px-1"><h2 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{text.history}</h2>{Boolean(history.data?.messages.length) && <button type="button" className="text-xs font-semibold text-red-600 hover:text-red-700" onClick={() => setDeleteTarget({ type: 'all' })}>{text.clear}</button>}</div>
             <div className="mt-2 min-h-0 flex-1 space-y-1 overflow-y-auto">
@@ -102,7 +102,7 @@ export function AIChatPage() {
             </div>
           </Card>
 
-          <Card className="flex min-h-[620px] flex-col overflow-hidden p-0">
+          <Card className="ai-chat-conversation flex min-h-[620px] min-w-0 flex-col overflow-hidden p-0">
             <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8">
               {!selectedMessage && !chatPending && (
                 <div className="mx-auto grid min-h-[390px] max-w-2xl place-items-center text-center"><div><span className="mx-auto grid size-16 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"><Bot className="size-8" /></span><h2 className="mt-5 text-2xl font-bold text-slate-950 dark:text-white">{text.welcome}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">{text.welcomeHelp}</p><div className="mt-6 grid gap-2 sm:grid-cols-2">{text.suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => setQuestion(suggestion)} className="rounded-xl border border-slate-200 p-3 text-left text-sm font-medium text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">{suggestion}</button>)}</div></div></div>

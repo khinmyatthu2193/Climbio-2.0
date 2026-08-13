@@ -53,13 +53,13 @@ export function AIAdvisorPage() {
   const money = new Intl.NumberFormat(undefined, { style: 'currency', currency });
 
   return (
-    <main className="page-container">
+    <main className="ai-advisor-page page-container">
       <PageHeader
         eyebrow="Business intelligence"
         title="Climbio AI Advisor"
         description="Get practical insights from your sales, products, inventory, and customers."
         actions={
-          <Button onClick={startAnalysis} disabled={analysisRunning}>
+          <Button className="ai-advisor-action" onClick={startAnalysis} disabled={analysisRunning}>
             {analysisRunning ? <LoaderCircle className="size-4 animate-spin" /> : data ? <RefreshCw className="size-4" /> : <Sparkles className="size-4" />}
             {analysisRunning ? 'Analyzing business…' : data ? 'Analyze again' : 'Analyze My Business'}
           </Button>
