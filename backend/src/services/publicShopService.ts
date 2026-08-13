@@ -17,6 +17,8 @@ export const publicShopService = {
         shopLogo: true,
         shopAddress: true,
         phone: true,
+        businessPhone: true, businessEmail: true, facebookPageUrl: true, messengerUrl: true,
+        viberContact: true, telegramContact: true, tiktokProfileUrl: true,
         setting: { select: { currency: true } },
         products: {
           where: { isActive: true },
@@ -38,6 +40,8 @@ export const publicShopService = {
         where: { slug },
         select: { shop: { select: {
           publicEnabled: true, slug: true, shopName: true, shopLogo: true, shopAddress: true, phone: true,
+          businessPhone: true, businessEmail: true, facebookPageUrl: true, messengerUrl: true,
+          viberContact: true, telegramContact: true, tiktokProfileUrl: true,
           setting: { select: { currency: true } },
           products: { where: { isActive: true }, select: { id: true, name: true, description: true, image: true, price: true, quantity: true, category: { select: { id: true, name: true } } }, orderBy: [{ quantity: 'desc' }, { name: 'asc' }] },
           accountStatus: true, approvalStatus: true,
@@ -71,6 +75,8 @@ export const publicShopService = {
         shopLogo: true,
         shopAddress: true,
         phone: true,
+        businessPhone: true, businessEmail: true, facebookPageUrl: true, messengerUrl: true,
+        viberContact: true, telegramContact: true, tiktokProfileUrl: true,
         _count: { select: { products: { where: { isActive: true } } } },
       },
     });
@@ -87,6 +93,13 @@ export const publicShopService = {
         shopLogo: shopInfo.shopLogo,
         shopAddress: shopInfo.shopAddress,
         phone: shopInfo.phone,
+        businessPhone: shopInfo.businessPhone,
+        businessEmail: shopInfo.businessEmail,
+        facebookPageUrl: shopInfo.facebookPageUrl,
+        messengerUrl: shopInfo.messengerUrl,
+        viberContact: shopInfo.viberContact,
+        telegramContact: shopInfo.telegramContact,
+        tiktokProfileUrl: shopInfo.tiktokProfileUrl,
         createdAt: shopInfo.createdAt,
       },
     };
@@ -101,6 +114,8 @@ export const publicShopService = {
     slug: string;
     shopName: string;
     phone?: string | null;
+    businessPhone?: string | null; businessEmail?: string | null; facebookPageUrl?: string | null;
+    messengerUrl?: string | null; viberContact?: string | null; telegramContact?: string | null; tiktokProfileUrl?: string | null;
     shopAddress?: string | null;
   }) {
     await prisma.$transaction(async (tx) => {
@@ -117,6 +132,13 @@ export const publicShopService = {
         slug: input.slug,
         shopName: input.shopName,
         phone: input.phone,
+        businessPhone: input.businessPhone,
+        businessEmail: input.businessEmail,
+        facebookPageUrl: input.facebookPageUrl,
+        messengerUrl: input.messengerUrl,
+        viberContact: input.viberContact,
+        telegramContact: input.telegramContact,
+        tiktokProfileUrl: input.tiktokProfileUrl,
         shopAddress: input.shopAddress,
         setting: {
           upsert: {

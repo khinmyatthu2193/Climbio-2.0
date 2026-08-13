@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { Check, Copy, ExternalLink, Facebook, Mail, Package, Power, Send, Share2, Store, Upload, X } from 'lucide-react';
+import { Check, Copy, ExternalLink, Facebook, Mail, MessageCircle, Package, Power, Send, Share2, Store, Upload, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
@@ -17,19 +17,45 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { getPublicShopUrl } from '@/utils/publicShopUrl';
 
 const validSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const validPhone = /^\+?[0-9\s()-]+$/;
+
+type StoreForm = { slug: string; shopName: string; phone: string; shopAddress: string; businessPhone: string; businessEmail: string; facebookPageUrl: string; messengerUrl: string; viberContact: string; telegramContact: string; tiktokProfileUrl: string };
+type FieldErrors = Partial<Record<keyof StoreForm, string>>;
+
+function matchesUrl(value: string, hosts: string[], pathPattern: RegExp) {
+  try {
+    const url = new URL(value);
+    return hosts.includes(url.hostname.toLowerCase().replace(/^www\./, '')) && pathPattern.test(url.pathname);
+  } catch { return false; }
+}
+
+function validateStoreForm(form: StoreForm): FieldErrors {
+  const errors: FieldErrors = {};
+  const phoneIsInvalid = (value: string) => value !== '' && (!validPhone.test(value) || value.replace(/\D/g, '').length < 7);
+  if (!validSlug.test(form.slug)) errors.slug = 'Use lowercase letters, numbers, and single hyphens only.';
+  if (phoneIsInvalid(form.phone)) errors.phone = 'Please enter a valid phone number.';
+  if (phoneIsInvalid(form.businessPhone)) errors.businessPhone = 'Please enter a valid business phone number.';
+  if (form.businessEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.businessEmail)) errors.businessEmail = 'Please enter a valid business email address.';
+  if (form.facebookPageUrl && !matchesUrl(form.facebookPageUrl, ['facebook.com'], /^\/.+/)) errors.facebookPageUrl = 'Facebook Page URL is invalid. Please enter a valid Facebook page link.';
+  if (form.messengerUrl && !matchesUrl(form.messengerUrl, ['m.me', 'messenger.com'], /^\/.+/)) errors.messengerUrl = 'Messenger URL is invalid. Please use a valid Messenger link.';
+  if (form.telegramContact && !(/^@[a-zA-Z0-9_]{5,32}$/.test(form.telegramContact) || /^https:\/\/(?:t\.me|telegram\.me)\/[a-zA-Z0-9_]{5,32}\/?$/.test(form.telegramContact))) errors.telegramContact = 'Telegram username or link is invalid.';
+  if (form.viberContact && !(/^\+?[0-9]{7,15}$/.test(form.viberContact) || /^viber:\/\/(?:chat|add)\?/.test(form.viberContact))) errors.viberContact = 'Enter a valid Viber phone number or deep link.';
+  if (form.tiktokProfileUrl && !matchesUrl(form.tiktokProfileUrl, ['tiktok.com'], /^\/@[A-Za-z0-9._-]+\/?$/)) errors.tiktokProfileUrl = 'TikTok URL is invalid. Please enter a valid TikTok profile URL.';
+  return errors;
+}
 
 const storeCopy = {
   en: {
     loading: 'Loading public store…', loadError: 'Public store settings could not be loaded.', eyebrow: 'Sales channel', title: 'My public store', description: 'Manage, preview, and share your customer catalog.', active: 'Active', inactive: 'Inactive',
-    shopLogo: 'Shop logo', noAddress: 'No shop address', visibleProducts: 'visible products', changeLogo: 'Change logo', logoError: 'Logo upload failed.', catalogLink: 'Catalog link', copied: 'Copied', copyLink: 'Copy Link', share: 'Share', shareTitle: 'Share your store', openStore: 'Open Store', facebook: 'Share on Facebook', whatsapp: 'Share on WhatsApp',
+    shopLogo: 'Shop logo', noAddress: 'No shop address', visibleProducts: 'visible products', changeLogo: 'Change logo', logoError: 'Logo upload failed.', catalogLink: 'Catalog link', copied: 'Copied', copyLink: 'Copy Link', share: 'Share', shareTitle: 'Share your store', openStore: 'Open Store', facebook: 'Share on Facebook', whatsapp: 'Share on WhatsApp', messengerSend: 'Send on Messenger', messengerCopied: 'Link copied for Messenger',
     availability: 'Store availability', availabilityHelp: 'Disabled stores cannot be opened by customers.', updating: 'Updating…', disable: 'Disable store', enable: 'Enable store', availabilityError: 'Store availability could not be changed.',
-    information: 'Store information', shopName: 'Shop name', slug: 'Public slug', slugPreview: 'Your store URL:', slugInvalid: 'Use lowercase letters, numbers, and single hyphens only.', phone: 'Phone', address: 'Address', saved: 'Store information saved.', saveError: 'Could not save store information.', saving: 'Saving…', save: 'Save store information', qrTitle: 'Store QR Code', qrHelp: 'Customers can scan to open your catalog.', visit: 'Visit',
+    information: 'Store information', shopName: 'Shop name', slug: 'Public slug', slugPreview: 'Your store URL:', slugInvalid: 'Use lowercase letters, numbers, and single hyphens only.', phone: 'Phone', address: 'Address', contactSocial: 'Contact & Social', businessPhone: 'Business phone', facebookPage: 'Facebook Page', messenger: 'Messenger', viber: 'Viber', telegram: 'Telegram', email: 'Business email', tiktok: 'TikTok', saved: 'Store information saved.', saveError: 'Could not save store information.', saving: 'Saving…', save: 'Save store information', qrTitle: 'Store QR Code', qrHelp: 'Customers can scan to open your catalog.', visit: 'Visit',
   },
   my: {
     loading: 'အများမြင်ဆိုင်ကို ဖွင့်နေသည်…', loadError: 'အများမြင်ဆိုင် ဆက်တင်များကို ဖွင့်၍မရပါ။', eyebrow: 'အရောင်းချန်နယ်', title: 'ကျွန်ုပ်၏ အများမြင်ဆိုင်', description: 'ဝယ်ယူသူများအတွက် ကုန်ပစ္စည်းစာရင်းကို စီမံ၊ အစမ်းကြည့်ပြီး မျှဝေပါ။', active: 'အသုံးပြုနေသည်', inactive: 'ပိတ်ထားသည်',
-    shopLogo: 'ဆိုင်လိုဂို', noAddress: 'ဆိုင်လိပ်စာ မရှိသေးပါ', visibleProducts: 'ခု မြင်နိုင်သော ကုန်ပစ္စည်း', changeLogo: 'လိုဂိုပြောင်းရန်', logoError: 'လိုဂိုတင်၍ မရပါ။', catalogLink: 'ကုန်ပစ္စည်းစာရင်းလင့်ခ်', copied: 'ကူးယူပြီး', copyLink: 'လင့်ခ်ကူးရန်', share: 'မျှဝေရန်', shareTitle: 'ဆိုင်ကို မျှဝေရန်', openStore: 'ဆိုင်ဖွင့်ကြည့်ရန်', facebook: 'Facebook တွင် မျှဝေရန်', whatsapp: 'WhatsApp တွင် မျှဝေရန်',
+    shopLogo: 'ဆိုင်လိုဂို', noAddress: 'ဆိုင်လိပ်စာ မရှိသေးပါ', visibleProducts: 'ခု မြင်နိုင်သော ကုန်ပစ္စည်း', changeLogo: 'လိုဂိုပြောင်းရန်', logoError: 'လိုဂိုတင်၍ မရပါ။', catalogLink: 'ကုန်ပစ္စည်းစာရင်းလင့်ခ်', copied: 'ကူးယူပြီး', copyLink: 'လင့်ခ်ကူးရန်', share: 'မျှဝေရန်', shareTitle: 'ဆိုင်ကို မျှဝေရန်', openStore: 'ဆိုင်ဖွင့်ကြည့်ရန်', facebook: 'Facebook တွင် မျှဝေရန်', whatsapp: 'WhatsApp တွင် မျှဝေရန်', messengerSend: 'Messenger ဖြင့် ပို့ရန်', messengerCopied: 'Messenger အတွက် လင့်ခ်ကူးပြီး',
     availability: 'ဆိုင်အသုံးပြုနိုင်မှု', availabilityHelp: 'ပိတ်ထားသောဆိုင်ကို ဝယ်ယူသူများ ဖွင့်ကြည့်၍မရပါ။', updating: 'ပြောင်းလဲနေသည်…', disable: 'ဆိုင်ပိတ်ရန်', enable: 'ဆိုင်ဖွင့်ရန်', availabilityError: 'ဆိုင်အသုံးပြုနိုင်မှုကို ပြောင်း၍မရပါ။',
-    information: 'ဆိုင်အချက်အလက်', shopName: 'ဆိုင်အမည်', slug: 'အများမြင်လင့်ခ်အမည်', slugPreview: 'သင့်ဆိုင်လင့်ခ်:', slugInvalid: 'အင်္ဂလိပ်စာလုံးအသေး၊ နံပါတ်နှင့် တစ်ဆက်တည်းမဟုတ်သော hyphen များကိုသာ သုံးပါ။', phone: 'ဖုန်းနံပါတ်', address: 'လိပ်စာ', saved: 'ဆိုင်အချက်အလက် သိမ်းပြီးပါပြီ။', saveError: 'ဆိုင်အချက်အလက်ကို မသိမ်းနိုင်ပါ။', saving: 'သိမ်းနေသည်…', save: 'ဆိုင်အချက်အလက် သိမ်းရန်', qrTitle: 'ဆိုင် QR ကုဒ်', qrHelp: 'ဝယ်ယူသူများက Scan ဖတ်၍ ကုန်ပစ္စည်းစာရင်းကို ဖွင့်နိုင်ပါသည်။', visit: 'ကြည့်ရှုရန်',
+    information: 'ဆိုင်အချက်အလက်', shopName: 'ဆိုင်အမည်', slug: 'အများမြင်လင့်ခ်အမည်', slugPreview: 'သင့်ဆိုင်လင့်ခ်:', slugInvalid: 'အင်္ဂလိပ်စာလုံးအသေး၊ နံပါတ်နှင့် တစ်ဆက်တည်းမဟုတ်သော hyphen များကိုသာ သုံးပါ။', phone: 'ဖုန်းနံပါတ်', address: 'လိပ်စာ', contactSocial: 'ဆက်သွယ်ရန်နှင့် လူမှုကွန်ရက်', businessPhone: 'လုပ်ငန်းဖုန်း', facebookPage: 'Facebook Page', messenger: 'Messenger', viber: 'Viber', telegram: 'Telegram', email: 'လုပ်ငန်းအီးမေးလ်', tiktok: 'TikTok', saved: 'ဆိုင်အချက်အလက် သိမ်းပြီးပါပြီ။', saveError: 'ဆိုင်အချက်အလက်ကို မသိမ်းနိုင်ပါ။', saving: 'သိမ်းနေသည်…', save: 'ဆိုင်အချက်အလက် သိမ်းရန်', qrTitle: 'ဆိုင် QR ကုဒ်', qrHelp: 'ဝယ်ယူသူများက Scan ဖတ်၍ ကုန်ပစ္စည်းစာရင်းကို ဖွင့်နိုင်ပါသည်။', visit: 'ကြည့်ရှုရန်',
   },
 };
 
@@ -41,9 +67,11 @@ export function MyPublicStore() {
   const setUser = useAuthStore((state) => state.setUser);
   const store = useQuery({ queryKey: ['my-public-store'], queryFn: publicShopService.getMyStore });
   const [copied, setCopied] = useState(false);
+  const [messengerCopied, setMessengerCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
-  const [form, setForm] = useState({ slug: '', shopName: '', phone: '', shopAddress: '' });
+  const [form, setForm] = useState<StoreForm>({ slug: '', shopName: '', phone: '', shopAddress: '', businessPhone: '', businessEmail: '', facebookPageUrl: '', messengerUrl: '', viberContact: '', telegramContact: '', tiktokProfileUrl: '' });
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     if (!store.data) return;
@@ -52,6 +80,10 @@ export function MyPublicStore() {
       shopName: store.data.shopInfo.shopName,
       phone: store.data.shopInfo.phone ?? '',
       shopAddress: store.data.shopInfo.shopAddress ?? '',
+      businessPhone: store.data.shopInfo.businessPhone ?? '', businessEmail: store.data.shopInfo.businessEmail ?? '',
+      facebookPageUrl: store.data.shopInfo.facebookPageUrl ?? '', messengerUrl: store.data.shopInfo.messengerUrl ?? '',
+      viberContact: store.data.shopInfo.viberContact ?? '', telegramContact: store.data.shopInfo.telegramContact ?? '',
+      tiktokProfileUrl: store.data.shopInfo.tiktokProfileUrl ?? '',
     });
   }, [store.data]);
 
@@ -62,8 +94,15 @@ export function MyPublicStore() {
   const detailsMutation = useMutation({
     mutationFn: publicShopService.updateMyStore,
     onSuccess: (data) => {
+      setFieldErrors({});
       queryClient.setQueryData(['my-public-store'], data);
       setUser({ ...user, shopName: data.shopInfo.shopName, phone: data.shopInfo.phone, shopAddress: data.shopInfo.shopAddress });
+    },
+    onError: (error) => {
+      if (!axios.isAxiosError(error)) return;
+      const details = (error.response?.data as { details?: Record<string, string[]> } | undefined)?.details;
+      if (!details) return;
+      setFieldErrors(Object.fromEntries(Object.entries(details).filter(([, messages]) => messages?.length).map(([field, messages]) => [field, messages[0]])) as FieldErrors);
     },
   });
   const logoMutation = useMutation({
@@ -92,12 +131,33 @@ export function MyPublicStore() {
 
   const saveDetails = (event: FormEvent) => {
     event.preventDefault();
+    const errors = validateStoreForm(form);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) return;
     detailsMutation.mutate({
       slug: form.slug.trim(),
       shopName: form.shopName,
       phone: form.phone || null,
       shopAddress: form.shopAddress || null,
+      businessPhone: form.businessPhone || null, businessEmail: form.businessEmail || null,
+      facebookPageUrl: form.facebookPageUrl || null, messengerUrl: form.messengerUrl || null,
+      viberContact: form.viberContact || null, telegramContact: form.telegramContact || null,
+      tiktokProfileUrl: form.tiktokProfileUrl || null,
     });
+  };
+
+  const updateField = <Key extends keyof StoreForm>(field: Key, value: StoreForm[Key]) => {
+    const nextForm = { ...form, [field]: value };
+    setForm(nextForm);
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const nextMessage = validateStoreForm(nextForm)[field];
+      const next = { ...current };
+      if (nextMessage) next[field] = nextMessage;
+      else delete next[field];
+      return next;
+    });
+    detailsMutation.reset();
   };
 
   if (store.isLoading) return <main className="page-container"><Card className="animate-pulse text-slate-500">{copy.loading}</Card></main>;
@@ -105,7 +165,7 @@ export function MyPublicStore() {
 
   const publicUrl = getPublicShopUrl(store.data.slug, store.data.publicUrl);
   const previewUrl = getPublicShopUrl(form.slug.trim(), store.data.publicUrl);
-  const slugError = form.slug.length > 0 && !validSlug.test(form.slug);
+  const slugError = fieldErrors.slug;
   const shareMessage = `Check out ${store.data.shopInfo.shopName} on Climbio.`;
   const shareText = encodeURIComponent(`${shareMessage} ${publicUrl}`);
   const shareUrl = encodeURIComponent(publicUrl);
@@ -118,6 +178,15 @@ export function MyPublicStore() {
       catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
     }
     setShareOpen(true);
+  };
+  const sendOnMessenger = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: store.data.shopInfo.shopName, text: shareMessage, url: publicUrl }); return; }
+      catch (error) { if (error instanceof DOMException && error.name === 'AbortError') return; }
+    }
+    await navigator.clipboard.writeText(publicUrl);
+    setMessengerCopied(true);
+    window.setTimeout(() => setMessengerCopied(false), 2500);
   };
 
   return (
@@ -190,9 +259,7 @@ export function MyPublicStore() {
                 <a className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 font-semibold text-white hover:opacity-90" href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" rel="noreferrer">
                   <IconLabel icon={Facebook}>{copy.facebook}</IconLabel>
                 </a>
-                <a className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 font-semibold text-white hover:opacity-90" href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noreferrer">
-                  {copy.whatsapp}
-                </a>
+                <button className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-[#0084FF] px-4 py-2 font-semibold text-white hover:opacity-90" onClick={sendOnMessenger}><IconLabel icon={messengerCopied ? Check : MessageCircle}>{messengerCopied ? copy.messengerCopied : copy.messengerSend}</IconLabel></button>
               </div>
             </Card>
 
@@ -216,29 +283,47 @@ export function MyPublicStore() {
 
             <Card>
               <h2 className="text-lg font-bold">{copy.information}</h2>
-              <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={saveDetails}>
+              <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={saveDetails} noValidate>
                 <label className="sm:col-span-2">
                   <span className="mb-1 block text-sm font-medium">{copy.shopName}</span>
-                  <Input value={form.shopName} maxLength={100} onChange={(event) => setForm({ ...form, shopName: event.target.value })} required />
+                  <Input value={form.shopName} maxLength={100} onChange={(event) => updateField('shopName', event.target.value)} required />
                 </label>
                 <label>
                   <span className="mb-1 block text-sm font-medium">{copy.slug}</span>
-                  <Input value={form.slug} maxLength={120} aria-invalid={slugError} onChange={(event) => setForm({ ...form, slug: event.target.value })} required />
-                  {slugError && <p className="mt-1 text-xs font-medium text-red-600">{copy.slugInvalid}</p>}
+                  <Input className={slugError ? 'border-red-500 focus:border-red-500 focus:ring-red-100 dark:border-red-500 dark:focus:ring-red-500/20' : ''} value={form.slug} maxLength={120} aria-invalid={Boolean(slugError)} onChange={(event) => updateField('slug', event.target.value)} required />
+                  {slugError && <p className="mt-1 text-xs font-medium text-red-600">⚠ {slugError}</p>}
                   <p className="mt-2 text-xs text-slate-500"><span className="font-semibold">{copy.slugPreview}</span> <span className="break-all">{previewUrl}</span></p>
                 </label>
                 <label>
                   <span className="mb-1 block text-sm font-medium">{copy.phone}</span>
-                  <Input value={form.phone} maxLength={30} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+                  <Input className={fieldErrors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-100 dark:border-red-500' : ''} value={form.phone} maxLength={30} aria-invalid={Boolean(fieldErrors.phone)} onChange={(event) => updateField('phone', event.target.value)} />
+                  {fieldErrors.phone && <p className="mt-1 text-xs font-medium text-red-600">⚠ {fieldErrors.phone}</p>}
                 </label>
                 <label className="sm:col-span-2">
                   <span className="mb-1 block text-sm font-medium">{copy.address}</span>
-                  <Input value={form.shopAddress} maxLength={500} onChange={(event) => setForm({ ...form, shopAddress: event.target.value })} />
+                  <Input value={form.shopAddress} maxLength={500} onChange={(event) => updateField('shopAddress', event.target.value)} />
                 </label>
+                <div className="border-t border-slate-200 pt-4 dark:border-slate-700 sm:col-span-2"><h3 className="font-bold">{copy.contactSocial}</h3></div>
+                {([
+                  ['businessPhone', copy.businessPhone, 'tel', '+959789999093'],
+                  ['businessEmail', copy.email, 'email', 'shop@example.com'],
+                  ['facebookPageUrl', copy.facebookPage, 'url', 'https://facebook.com/your-page'],
+                  ['messengerUrl', copy.messenger, 'url', 'https://m.me/username'],
+                  ['viberContact', copy.viber, 'text', '+959789999093 or viber://…'],
+                  ['telegramContact', copy.telegram, 'text', '@username or https://t.me/username'],
+                  ['tiktokProfileUrl', copy.tiktok, 'url', 'https://www.tiktok.com/@username'],
+                ] as const).map(([field, label, type, placeholder]) => (
+                  <label key={field} className={field === 'tiktokProfileUrl' ? 'sm:col-span-2' : ''}>
+                    <span className="mb-1 block text-sm font-medium">{label}</span>
+                    <Input className={fieldErrors[field] ? 'border-red-500 focus:border-red-500 focus:ring-red-100 dark:border-red-500 dark:focus:ring-red-500/20' : ''} type={type} value={form[field]} maxLength={500} placeholder={placeholder} aria-invalid={Boolean(fieldErrors[field])} onChange={(event) => updateField(field, event.target.value)} />
+                    {fieldErrors[field] && <p className="mt-1 text-xs font-medium text-red-600">⚠ {fieldErrors[field]}</p>}
+                  </label>
+                ))}
                 <div className="sm:col-span-2">
                   {detailsMutation.isSuccess && <Alert className="mb-3" tone="success">{copy.saved}</Alert>}
-                  {detailsMutation.isError && <Alert className="mb-3" tone="error">{mutationError || copy.saveError}</Alert>}
-                  <Button type="submit" disabled={detailsMutation.isPending || slugError}>{detailsMutation.isPending ? copy.saving : copy.save}</Button>
+                  {Object.keys(fieldErrors).length > 0 && <Alert className="mb-3" tone="error"><div><p className="font-semibold">Please fix the following:</p><ul className="mt-1 list-disc space-y-1 pl-4">{Object.entries(fieldErrors).map(([field, message]) => <li key={field}>{message}</li>)}</ul></div></Alert>}
+                  {detailsMutation.isError && Object.keys(fieldErrors).length === 0 && <Alert className="mb-3" tone="error">{mutationError === 'Validation failed' ? copy.saveError : mutationError || copy.saveError}</Alert>}
+                  <Button type="submit" disabled={detailsMutation.isPending}>{detailsMutation.isPending ? copy.saving : copy.save}</Button>
                 </div>
               </form>
             </Card>

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, PackageOpen, Phone, Search, ShoppingBag, X } from 'lucide-react';
+import { ExternalLink, Facebook, Mail, MapPin, MessageCircle, Music2, PackageOpen, Phone, Search, Send, ShoppingBag, X } from 'lucide-react';
 import { IconLabel } from '@/components/ui/IconLabel';
 import { publicShopService } from '@/services/publicShopService';
 import type { PublicShopProduct } from '@/types/publicShop';
@@ -10,11 +10,22 @@ export function PublicShop({ slug }: { slug: string }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [selected, setSelected] = useState<PublicShopProduct | null>(null);
+  const [contactOpen, setContactOpen] = useState(false);
+  const contactCloseRef = useRef<HTMLButtonElement>(null);
+  const contactTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const canonicalSlug = catalog.data?.canonicalSlug;
     if (canonicalSlug && canonicalSlug !== slug) window.location.replace(`/shop/${canonicalSlug}`);
   }, [catalog.data?.canonicalSlug, slug]);
+
+  useEffect(() => {
+    if (!contactOpen) return;
+    contactCloseRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && setContactOpen(false);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => { document.removeEventListener('keydown', closeOnEscape); contactTriggerRef.current?.focus(); };
+  }, [contactOpen]);
 
   const products = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -44,6 +55,19 @@ export function PublicShop({ slug }: { slug: string }) {
     currency: shop.currency,
     maximumFractionDigits: shop.currency === 'MMK' ? 0 : 2,
   });
+  const contactPhone = shop.businessPhone || shop.phone;
+  const telegramUrl = shop.telegramContact?.startsWith('@') ? `https://t.me/${shop.telegramContact.slice(1)}` : shop.telegramContact;
+  const viberUrl = shop.viberContact && !shop.viberContact.startsWith('viber://')
+    ? `viber://chat?number=${encodeURIComponent(shop.viberContact.replace(/^\+/, ''))}` : shop.viberContact;
+  const contacts = [
+    contactPhone && { label: 'Call seller', href: `tel:${contactPhone}`, icon: Phone, external: false },
+    shop.messengerUrl && { label: 'Messenger', href: shop.messengerUrl, icon: MessageCircle, external: true },
+    viberUrl && { label: 'Viber', href: viberUrl, icon: Phone, external: false },
+    telegramUrl && { label: 'Telegram', href: telegramUrl, icon: Send, external: true },
+    shop.businessEmail && { label: 'Email', href: `mailto:${shop.businessEmail}`, icon: Mail, external: false },
+    shop.facebookPageUrl && { label: 'Facebook Page', href: shop.facebookPageUrl, icon: Facebook, external: true },
+    shop.tiktokProfileUrl && { label: 'TikTok Profile', href: shop.tiktokProfileUrl, icon: Music2, external: true },
+  ].filter(Boolean) as Array<{ label: string; href: string; icon: typeof Phone; external: boolean }>;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -63,11 +87,9 @@ export function PublicShop({ slug }: { slug: string }) {
               {shop.shopAddress && <p className="mt-2 flex items-center gap-1 text-sm text-slate-600"><IconLabel icon={MapPin}>{shop.shopAddress}</IconLabel></p>}
             </div>
           </div>
-          {shop.phone && (
-            <a className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" href={`tel:${shop.phone}`}>
-              <IconLabel icon={Phone}>Contact seller</IconLabel>
-            </a>
-          )}
+          <button ref={contactTriggerRef} className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md" onClick={() => setContactOpen(true)}>
+            <IconLabel icon={Phone}>Contact seller</IconLabel>
+          </button>
         </div>
       </header>
 
@@ -127,6 +149,22 @@ export function PublicShop({ slug }: { slug: string }) {
       <footer className="mt-10 border-t bg-white py-6 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
         {shop.shopName} · Powered by <span className="font-bold text-primary">Climbio</span>
       </footer>
+
+      {contactOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-0 sm:grid sm:place-items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="contact-seller-title" onMouseDown={(event) => event.target === event.currentTarget && setContactOpen(false)}>
+          <div className="w-full rounded-t-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:max-w-md sm:rounded-3xl sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div><p className="text-xs font-bold uppercase tracking-wider text-primary">Contact seller</p><h2 id="contact-seller-title" className="mt-1 text-xl font-black">Contact {shop.shopName}</h2></div>
+              <button ref={contactCloseRef} className="rounded-full bg-slate-100 p-2 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-slate-800 dark:hover:bg-slate-700" onClick={() => setContactOpen(false)} aria-label="Close contact options"><X size={18} /></button>
+            </div>
+            {contacts.length ? <div className="mt-5 grid gap-2">{contacts.map(({ label, href, icon: Icon, external }) => (
+              <a key={label} className="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 px-4 font-semibold transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 dark:border-slate-700 dark:hover:border-violet-500 dark:hover:bg-violet-500/10" href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
+                <Icon size={19} className="text-primary" /><span className="flex-1">{label}</span>{external && <ExternalLink size={15} className="text-slate-400" />}
+              </a>
+            ))}</div> : <p className="mt-5 rounded-xl bg-slate-100 p-4 text-sm text-slate-500 dark:bg-slate-800">No contact methods are available for this store.</p>}
+          </div>
+        </div>
+      )}
 
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && setSelected(null)}>

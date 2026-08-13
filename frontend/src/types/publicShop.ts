@@ -16,6 +16,13 @@ export interface PublicShopResponse {
     shopLogo: string | null;
     shopAddress: string | null;
     phone: string | null;
+    businessPhone: string | null;
+    businessEmail: string | null;
+    facebookPageUrl: string | null;
+    messengerUrl: string | null;
+    viberContact: string | null;
+    telegramContact: string | null;
+    tiktokProfileUrl: string | null;
     currency: 'MMK' | 'USD' | 'THB';
   };
   categories: Array<{ id: string; name: string }>;
@@ -32,6 +39,13 @@ export interface MyPublicStore {
     shopLogo: string | null;
     shopAddress: string | null;
     phone: string | null;
+    businessPhone: string | null;
+    businessEmail: string | null;
+    facebookPageUrl: string | null;
+    messengerUrl: string | null;
+    viberContact: string | null;
+    telegramContact: string | null;
+    tiktokProfileUrl: string | null;
     createdAt: string;
   };
 }
@@ -40,5 +54,12 @@ export interface UpdatePublicStoreInput {
   slug: string;
   shopName: string;
   phone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
+  facebookPageUrl: string | null;
+  messengerUrl: string | null;
+  viberContact: string | null;
+  telegramContact: string | null;
+  tiktokProfileUrl: string | null;
   shopAddress: string | null;
 }
