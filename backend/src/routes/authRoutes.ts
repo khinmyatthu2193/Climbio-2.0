@@ -30,6 +30,9 @@ const profileSchema = z.object({
   watermarkType: z.enum(['NONE', 'LOGO', 'EMOJI', 'IMAGE']),
   watermarkEmoji: z.string().trim().max(20).nullable().optional(),
   watermarkOpacity: z.number().int().min(0, 'Watermark opacity cannot be below 0%.').max(30, 'Watermark opacity cannot exceed 30%.'),
+  watermarkPosition: z.enum(['TOP_LEFT', 'TOP_CENTER', 'TOP_RIGHT', 'CENTER_LEFT', 'CENTER', 'CENTER_RIGHT', 'BOTTOM_LEFT', 'BOTTOM_CENTER', 'BOTTOM_RIGHT']),
+  watermarkSize: z.enum(['SMALL', 'MEDIUM', 'LARGE']),
+  watermarkRotation: z.number().int().min(-45, 'Watermark rotation cannot be below -45°.' ).max(45, 'Watermark rotation cannot exceed 45°.'),
 }).strict();
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1).max(72),

@@ -3,6 +3,8 @@ import myanmarRegular from '@fontsource/noto-sans-myanmar/files/noto-sans-myanma
 import myanmarBold from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-700-normal.woff';
 import type { User } from '@/types/auth';
 import type { Invoice } from '@/types/invoice';
+import { getPdfWatermarkPosition, watermarkSizes } from '@/utils/invoiceWatermark';
+import type { WatermarkPosition, WatermarkSize } from '@/types/auth';
 
 Font.register({ family: 'NotoSansMyanmar', fonts: [{ src: myanmarRegular, fontWeight: 400 }, { src: myanmarBold, fontWeight: 700 }] });
 Font.registerEmojiSource({ format: 'png', url: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/' });
@@ -37,8 +39,8 @@ const styles = StyleSheet.create({
   totalLine: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
   grandTotal: { borderTopWidth: 1, borderTopColor: '#b7cfc4', marginTop: 4, paddingTop: 10, fontSize: 13, fontFamily: 'Helvetica-Bold' },
   footer: { position: 'absolute', bottom: 30, left: 42, right: 42, borderTopWidth: 1, borderTopColor: '#dbe7e1', paddingTop: 10, textAlign: 'center', color: '#64748b', fontSize: 9 },
-  watermarkImage: { position: 'absolute', width: 260, height: 260, objectFit: 'contain', left: 168, top: 290 },
-  watermarkEmoji: { position: 'absolute', left: 190, top: 330, width: 215, textAlign: 'center', fontSize: 110 },
+  watermarkImage: { position: 'absolute', objectFit: 'contain' },
+  watermarkEmoji: { position: 'absolute', textAlign: 'center' },
 });
 
 export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: User }) {
@@ -52,12 +54,18 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
   const themeColor = setting?.invoiceThemeColor || '#7c3aed';
   const watermarkOpacity = Math.min(30, Math.max(0, setting?.watermarkOpacity ?? 10)) / 100;
   const watermarkImage = setting?.watermarkType === 'LOGO' ? shop.shopLogo : setting?.watermarkType === 'IMAGE' ? setting.watermarkImageUrl : null;
+  const watermarkSize = (setting?.watermarkSize ?? 'MEDIUM') as WatermarkSize;
+  const watermarkPosition = (setting?.watermarkPosition ?? 'CENTER') as WatermarkPosition;
+  const size = watermarkSizes[watermarkSize];
+  const imagePosition = getPdfWatermarkPosition(watermarkPosition, size.pdf);
+  const emojiPosition = getPdfWatermarkPosition(watermarkPosition, size.pdf);
+  const rotation = Math.min(45, Math.max(-45, setting?.watermarkRotation ?? 0));
 
   return (
     <Document title={invoice.invoiceNumber} author={shop.shopName} subject="Invoice">
       <Page size="A4" style={styles.page}>
-        {watermarkImage && <Image fixed style={[styles.watermarkImage, { opacity: watermarkOpacity }]} src={watermarkImage} />}
-        {setting?.watermarkType === 'EMOJI' && setting.watermarkEmoji && <Text fixed style={[styles.watermarkEmoji, { opacity: watermarkOpacity }]}>{setting.watermarkEmoji}</Text>}
+        {watermarkImage && <Image fixed style={[styles.watermarkImage, imagePosition, { width: size.pdf, height: size.pdf, opacity: watermarkOpacity, transform: `rotate(${rotation}deg)` }]} src={watermarkImage} />}
+        {setting?.watermarkType === 'EMOJI' && setting.watermarkEmoji && <Text fixed style={[styles.watermarkEmoji, emojiPosition, { width: size.pdf, height: size.pdf, fontSize: size.emojiPdf, opacity: watermarkOpacity, transform: `rotate(${rotation}deg)` }]}>{setting.watermarkEmoji}</Text>}
         <View style={styles.header}>
           <View style={styles.brand}>
             {shop.shopLogo ? (

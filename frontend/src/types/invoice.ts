@@ -52,5 +52,8 @@ export interface PublicInvoiceResponse {
     watermarkImageUrl: string | null;
     watermarkEmoji: string | null;
     watermarkOpacity: number;
+    watermarkPosition: 'TOP_LEFT' | 'TOP_CENTER' | 'TOP_RIGHT' | 'CENTER_LEFT' | 'CENTER' | 'CENTER_RIGHT' | 'BOTTOM_LEFT' | 'BOTTOM_CENTER' | 'BOTTOM_RIGHT';
+    watermarkSize: 'SMALL' | 'MEDIUM' | 'LARGE';
+    watermarkRotation: number;
   };
 }

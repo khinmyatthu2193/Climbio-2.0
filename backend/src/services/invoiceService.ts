@@ -34,14 +34,14 @@ export const invoiceService = {
             shopLogo: true,
             shopAddress: true,
             phone: true,
-            setting: { select: { currency: true, invoiceFooter: true, invoiceThemeColor: true, watermarkType: true, watermarkImageUrl: true, watermarkEmoji: true, watermarkOpacity: true } },
+            setting: { select: { currency: true, invoiceFooter: true, invoiceThemeColor: true, watermarkType: true, watermarkImageUrl: true, watermarkEmoji: true, watermarkOpacity: true, watermarkPosition: true, watermarkSize: true, watermarkRotation: true } },
           },
         },
       },
     });
     if (!invoice) throw new AppError('Invoice not found', 404);
     const { user, userId: _userId, ...publicInvoice } = invoice;
-    return { invoice: publicInvoice, shop: { ...user, currency: user.setting?.currency ?? 'MMK', invoiceFooter: user.setting?.invoiceFooter ?? null, invoiceThemeColor: user.setting?.invoiceThemeColor ?? '#7c3aed', watermarkType: user.setting?.watermarkType ?? 'NONE', watermarkImageUrl: user.setting?.watermarkImageUrl ?? null, watermarkEmoji: user.setting?.watermarkEmoji ?? null, watermarkOpacity: user.setting?.watermarkOpacity ?? 10, setting: undefined } };
+    return { invoice: publicInvoice, shop: { ...user, currency: user.setting?.currency ?? 'MMK', invoiceFooter: user.setting?.invoiceFooter ?? null, invoiceThemeColor: user.setting?.invoiceThemeColor ?? '#7c3aed', watermarkType: user.setting?.watermarkType ?? 'NONE', watermarkImageUrl: user.setting?.watermarkImageUrl ?? null, watermarkEmoji: user.setting?.watermarkEmoji ?? null, watermarkOpacity: user.setting?.watermarkOpacity ?? 10, watermarkPosition: user.setting?.watermarkPosition ?? 'CENTER', watermarkSize: user.setting?.watermarkSize ?? 'MEDIUM', watermarkRotation: user.setting?.watermarkRotation ?? 0, setting: undefined } };
   },
 
   list(userId: string) {

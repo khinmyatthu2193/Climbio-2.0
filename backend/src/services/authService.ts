@@ -19,7 +19,7 @@ const publicUser = {
   submittedAt: true,
   approvedAt: true,
   setting: {
-    select: { currency: true, invoiceFooter: true, invoiceThemeColor: true, watermarkType: true, watermarkImageUrl: true, watermarkEmoji: true, watermarkOpacity: true, companyName: true, companyLogo: true, theme: true },
+    select: { currency: true, invoiceFooter: true, invoiceThemeColor: true, watermarkType: true, watermarkImageUrl: true, watermarkEmoji: true, watermarkOpacity: true, watermarkPosition: true, watermarkSize: true, watermarkRotation: true, companyName: true, companyLogo: true, theme: true },
   },
 } satisfies Prisma.UserSelect;
 
@@ -94,16 +94,19 @@ export const authService = {
     watermarkType: 'NONE' | 'LOGO' | 'EMOJI' | 'IMAGE';
     watermarkEmoji?: string | null;
     watermarkOpacity: number;
+    watermarkPosition: 'TOP_LEFT' | 'TOP_CENTER' | 'TOP_RIGHT' | 'CENTER_LEFT' | 'CENTER' | 'CENTER_RIGHT' | 'BOTTOM_LEFT' | 'BOTTOM_CENTER' | 'BOTTOM_RIGHT';
+    watermarkSize: 'SMALL' | 'MEDIUM' | 'LARGE';
+    watermarkRotation: number;
   }) {
-    const { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, ...profile } = input;
+    const { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, watermarkPosition, watermarkSize, watermarkRotation, ...profile } = input;
     return prisma.user.update({
       where: { id },
       data: {
         ...profile,
         setting: {
           upsert: {
-            create: { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, companyName: profile.shopName },
-            update: { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, companyName: profile.shopName },
+            create: { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, watermarkPosition, watermarkSize, watermarkRotation, companyName: profile.shopName },
+            update: { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, watermarkPosition, watermarkSize, watermarkRotation, companyName: profile.shopName },
           },
         },
       },

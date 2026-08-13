@@ -2,6 +2,9 @@ import { forwardRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { StatusBadge } from './StatusBadge';
 import type { Invoice } from '@/types/invoice';
+import { cn } from '@/utils/cn';
+import { htmlWatermarkPositions, watermarkSizes } from '@/utils/invoiceWatermark';
+import type { WatermarkPosition, WatermarkSize } from '@/types/auth';
 
 export interface InvoiceTemplateShop {
   name: string;
@@ -15,6 +18,9 @@ export interface InvoiceTemplateShop {
   watermarkImageUrl?: string | null;
   watermarkEmoji?: string | null;
   watermarkOpacity?: number;
+  watermarkPosition?: WatermarkPosition;
+  watermarkSize?: WatermarkSize;
+  watermarkRotation?: number;
 }
 
 interface InvoiceTemplateProps {
@@ -32,10 +38,13 @@ export const InvoiceTemplate = forwardRef<HTMLDivElement, InvoiceTemplateProps>(
   const themeColor = shop.themeColor || '#7c3aed';
   const watermarkImage = shop.watermarkType === 'LOGO' ? shop.logo : shop.watermarkType === 'IMAGE' ? shop.watermarkImageUrl : null;
   const watermarkOpacity = Math.min(30, Math.max(0, shop.watermarkOpacity ?? 10)) / 100;
+  const watermarkPosition = htmlWatermarkPositions[shop.watermarkPosition ?? 'CENTER'];
+  const watermarkSize = watermarkSizes[shop.watermarkSize ?? 'MEDIUM'];
+  const rotation = Math.min(45, Math.max(-45, shop.watermarkRotation ?? 0));
 
   return <div ref={ref} className="invoice-template relative overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-sm [font-family:Inter,'Noto_Sans_Myanmar','Myanmar_Text',sans-serif]">
-    {watermarkImage && <img className="pointer-events-none absolute left-1/2 top-1/2 z-0 size-72 -translate-x-1/2 -translate-y-1/2 object-contain" style={{ opacity: watermarkOpacity }} src={watermarkImage} alt="" crossOrigin="anonymous" />}
-    {shop.watermarkType === 'EMOJI' && shop.watermarkEmoji && <span className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 text-9xl" style={{ opacity: watermarkOpacity }}>{shop.watermarkEmoji}</span>}
+    {watermarkImage && <img className={cn('pointer-events-none absolute z-0 object-contain', watermarkPosition, watermarkSize.html)} style={{ opacity: watermarkOpacity, rotate: `${rotation}deg` }} src={watermarkImage} alt="" crossOrigin="anonymous" />}
+    {shop.watermarkType === 'EMOJI' && shop.watermarkEmoji && <span className={cn('pointer-events-none absolute z-0 grid place-items-center', watermarkPosition, watermarkSize.html, watermarkSize.emojiHtml)} style={{ opacity: watermarkOpacity, rotate: `${rotation}deg` }}>{shop.watermarkEmoji}</span>}
     <header className="relative z-10 grid gap-6 p-6 text-white sm:grid-cols-[1fr_auto] sm:p-8" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}dd)` }}>
       <div className="flex items-center gap-4">{shop.logo ? <img className="size-16 rounded-2xl border-2 border-white/30 bg-white object-cover" src={shop.logo} alt={`${shop.name} logo`} crossOrigin="anonymous" /> : <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-white/15 text-2xl font-black ring-1 ring-white/25">{shop.name.charAt(0).toUpperCase() || 'C'}</span>}<div><h2 className="text-xl font-black sm:text-2xl">{shop.name}</h2>{shop.phone && <p className="mt-1 text-sm text-violet-100">{shop.phone}</p>}{shop.address && <p className="mt-1 max-w-md text-sm leading-5 text-violet-100">{shop.address}</p>}</div></div>
       <div className="sm:text-right"><p className="text-3xl font-black tracking-wide">INVOICE</p><p className="mt-2 font-bold">{invoice.invoiceNumber}</p><p className="mt-1 text-sm text-violet-100">{new Date(invoice.createdAt).toLocaleDateString()}</p></div>
