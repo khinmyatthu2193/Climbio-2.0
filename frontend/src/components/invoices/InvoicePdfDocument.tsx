@@ -1,6 +1,15 @@
-import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { Document, Font, Image, Page, StyleSheet, Text, View, type TextProps } from '@react-pdf/renderer';
+import myanmarRegular from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-400-normal.woff';
+import myanmarBold from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-700-normal.woff';
 import type { User } from '@/types/auth';
 import type { Invoice } from '@/types/invoice';
+
+Font.register({ family: 'NotoSansMyanmar', fonts: [{ src: myanmarRegular, fontWeight: 400 }, { src: myanmarBold, fontWeight: 700 }] });
+Font.registerEmojiSource({ format: 'png', url: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/' });
+
+function MixedText({ value, style, bold = false, fixed = false }: { value: string; style?: TextProps['style']; bold?: boolean; fixed?: boolean }) {
+  return <Text style={style} fixed={fixed}>{value.split(/([\u1000-\u109F\uAA60-\uAA7F]+)/u).map((part, index) => /[\u1000-\u109F\uAA60-\uAA7F]/u.test(part) ? <Text key={index} style={{ fontFamily: 'NotoSansMyanmar', fontWeight: bold ? 700 : 400 }}>{part}</Text> : part)}</Text>;
+}
 
 const styles = StyleSheet.create({
   page: { padding: 42, paddingBottom: 70, color: '#16372b', fontFamily: 'Helvetica', fontSize: 10 },
@@ -28,6 +37,8 @@ const styles = StyleSheet.create({
   totalLine: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
   grandTotal: { borderTopWidth: 1, borderTopColor: '#b7cfc4', marginTop: 4, paddingTop: 10, fontSize: 13, fontFamily: 'Helvetica-Bold' },
   footer: { position: 'absolute', bottom: 30, left: 42, right: 42, borderTopWidth: 1, borderTopColor: '#dbe7e1', paddingTop: 10, textAlign: 'center', color: '#64748b', fontSize: 9 },
+  watermarkImage: { position: 'absolute', width: 260, height: 260, objectFit: 'contain', left: 168, top: 290 },
+  watermarkEmoji: { position: 'absolute', left: 190, top: 330, width: 215, textAlign: 'center', fontSize: 110 },
 });
 
 export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: User }) {
@@ -37,10 +48,16 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
     currency,
     maximumFractionDigits: currency === 'MMK' ? 0 : 2,
   });
+  const setting = shop.setting;
+  const themeColor = setting?.invoiceThemeColor || '#7c3aed';
+  const watermarkOpacity = Math.min(30, Math.max(0, setting?.watermarkOpacity ?? 10)) / 100;
+  const watermarkImage = setting?.watermarkType === 'LOGO' ? shop.shopLogo : setting?.watermarkType === 'IMAGE' ? setting.watermarkImageUrl : null;
 
   return (
     <Document title={invoice.invoiceNumber} author={shop.shopName} subject="Invoice">
       <Page size="A4" style={styles.page}>
+        {watermarkImage && <Image fixed style={[styles.watermarkImage, { opacity: watermarkOpacity }]} src={watermarkImage} />}
+        {setting?.watermarkType === 'EMOJI' && setting.watermarkEmoji && <Text fixed style={[styles.watermarkEmoji, { opacity: watermarkOpacity }]}>{setting.watermarkEmoji}</Text>}
         <View style={styles.header}>
           <View style={styles.brand}>
             {shop.shopLogo ? (
@@ -49,34 +66,34 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
               <View style={styles.logoFallback}><Text style={styles.logoLetter}>C</Text></View>
             )}
             <View>
-              <Text style={styles.shopName}>{shop.shopName || 'Climbio'}</Text>
+              <MixedText style={styles.shopName} value={shop.shopName || 'Climbio'} bold />
               <Text style={styles.muted}>Powered by Climbio</Text>
               {shop.phone && <Text style={styles.muted}>{shop.phone}</Text>}
             </View>
           </View>
           <View>
-            <Text style={styles.invoiceTitle}>INVOICE</Text>
+            <Text style={[styles.invoiceTitle, { color: themeColor }]}>INVOICE</Text>
             <Text style={styles.invoiceMeta}>{invoice.invoiceNumber}</Text>
             <Text style={styles.invoiceMeta}>{new Date(invoice.createdAt).toLocaleDateString()}</Text>
           </View>
         </View>
 
-        <View style={styles.customerBox}>
-          <Text style={styles.sectionLabel}>Bill to</Text>
-          <Text style={styles.customerName}>{invoice.customerName}</Text>
-          <Text style={styles.muted}>{invoice.customerPhone || 'No phone number'}</Text>
+        <View style={[styles.customerBox, { borderLeftWidth: 3, borderLeftColor: themeColor }]}>
+          <Text style={[styles.sectionLabel, { color: themeColor }]}>Bill to</Text>
+          <MixedText style={styles.customerName} value={invoice.customerName} bold />
+          <MixedText style={styles.muted} value={invoice.customerPhone || 'No phone number'} />
         </View>
 
-        <View style={styles.table}>
-          <View style={[styles.row, styles.tableHeader]}>
+        <View style={[styles.table, { borderColor: themeColor }]}>
+          <View style={[styles.row, styles.tableHeader, { color: themeColor, borderBottomColor: themeColor }]}>
             <Text style={styles.productCell}>Product</Text>
             <Text style={styles.quantityCell}>Qty</Text>
             <Text style={styles.priceCell}>Price</Text>
             <Text style={styles.totalCell}>Total</Text>
           </View>
           {invoice.items?.map((item, index) => (
-            <View key={item.id} style={[styles.row, index === (invoice.items?.length ?? 0) - 1 ? styles.lastRow : {}]}>
-              <Text style={styles.productCell}>{item.productName}</Text>
+            <View key={item.id} style={[styles.row, { borderBottomColor: themeColor }, index === (invoice.items?.length ?? 0) - 1 ? styles.lastRow : {}]}>
+              <MixedText style={styles.productCell} value={item.productName} />
               <Text style={styles.quantityCell}>{item.quantity}</Text>
               <Text style={styles.priceCell}>{money.format(Number(item.price))}</Text>
               <Text style={styles.totalCell}>{money.format(Number(item.price) * item.quantity)}</Text>
@@ -87,12 +104,10 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
         <View style={styles.totals}>
           <View style={styles.totalLine}><Text>Subtotal</Text><Text>{money.format(Number(invoice.subtotal))}</Text></View>
           <View style={styles.totalLine}><Text>Discount</Text><Text>- {money.format(Number(invoice.discount))}</Text></View>
-          <View style={[styles.totalLine, styles.grandTotal]}><Text>Total</Text><Text>{money.format(Number(invoice.total))}</Text></View>
+          <View style={[styles.totalLine, styles.grandTotal, { borderTopColor: themeColor, color: themeColor }]}><Text>Total</Text><Text>{money.format(Number(invoice.total))}</Text></View>
         </View>
 
-        <Text style={styles.footer} fixed>
-          {shop.setting?.invoiceFooter || `Thank you for choosing ${shop.shopName || 'Climbio'}.`}
-        </Text>
+        <MixedText style={[styles.footer, { borderTopColor: themeColor }]} fixed value={shop.setting?.invoiceFooter || `Thank you for choosing ${shop.shopName || 'Climbio'}.`} />
       </Page>
     </Document>
   );

@@ -19,7 +19,7 @@ const publicUser = {
   submittedAt: true,
   approvedAt: true,
   setting: {
-    select: { currency: true, invoiceFooter: true, companyName: true, companyLogo: true, theme: true },
+    select: { currency: true, invoiceFooter: true, invoiceThemeColor: true, watermarkType: true, watermarkImageUrl: true, watermarkEmoji: true, watermarkOpacity: true, companyName: true, companyLogo: true, theme: true },
   },
 } satisfies Prisma.UserSelect;
 
@@ -90,16 +90,20 @@ export const authService = {
     shopAddress?: string | null;
     currency: 'MMK' | 'USD' | 'THB';
     invoiceFooter?: string | null;
+    invoiceThemeColor: string;
+    watermarkType: 'NONE' | 'LOGO' | 'EMOJI' | 'IMAGE';
+    watermarkEmoji?: string | null;
+    watermarkOpacity: number;
   }) {
-    const { currency, invoiceFooter, ...profile } = input;
+    const { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, ...profile } = input;
     return prisma.user.update({
       where: { id },
       data: {
         ...profile,
         setting: {
           upsert: {
-            create: { currency, invoiceFooter, companyName: profile.shopName },
-            update: { currency, invoiceFooter, companyName: profile.shopName },
+            create: { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, companyName: profile.shopName },
+            update: { currency, invoiceFooter, invoiceThemeColor, watermarkType, watermarkEmoji, watermarkOpacity, companyName: profile.shopName },
           },
         },
       },
@@ -131,6 +135,14 @@ export const authService = {
           },
         },
       },
+      select: publicUser,
+    });
+  },
+
+  async updateInvoiceWatermark(id: string, imageUrl: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { setting: { upsert: { create: { watermarkImageUrl: imageUrl, watermarkType: 'IMAGE' }, update: { watermarkImageUrl: imageUrl, watermarkType: 'IMAGE' } } } },
       select: publicUser,
     });
   },

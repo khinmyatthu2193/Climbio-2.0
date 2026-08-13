@@ -56,7 +56,7 @@ export function InvoiceDetail({ invoiceId }: { invoiceId: string }) {
 
         <div className="mt-6"><StatusUpdate invoiceId={invoiceId} currentStatus={invoice.data.status} orderType={invoice.data.orderType} /></div>
 
-        <div className="mt-5"><InvoiceTemplate ref={invoiceExportRef} invoice={invoice.data} publicUrl={`${window.location.origin}/invoice/${invoice.data.id}`} shop={{ name: user?.shopName || 'Climbio', logo: user?.shopLogo, phone: user?.phone, address: user?.shopAddress, currency: user?.setting?.currency ?? 'MMK' }} /></div>
+        <div className="mt-5"><InvoiceTemplate ref={invoiceExportRef} invoice={invoice.data} publicUrl={`${window.location.origin}/invoice/${invoice.data.id}`} shop={{ name: user?.shopName || 'Climbio', logo: user?.shopLogo, phone: user?.phone, address: user?.shopAddress, currency: user?.setting?.currency ?? 'MMK', footerText: user?.setting?.invoiceFooter, themeColor: user?.setting?.invoiceThemeColor, watermarkType: user?.setting?.watermarkType, watermarkImageUrl: user?.setting?.watermarkImageUrl, watermarkEmoji: user?.setting?.watermarkEmoji, watermarkOpacity: user?.setting?.watermarkOpacity }} /></div>
         {downloadError && <Alert className="mt-3" tone="error">PDF could not be generated. Check the shop logo URL and try again.</Alert>}
       </div>
       <ShareInvoiceModal open={shareOpen} onClose={() => setShareOpen(false)} invoice={invoice.data} invoiceRef={invoiceExportRef} />

@@ -47,5 +47,10 @@ export interface PublicInvoiceResponse {
     phone: string | null;
     currency: 'MMK' | 'USD' | 'THB';
     invoiceFooter: string | null;
+    invoiceThemeColor: string;
+    watermarkType: 'NONE' | 'LOGO' | 'EMOJI' | 'IMAGE';
+    watermarkImageUrl: string | null;
+    watermarkEmoji: string | null;
+    watermarkOpacity: number;
   };
 }

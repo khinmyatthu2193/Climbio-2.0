@@ -12,6 +12,15 @@ export const logoUpload = multer({
   },
 });
 
+export const watermarkUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, callback) => {
+    if (!allowedTypes.has(file.mimetype)) return callback(new AppError('Watermark image must be PNG, JPG, or WebP.', 422));
+    callback(null, true);
+  },
+});
+
 const applicationTypes = new Set([...allowedTypes, 'application/pdf']);
 
 export const applicationUpload = multer({

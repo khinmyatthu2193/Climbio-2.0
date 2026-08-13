@@ -17,7 +17,8 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
     return;
   }
   if (error instanceof multer.MulterError) {
-    res.status(422).json({ error: error.code === 'LIMIT_FILE_SIZE' ? 'Uploaded file is too large' : error.message });
+    const tooLarge = error.code === 'LIMIT_FILE_SIZE';
+    res.status(422).json({ error: tooLarge && error.field === 'watermark' ? 'Watermark image must be 2 MB or smaller.' : tooLarge ? 'Uploaded file is too large' : error.message });
     return;
   }
   console.error(error);

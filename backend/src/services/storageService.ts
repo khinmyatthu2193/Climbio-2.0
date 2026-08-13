@@ -28,4 +28,5 @@ export const storageService = {
     return upload(userId, 'logos', file);
   },
   uploadVerificationDocument: (userId: string, file: Express.Multer.File) => upload(userId, 'verification-documents', file),
+  uploadInvoiceWatermark: (userId: string, file: Express.Multer.File) => upload(userId, 'invoice-watermarks', file),
 };

@@ -235,14 +235,19 @@ model Customer {
 }
 
 model Setting {
-  id            String   @id @default(uuid()) @db.Uuid
-  userId        String   @unique @map("user_id") @db.Uuid
-  currency      Currency @default(MMK)
-  invoiceFooter String?  @map("invoice_footer")
-  companyName   String?  @map("company_name") @db.VarChar(100)
-  companyLogo   String?  @map("company_logo")
-  theme         String   @default("system") @db.VarChar(30)
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @unique @map("user_id") @db.Uuid
+  currency          Currency @default(MMK)
+  invoiceFooter     String?  @map("invoice_footer")
+  invoiceThemeColor String   @default("#7c3aed") @map("invoice_theme_color") @db.VarChar(7)
+  watermarkType     String   @default("NONE") @map("watermark_type") @db.VarChar(20)
+  watermarkImageUrl String?  @map("watermark_image_url")
+  watermarkEmoji    String?  @map("watermark_emoji") @db.VarChar(20)
+  watermarkOpacity  Int      @default(10) @map("watermark_opacity")
+  companyName       String?  @map("company_name") @db.VarChar(100)
+  companyLogo       String?  @map("company_logo")
+  theme             String   @default("system") @db.VarChar(30)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("settings")
 }

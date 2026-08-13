@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { authController } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validate.js';
-import { logoUpload } from '../middleware/upload.js';
+import { logoUpload, watermarkUpload } from '../middleware/upload.js';
 
 const password = z.string().min(8).max(72).regex(/[a-z]/, 'Must contain lowercase').regex(/[A-Z]/, 'Must contain uppercase').regex(/\d/, 'Must contain a number');
 const registerSchema = z.object({
@@ -26,6 +26,10 @@ const profileSchema = z.object({
   shopAddress: nullableText(500),
   currency: z.enum(['MMK', 'USD', 'THB']),
   invoiceFooter: nullableText(500),
+  invoiceThemeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invoice theme color must be a valid hex color.'),
+  watermarkType: z.enum(['NONE', 'LOGO', 'EMOJI', 'IMAGE']),
+  watermarkEmoji: z.string().trim().max(20).nullable().optional(),
+  watermarkOpacity: z.number().int().min(0, 'Watermark opacity cannot be below 0%.').max(30, 'Watermark opacity cannot exceed 30%.'),
 }).strict();
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1).max(72),
@@ -45,3 +49,4 @@ authRoutes.get('/me', requireAuth, authController.me);
 authRoutes.put('/profile', requireAuth, validateBody(profileSchema), authController.updateProfile);
 authRoutes.put('/change-password', requireAuth, validateBody(changePasswordSchema), authController.changePassword);
 authRoutes.post('/upload-logo', requireAuth, logoUpload.single('logo'), authController.uploadLogo);
+authRoutes.post('/upload-invoice-watermark', requireAuth, watermarkUpload.single('watermark'), authController.uploadInvoiceWatermark);

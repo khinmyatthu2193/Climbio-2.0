@@ -50,4 +50,9 @@ export const authController = {
     const logoUrl = await storageService.uploadLogo(req.user!.id, req.file);
     res.json(await authService.updateLogo(req.user!.id, logoUrl));
   },
+  uploadInvoiceWatermark: async (req: Request, res: Response) => {
+    if (!req.file) throw new AppError('A watermark image is required', 422);
+    const imageUrl = await storageService.uploadInvoiceWatermark(req.user!.id, req.file);
+    res.json(await authService.updateInvoiceWatermark(req.user!.id, imageUrl));
+  },
 };

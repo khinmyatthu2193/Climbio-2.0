@@ -24,4 +24,9 @@ export const authService = {
     data.append('logo', file);
     return api.post<User>('/auth/upload-logo', data, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data);
   },
+  uploadInvoiceWatermark: (file: File) => {
+    const data = new FormData();
+    data.append('watermark', file);
+    return api.post<User>('/auth/upload-invoice-watermark', data, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data);
+  },
 };
