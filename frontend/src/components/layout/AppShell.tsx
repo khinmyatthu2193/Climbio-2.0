@@ -8,6 +8,7 @@ import climbioSidebarLogo from '@/assets/branding/climbio-logo-new.png';
 import { useLanguage } from '@/hooks/useLanguage';
 import { sidebarLabelClass } from '@/components/layout/sidebarStyles';
 import { iconFrameClass } from '@/components/ui/IconLabel';
+import { BackToTop } from '@/components/common/BackToTop';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -155,6 +156,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className={cn(desktopSidebarOpen && 'lg:pl-[272px]')}>{children}</div>
+      <BackToTop />
     </div>
   );
 }

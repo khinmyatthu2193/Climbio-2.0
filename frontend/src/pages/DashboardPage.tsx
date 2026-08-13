@@ -151,7 +151,7 @@ export function DashboardPage() {
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{today}</p>
           <h1 className={language === 'my' ? 'mt-1 py-2 text-xl font-bold leading-[1.9] tracking-tight text-slate-950 dark:text-white sm:text-2xl' : 'mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl'}>
-            {language === 'my' ? `${user?.name?.split(' ')[0]} မှ ကြိုဆိုပါသည်။` : `Welcome back, ${user?.name?.split(' ')[0]}.`}
+            {language === 'my' ? `မင်္ဂလာပါ ${user?.name?.split(' ')[0]} ❣️` : `Welcome back, ${user?.name?.split(' ')[0]}.`}
           </h1>
           <p className={language === 'my' ? 'py-1 text-sm leading-7 text-slate-600 dark:text-slate-400' : 'mt-2 text-sm text-slate-600 dark:text-slate-400'}>{language === 'my' ? `${user?.shopName}၏ လုပ်ငန်းအခြေအနေကို တစ်နေရာတည်းတွင် ကြည့်ရှုပါ။` : `A clear view of what is happening at ${user?.shopName}.`}</p>
         </div>

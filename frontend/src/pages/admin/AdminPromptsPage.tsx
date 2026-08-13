@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { Edit3, Plus, Tags, Trash2, X } from 'lucide-react';
+import { Edit3, Eye, Plus, Tags, Trash2, X } from 'lucide-react';
 import { promptGalleryService } from '@/services/promptGalleryService';
 import type { AIPrompt, PromptInput } from '@/types/promptGallery';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -47,7 +47,7 @@ export function AdminPromptsPage() {
   const toggleTool = (tool: string) => setForm((current) => ({ ...current, aiTools: current.aiTools.includes(tool) ? current.aiTools.filter((item) => item !== tool) : [...current.aiTools, tool] }));
 
   return <main className="page-container">
-    <PageHeader eyebrow="Administration" title="AI Prompt Gallery" description="Create and publish ready-made marketing prompts for shop owners." actions={<><Button variant="outline" onClick={() => setCategoryOpen(true)}><Tags className="size-4" />Categories</Button><Button onClick={() => setEditing(null)}><Plus className="size-4" />New prompt</Button></>} />
+    <PageHeader eyebrow="Administration" title="AI Prompt Gallery" description="Create and publish ready-made marketing prompts for shop owners." actions={<><a href="/admin/prompts/preview" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900"><Eye className="size-4" />View prompt library</a><Button variant="outline" onClick={() => setCategoryOpen(true)}><Tags className="size-4" />Categories</Button><Button onClick={() => setEditing(null)}><Plus className="size-4" />New prompt</Button></>} />
     {message && <Alert className="mt-4" tone="success">{message}</Alert>}
     {prompts.isLoading ? <LoadingState label="Loading prompts" /> : prompts.isError ? <Alert className="mt-4" tone="error">Could not load prompts.</Alert> : <Card className="mt-6 overflow-x-auto p-0"><table className="w-full min-w-[760px] text-left"><thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-slate-800"><tr><th className="px-5 py-4">Prompt</th><th className="px-5 py-4">Category</th><th className="px-5 py-4">AI tools</th><th className="px-5 py-4">Status</th><th className="px-5 py-4">Updated</th><th className="px-5 py-4 text-right">Actions</th></tr></thead><tbody className="divide-y dark:divide-slate-800">{prompts.data?.map((prompt) => <tr key={prompt.id}><td className="px-5 py-4 font-semibold">{prompt.title}</td><td className="px-5 py-4">{prompt.category.icon} {prompt.category.name}</td><td className="px-5 py-4">{prompt.aiTools.join(', ')}</td><td className="px-5 py-4"><span className={prompt.status === 'PUBLISHED' ? 'text-emerald-600' : 'text-amber-600'}>{prompt.status === 'PUBLISHED' ? 'Published' : 'Draft'}</span></td><td className="px-5 py-4 text-sm">{new Date(prompt.updatedAt).toLocaleDateString()}</td><td className="px-5 py-4"><div className="flex justify-end gap-1"><Button size="sm" variant="ghost" onClick={() => setEditing(prompt)}><Edit3 className="size-4" />Edit</Button><Button size="sm" variant="ghost" onClick={() => { if (window.confirm(`Delete “${prompt.title}”?`)) remove.mutate(prompt.id); }}><Trash2 className="size-4 text-red-500" />Delete</Button></div></td></tr>)}{!prompts.data?.length && <tr><td colSpan={6} className="px-5 py-12 text-center text-slate-500">No prompts yet. Create the first one.</td></tr>}</tbody></table></Card>}
 

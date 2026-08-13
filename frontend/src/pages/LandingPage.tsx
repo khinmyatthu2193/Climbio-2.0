@@ -7,6 +7,7 @@ import { BusinessWorkflow, OnboardingTimeline, ProductShowcase } from '@/compone
 import { AISection, FinalCTA, LandingFooter, SecuritySection, StorefrontSection } from '@/components/landing/LandingTrust';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/hooks/useTheme';
+import { BackToTop } from '@/components/common/BackToTop';
 
 export type LandingAuthMode = 'login' | 'signup';
 
@@ -50,6 +51,7 @@ export function LandingPage({ initialAuthMode = null }: { initialAuthMode?: Land
         <SecuritySection />
         <FinalCTA onOpenAuth={openAuth} />
         <LandingFooter onOpenAuth={openAuth} />
+        <BackToTop />
       </div>
       <LandingAuthDialog mode={authMode} onClose={closeAuth} onChangeMode={openAuth} />
     </main>

@@ -42,7 +42,7 @@ export const InvoiceTemplate = forwardRef<HTMLDivElement, InvoiceTemplateProps>(
   const watermarkSize = watermarkSizes[shop.watermarkSize ?? 'MEDIUM'];
   const rotation = Math.min(45, Math.max(-45, shop.watermarkRotation ?? 0));
 
-  return <div ref={ref} className="invoice-template relative overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-sm [font-family:Inter,'Noto_Sans_Myanmar','Myanmar_Text',sans-serif]">
+  return <div ref={ref} className="invoice-template relative overflow-hidden rounded-3xl border border-slate-200 bg-white font-sans text-slate-900 shadow-sm">
     {watermarkImage && <img className={cn('pointer-events-none absolute z-0 object-contain', watermarkPosition, watermarkSize.html)} style={{ opacity: watermarkOpacity, rotate: `${rotation}deg` }} src={watermarkImage} alt="" crossOrigin="anonymous" />}
     {shop.watermarkType === 'EMOJI' && shop.watermarkEmoji && <span className={cn('pointer-events-none absolute z-0 grid place-items-center', watermarkPosition, watermarkSize.html, watermarkSize.emojiHtml)} style={{ opacity: watermarkOpacity, rotate: `${rotation}deg` }}>{shop.watermarkEmoji}</span>}
     <header className="relative z-10 grid gap-6 p-6 text-white sm:grid-cols-[1fr_auto] sm:p-8" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}dd)` }}>

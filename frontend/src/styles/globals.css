@@ -12,7 +12,6 @@
     --secondary: 160 84% 39%;
     --accent: 25 95% 53%;
     --muted: 215 16% 47%;
-    --control-text-optical-offset: 2px;
   }
   .dark {
     --background: 222 47% 11%;
@@ -25,9 +24,10 @@
   * { @apply border-border; }
   html { @apply scroll-smooth; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-  body { @apply m-0 min-w-80 bg-background text-foreground antialiased transition-colors; font-family: Inter, "Noto Sans Myanmar", "Myanmar Text", ui-sans-serif, system-ui, sans-serif; }
-  html[lang="my"] body { font-size: 15px; line-height: 1.65; }
-  button, a, input, select, textarea { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2; }
+  html, body { font-family: "Outfit", "Noto Sans Myanmar", sans-serif; }
+  body { @apply m-0 min-w-80 bg-background text-foreground antialiased transition-colors; line-height: 1.5; }
+  html[lang="my"] body { font-size: 15px; line-height: 1.55; }
+  button, a, input, select, textarea { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2; font: inherit; }
   [data-lucide] { @apply block shrink-0; }
   ::selection { @apply bg-violet-200 text-violet-950; }
 }
@@ -41,13 +41,13 @@
   .page-container { @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8; }
   .field-label { @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200; }
   .control { @apply min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm leading-5 text-slate-900 shadow-sm transition placeholder:leading-5 placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/20 dark:disabled:bg-slate-800; }
-  input.control, select.control { @apply h-11 py-0; padding-top: calc(var(--control-text-optical-offset) * 2); }
-  .auth-control { @apply h-[54px] w-full rounded-2xl border border-slate-200 bg-[#edf3ff] py-0 text-sm leading-5 text-slate-900 shadow-inner shadow-slate-900/[0.02] transition placeholder:leading-5 placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:bg-slate-950 dark:focus:ring-violet-500/15; padding-top: calc(var(--control-text-optical-offset) * 2); }
+  input.control, select.control { @apply h-11 py-0; }
+  .auth-control { @apply h-[54px] w-full rounded-2xl border border-slate-200 bg-[#edf3ff] py-0 text-sm leading-5 text-slate-900 shadow-inner shadow-slate-900/[0.02] transition placeholder:leading-5 placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:bg-slate-950 dark:focus:ring-violet-500/15; }
   .input-icon-frame { @apply pointer-events-none absolute inset-y-0 flex items-center justify-center text-slate-400 dark:text-slate-500; }
   .icon-text-control { @apply inline-flex items-center justify-center leading-5; }
   .tab-control { @apply inline-flex items-center justify-center leading-5; }
   .checkbox-label { @apply flex items-center leading-5; }
-  .control-text { display: inline-block; line-height: 1.25rem; transform: translateY(var(--control-text-optical-offset)); }
+  .control-text { display: inline-block; line-height: 1.25rem; }
 
   .sidebar-scroll {
     -ms-overflow-style: none;
@@ -55,6 +55,4 @@
   }
 
   .sidebar-scroll::-webkit-scrollbar { display: none; }
-  .ui-button > span:not([aria-hidden="true"]):not(.icon-text-control) { transform: translateY(var(--control-text-optical-offset)); }
-  .tab-control > span:not(.icon-text-control) { transform: translateY(var(--control-text-optical-offset)); }
 }

@@ -26,6 +26,7 @@ import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage';
 import { UserManualPage } from '@/pages/UserManualPage';
 import { PromptGalleryPage } from '@/pages/PromptGalleryPage';
 import { AdminPromptsPage } from '@/pages/admin/AdminPromptsPage';
+import { AdminPromptPreviewPage } from '@/pages/admin/AdminPromptPreviewPage';
 import type { Role } from '@/types/auth';
 import { useAuthStore } from '@/store/authStore';
 
@@ -92,6 +93,7 @@ export default function App() {
   if (path === '/admin/users') return adminPage(<AdminUsersPage />);
   if (path === '/admin/audit-logs') return adminPage(<AdminAuditLogsPage />);
   if (path === '/admin/prompts') return adminPage(<AdminPromptsPage />);
+  if (path === '/admin/prompts/preview') return adminPage(<AdminPromptPreviewPage />);
   const adminApplication = path.match(/^\/admin\/applications\/([0-9a-f-]+)$/i);
   if (adminApplication) return adminPage(<AdminApplicationDetailPage shopId={adminApplication[1]} />);
   if (path === '/application') return <ProtectedRoute><ApplicationStatusPage /></ProtectedRoute>;
