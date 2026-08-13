@@ -4,6 +4,7 @@ import type { DashboardSummary, SalesRange } from '@/types/dashboard';
 import type { Language } from '@/hooks/useLanguage';
 import { getReportTranslations } from '@/utils/reportTranslations';
 import { PdfText } from '@/components/reports/PdfText';
+import { getSalesComparison } from '@/utils/salesComparison';
 
 const styles = StyleSheet.create({
   page: { padding: 42, paddingBottom: 58, color: '#172033', fontFamily: 'Helvetica', fontSize: 10 },
@@ -47,15 +48,7 @@ export function FinancialReportPdfDocument({ report, shop, range, createdAt, lan
   const currency = shop.setting?.currency ?? 'MMK';
   const money = new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: currency === 'MMK' ? 0 : 2 });
   const generatedAt = new Intl.DateTimeFormat(language === 'my' ? 'my-MM' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt);
-  const trendText = report.revenueTrend === 'NEW'
-    ? t.newSales
-    : report.revenueTrend === 'UP'
-      ? Math.abs(report.revenueChangePercent ?? 0) >= 1000 && report.previousPeriodRevenue > 0
-        ? `${t.increased} ${(report.currentPeriodRevenue / report.previousPeriodRevenue).toFixed(1)} ${t.times}`
-        : `${t.increased} ${Math.abs(report.revenueChangePercent ?? 0).toFixed(1)}%`
-      : report.revenueTrend === 'DOWN'
-        ? `${t.decreased} ${Math.abs(report.revenueChangePercent ?? 0).toFixed(1)}%`
-        : t.unchanged;
+  const comparison = getSalesComparison(range, report, currency, language, createdAt);
 
   const bucketChange = (index: number) => {
     if (index === 0) return '-';
@@ -81,10 +74,13 @@ export function FinancialReportPdfDocument({ report, shop, range, createdAt, lan
           <Metric label={t.itemsRunningLow} value={String(report.lowStockCount)} />
         </View>
 
+        <PdfText style={styles.sectionTitle} value={t.salesComparison} bold />
         <View style={styles.comparison}>
-          <View><PdfText style={styles.muted} value={t.salesDuringPeriod} /><PdfText style={styles.comparisonValue} value={money.format(report.currentPeriodRevenue)} bold /></View>
-          <View><PdfText style={styles.comparisonTrend} value={trendText} bold /><PdfText style={styles.comparisonPrevious} value={`${t.comparedWithPrevious}: ${money.format(report.previousPeriodRevenue)}`} /></View>
+          <View><PdfText style={styles.muted} value={t.currentPeriod} /><PdfText style={styles.comparisonPrevious} value={comparison.currentDates} /><PdfText style={styles.comparisonValue} value={money.format(report.currentPeriodRevenue)} bold /></View>
+          <View><PdfText style={styles.muted} value={comparison.previousLabel} /><PdfText style={styles.comparisonPrevious} value={comparison.previousDates} /><PdfText style={styles.comparisonValue} value={money.format(report.previousPeriodRevenue)} bold /></View>
+          <View><PdfText style={styles.muted} value={t.difference} /><PdfText style={styles.comparisonTrend} value={comparison.signedAmount} bold /></View>
         </View>
+        <PdfText style={[styles.muted, { marginBottom: 16 }]} value={comparison.message} />
 
         <PdfText style={styles.sectionTitle} value={t.salesDetails} bold />
         <View style={styles.table} wrap>

@@ -2,6 +2,7 @@ import type { Currency } from '@/types/auth';
 import type { DashboardSummary, SalesRange } from '@/types/dashboard';
 import type { Language } from '@/hooks/useLanguage';
 import { getReportTranslations } from '@/utils/reportTranslations';
+import { getSalesComparison } from '@/utils/salesComparison';
 
 const REPORT_FONT = 'Noto Sans Myanmar';
 const BRAND_PURPLE = '7C3AED';
@@ -20,6 +21,7 @@ export async function downloadFinancialReportExcel({ report, shopName, currency,
 }) {
   const { default: ExcelJS } = await import('exceljs');
   const t = getReportTranslations(language);
+  const comparison = getSalesComparison(range, report, currency, language, createdAt);
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Climbio';
   workbook.created = createdAt;
@@ -77,10 +79,14 @@ export async function downloadFinancialReportExcel({ report, shopName, currency,
     sheet.getCell(row, 2).numFmt = isCurrency ? currencyNumberFormat(currency) : '#,##0';
   });
 
-  sectionRow(sheet, 11, t.salesDetails);
-  tableHeader(sheet, 12, [t.period, t.sales, t.change, t.share]);
+  sectionRow(sheet, 11, t.salesComparison);
+  const comparisonRows = [[`${t.currentPeriod}\n${comparison.currentDates}`, report.currentPeriodRevenue], [`${comparison.previousLabel}\n${comparison.previousDates}`, report.previousPeriodRevenue], [t.difference, comparison.amount]] as const;
+  comparisonRows.forEach(([label, value], index) => { const row = 12 + index; sheet.getCell(row, 1).value = label; sheet.getCell(row, 2).value = value; sheet.mergeCells(row, 2, row, 4); styleBodyRow(sheet, row, index % 2 === 1); sheet.getCell(row, 2).numFmt = currencyNumberFormat(currency); });
+  mergeAndSet(sheet, 'A15:D15', comparison.message); styleBodyRow(sheet, 15, true);
+  sectionRow(sheet, 17, t.salesDetails);
+  tableHeader(sheet, 18, [t.period, t.sales, t.change, t.share]);
   report.salesOverview.forEach((item, index) => {
-    const rowNumber = 13 + index;
+    const rowNumber = 19 + index;
     const previous = index === 0 ? null : report.salesOverview[index - 1]!.revenue;
     const change = previous === null ? '-' : previous === 0 ? (item.revenue > 0 ? t.newValue : '-') : `${item.revenue >= previous ? '+' : ''}${(((item.revenue - previous) / previous) * 100).toFixed(1)}%`;
     const share = report.currentPeriodRevenue > 0 ? `${((item.revenue / report.currentPeriodRevenue) * 100).toFixed(1)}%` : '0%';
@@ -92,7 +98,7 @@ export async function downloadFinancialReportExcel({ report, shopName, currency,
     sheet.getCell(rowNumber, 4).alignment = { horizontal: 'right', vertical: 'middle' };
   });
 
-  const inventorySectionRow = 14 + report.salesOverview.length;
+  const inventorySectionRow = 20 + report.salesOverview.length;
   sectionRow(sheet, inventorySectionRow, t.stockStatus);
   tableHeader(sheet, inventorySectionRow + 1, [t.product, t.status, t.quantity, '']);
   report.productStock.forEach((item, index) => {

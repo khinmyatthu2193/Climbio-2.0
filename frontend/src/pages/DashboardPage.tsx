@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { IconLabel } from '@/components/ui/IconLabel';
 import { download, downloadFinancialReportExcel } from '@/utils/financialReportExport';
 import { getReportTranslations } from '@/utils/reportTranslations';
+import { getSalesComparison } from '@/utils/salesComparison';
 
 const chartTooltip = {
   backgroundColor: 'hsl(var(--background))',
@@ -76,19 +77,7 @@ export function DashboardPage() {
   });
   const today = new Intl.DateTimeFormat(language === 'my' ? 'my-MM' : undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
   const revenueTrend = dashboard.data?.revenueTrend ?? 'FLAT';
-  const revenueChange = dashboard.data?.revenueChangePercent;
-  const revenueRatio = dashboard.data && dashboard.data.previousPeriodRevenue > 0
-    ? dashboard.data.currentPeriodRevenue / dashboard.data.previousPeriodRevenue
-    : null;
-  const trendMessage = revenueTrend === 'NEW'
-    ? reportText.newSales
-    : revenueTrend === 'UP'
-      ? Math.abs(revenueChange ?? 0) >= 1000 && revenueRatio
-        ? `${reportText.increased} ${revenueRatio.toFixed(1)} ${reportText.times}`
-        : `${reportText.increased} ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
-      : revenueTrend === 'DOWN'
-        ? `${reportText.decreased} ${Math.abs(revenueChange ?? 0).toFixed(1)}%`
-        : reportText.unchanged;
+  const comparison = dashboard.data ? getSalesComparison(salesRange, dashboard.data, currency, language) : null;
 
   const downloadPdfReport = async () => {
     if (!dashboard.data || !user) return;
@@ -161,10 +150,10 @@ export function DashboardPage() {
       <section className="flex flex-col gap-5 border-b border-slate-200/80 pb-7 dark:border-slate-800 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{today}</p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-            {language === 'my' ? `${user?.name?.split(' ')[0]}၊ ပြန်လည်ကြိုဆိုပါသည်။` : `Welcome back, ${user?.name?.split(' ')[0]}.`}
+          <h1 className={language === 'my' ? 'mt-1 py-2 text-xl font-bold leading-[1.9] tracking-tight text-slate-950 dark:text-white sm:text-2xl' : 'mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl'}>
+            {language === 'my' ? `${user?.name?.split(' ')[0]} မှ ကြိုဆိုပါသည်။` : `Welcome back, ${user?.name?.split(' ')[0]}.`}
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{language === 'my' ? `${user?.shopName}၏ လုပ်ငန်းအခြေအနေကို တစ်နေရာတည်းတွင် ကြည့်ရှုပါ။` : `A clear view of what is happening at ${user?.shopName}.`}</p>
+          <p className={language === 'my' ? 'py-1 text-sm leading-7 text-slate-600 dark:text-slate-400' : 'mt-2 text-sm text-slate-600 dark:text-slate-400'}>{language === 'my' ? `${user?.shopName}၏ လုပ်ငန်းအခြေအနေကို တစ်နေရာတည်းတွင် ကြည့်ရှုပါ။` : `A clear view of what is happening at ${user?.shopName}.`}</p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <Button variant="outline" size="md" onClick={downloadPdfReport} disabled={!dashboard.data || isDownloadingPdf} title="Download financial report as PDF">
@@ -240,15 +229,12 @@ export function DashboardPage() {
             </div>
           </div>
           {dashboard.data && (
-            <div className="mx-5 mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60 sm:mx-6">
-              <div><p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{reportText.salesDuringPeriod}</p><p className="mt-0.5 text-lg font-black text-slate-950 dark:text-white">{currencyFormatter.format(dashboard.data.currentPeriodRevenue)}</p></div>
-              <div className="text-right">
-                <div className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${revenueTrend === 'UP' || revenueTrend === 'NEW' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : revenueTrend === 'DOWN' ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
-                  {revenueTrend === 'UP' || revenueTrend === 'NEW' ? <ArrowUpRight className="size-4" /> : revenueTrend === 'DOWN' ? <ArrowDownRight className="size-4" /> : <ArrowRight className="size-4" />}
-                  {trendMessage}
-                </div>
-                <p className="mt-1.5 text-[11px] font-medium text-slate-400">{reportText.comparedWithPrevious}: {currencyFormatter.format(dashboard.data.previousPeriodRevenue)}</p>
-              </div>
+            <div className="mx-5 mt-5 rounded-xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/60 sm:mx-6">
+              <p className="text-sm font-bold">{reportText.salesComparison}</p><div className="mt-3 grid gap-3 sm:grid-cols-3">
+                <div><p className="text-xs font-semibold text-slate-500">{reportText.currentPeriod}</p><p className="text-xs text-slate-400">{comparison?.currentDates}</p><p className="mt-1 font-black">{currencyFormatter.format(dashboard.data.currentPeriodRevenue)}</p></div>
+                <div><p className="text-xs font-semibold text-slate-500">{comparison?.previousLabel}</p><p className="text-xs text-slate-400">{comparison?.previousDates}</p><p className="mt-1 font-black">{currencyFormatter.format(dashboard.data.previousPeriodRevenue)}</p></div>
+                <div><p className="text-xs font-semibold text-slate-500">{reportText.difference}</p><p className={`mt-4 font-black ${comparison && comparison.amount > 0 ? 'text-emerald-600' : comparison && comparison.amount < 0 ? 'text-red-600' : ''}`}>{comparison?.signedAmount}</p></div>
+              </div><div className={`mt-3 flex items-center gap-2 text-xs font-bold ${revenueTrend === 'UP' || revenueTrend === 'NEW' ? 'text-emerald-700 dark:text-emerald-300' : revenueTrend === 'DOWN' ? 'text-red-700 dark:text-red-300' : 'text-slate-600 dark:text-slate-300'}`}>{revenueTrend === 'UP' || revenueTrend === 'NEW' ? <ArrowUpRight className="size-4" /> : revenueTrend === 'DOWN' ? <ArrowDownRight className="size-4" /> : <ArrowRight className="size-4" />}{comparison?.message}</div>
             </div>
           )}
           {dashboard.isLoading ? (

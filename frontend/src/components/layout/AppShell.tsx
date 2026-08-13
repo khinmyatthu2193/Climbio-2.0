@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     () => localStorage.getItem('climbio-sidebar-collapsed') !== 'true',
   );
   const { theme, toggleTheme } = useTheme();
-  const { language } = useLanguage();
+  const { language, translate } = useLanguage();
   const aiAnalysisRunning = useIsFetching({ queryKey: ['ai-business-analysis'] }) > 0;
   const aiChatRunning = useIsMutating({ mutationKey: ['ai-chat'] }) > 0;
   const currentPage = navigation.find((item) => isCurrent(item.href)) ?? navigation[0];
@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const sidebar = () => (
     <nav className="sidebar-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3" aria-label="Primary navigation">
-      <p className="px-3 pb-2 pt-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Workspace</p>
+      <p className={cn('px-3 pb-2 pt-4 font-bold uppercase text-slate-400 dark:text-slate-500', language === 'my' ? 'text-[9px] tracking-[0.1em]' : 'text-[10px] tracking-[0.18em]')}>{translate('Workspace')}</p>
       {navigation.map(({ label, href, icon: Icon }) => (
         <a
           key={href}
@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className={cn('min-w-5', iconFrameClass)} aria-hidden="true">
             <Icon className={cn('block size-[18px] shrink-0 transition', isCurrent(href) ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300')} />
           </span>
-          <span className={sidebarLabelClass}>{label}</span>
+          <span className={cn(sidebarLabelClass, language === 'my' && 'text-[13px]')}>{translate(label)}</span>
         </a>
       ))}
     </nav>
@@ -113,7 +113,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {desktopSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
               </span>
             </span>
-            <span className="relative top-px truncate font-bold text-slate-900 dark:text-white" aria-current="page">{currentPage.label}</span>
+            <span className={cn('relative top-px truncate font-bold text-slate-900 dark:text-white', language === 'my' && 'text-[13px]')} aria-current="page">{translate(currentPage.label)}</span>
           </nav>
           <div className="ml-auto flex min-w-0 items-center gap-3">
             {aiAnalysisRunning && (

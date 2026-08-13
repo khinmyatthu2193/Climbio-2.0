@@ -5,6 +5,7 @@ const translations = {
   en: {
     financialReport: 'Business Report', businessSummary: 'Business summary', reportingPeriod: 'Report period', generated: 'Created',
     salesReceived: 'Sales received', products: 'Products', stockAvailable: 'Items in stock', itemsRunningLow: 'Items running low',
+    salesComparison: 'Sales comparison', currentPeriod: 'Current period', difference: 'Increase / decrease',
     salesDuringPeriod: 'Sales during this period', comparedWithPrevious: 'Compared with previous period',
     newSales: 'Sales started in this period', increased: 'Sales increased', decreased: 'Sales decreased', unchanged: 'Sales stayed the same', times: 'times',
     salesDetails: 'Sales details', period: 'Period', sales: 'Sales', change: 'Change from last period', share: 'Part of period sales', newValue: 'New',
@@ -13,6 +14,7 @@ const translations = {
     ranges: { '7d': 'Last 7 days', '30d': 'Last 30 days', '6m': 'Last 6 months' } satisfies Record<SalesRange, string>,
   },
   my: {
+    salesComparison: 'ရောင်းရငွေ နှိုင်းယှဉ်ချက်', currentPeriod: 'လက်ရှိကာလ', difference: 'တိုး/လျော့ ပမာဏ',
     financialReport: 'လုပ်ငန်းအစီရင်ခံစာ', businessSummary: 'လုပ်ငန်းအကျဉ်းချုပ်', reportingPeriod: 'အစီရင်ခံကာလ', generated: 'ဖန်တီးချိန်',
     salesReceived: 'လက်ခံရရှိသော ရောင်းရငွေ', products: 'ကုန်ပစ္စည်းများ', stockAvailable: 'လက်ကျန်ပစ္စည်း', itemsRunningLow: 'လက်ကျန်နည်းနေသော ပစ္စည်း',
     salesDuringPeriod: 'ဤကာလအတွင်း ရောင်းရငွေ', comparedWithPrevious: 'ယခင်ကာလနှင့် နှိုင်းယှဉ်ချက်',
