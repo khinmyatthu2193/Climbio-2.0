@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
-import { createUniqueShopSlug } from '../utils/shopSlug.js';
+import { createUniqueShopSlug, slugifyShopName } from '../utils/shopSlug.js';
 
 const publicStoreWhere = { publicEnabled: true, approvalStatus: 'APPROVED' as const, accountStatus: 'ACTIVE' as const };
 const publicFrontendUrl = env.FRONTEND_URL.split(',')[0]!.trim().replace(/\/$/, '');
@@ -65,7 +65,7 @@ export const publicShopService = {
   },
 
   async getMyStore(userId: string) {
-    const store = await prisma.user.findUnique({
+    let store = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         slug: true,
@@ -81,6 +81,24 @@ export const publicShopService = {
       },
     });
     if (!store) throw new AppError('Shop not found', 404);
+
+    const nameSlug = slugifyShopName(store.shopName);
+    if (/^shop(?:-[a-f0-9]{10}|-\d+)?$/.test(store.slug) && nameSlug !== 'shop') {
+      const currentSlug = store.slug;
+      const shopName = store.shopName;
+      const slug = await prisma.$transaction(async (tx) => {
+        const nextSlug = await createUniqueShopSlug(tx, shopName, userId);
+        if (nextSlug === currentSlug) return nextSlug;
+        await tx.shopSlugHistory.upsert({
+          where: { slug: currentSlug },
+          create: { shopId: userId, slug: currentSlug },
+          update: { shopId: userId },
+        });
+        await tx.user.update({ where: { id: userId }, data: { slug: nextSlug } });
+        return nextSlug;
+      });
+      store = { ...store, slug };
+    }
 
     const { _count, ...shopInfo } = store;
     return {

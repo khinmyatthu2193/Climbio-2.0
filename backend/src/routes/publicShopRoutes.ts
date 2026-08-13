@@ -4,9 +4,10 @@ import { publicShopController } from '../controllers/publicShopController.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireApprovedShop } from '../middleware/approval.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
+import { SHOP_SLUG_PATTERN } from '../utils/shopSlug.js';
 
 const slugParams = z.object({
-  slug: z.string().trim().min(3).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  slug: z.string().trim().min(1).max(120).regex(SHOP_SLUG_PATTERN),
 }).strict();
 const statusSchema = z.object({ publicEnabled: z.boolean() }).strict();
 const socialUrl = (hosts: string[], message: string, pathPattern?: RegExp) => z.string().trim().max(500).url(message).refine((value) => {

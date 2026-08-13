@@ -75,8 +75,8 @@ export default function App() {
   if (path === '/account/login') return <LandingPage initialAuthMode="login" />;
   if (path === '/account/signup') return <LandingPage initialAuthMode="signup" />;
   if (path === '/' && initialized && !user) return <LandingPage />;
-  const publicShop = path.match(/^\/shop\/([a-z0-9-]+)$/i);
-  if (publicShop) return <PublicShop slug={publicShop[1].toLowerCase()} />;
+  const publicShop = path.match(/^\/shop\/([^/]+)$/u);
+  if (publicShop) return <PublicShop slug={decodeURIComponent(publicShop[1]).toLowerCase()} />;
   const publicInvoice = path.match(/^\/invoice\/([0-9a-f-]+)$/i);
   if (publicInvoice) return <PublicInvoice invoiceId={publicInvoice[1]} />;
   if (initialized && user?.role === 'ADMIN' && !path.startsWith('/admin')) {

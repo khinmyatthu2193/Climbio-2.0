@@ -36,6 +36,10 @@
   .landing-section { scroll-margin-top: 76px; }
 }
 
+@media (min-width: 768px) {
+  #product article:nth-child(4) { grid-column: span 6 / span 6; }
+}
+
 @media (max-width: 639px) {
   .landing-nav { padding: 0.625rem 0.625rem 0; }
   .landing-nav nav { height: 3.5rem; gap: 0.5rem; padding-inline: 0.75rem; }

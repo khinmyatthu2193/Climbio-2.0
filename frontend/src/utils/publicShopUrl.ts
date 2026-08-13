@@ -3,5 +3,5 @@ export function getPublicShopUrl(slug: string, currentPublicUrl?: string) {
   const fallbackBase = currentPublicUrl
     ? new URL(currentPublicUrl).origin
     : typeof window !== 'undefined' ? window.location.origin : '';
-  return `${(configuredBase || fallbackBase).replace(/\/$/, '')}/shop/${slug}`;
+  return `${(configuredBase || fallbackBase).replace(/\/$/, '')}/shop/${encodeURIComponent(slug)}`;
 }

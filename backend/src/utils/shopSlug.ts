@@ -2,13 +2,13 @@ import type { Prisma, PrismaClient } from '@prisma/client';
 
 type DbClient = PrismaClient | Prisma.TransactionClient;
 
-export const SHOP_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const SHOP_SLUG_PATTERN = /^[\p{L}\p{N}\p{M}]+(?:-[\p{L}\p{N}\p{M}]+)*$/u;
 
 export function slugifyShopName(name: string) {
   const slug = name
-    .normalize('NFKD')
+    .normalize('NFKC')
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 120)
