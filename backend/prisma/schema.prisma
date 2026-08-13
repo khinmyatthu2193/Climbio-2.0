@@ -68,61 +68,73 @@ enum AIInsightType {
 }
 
 model User {
-  id            String         @id @default(uuid()) @db.Uuid
-  email         String         @unique @db.VarChar(255)
-  password      String
-  name          String         @db.VarChar(100)
-  shopName      String         @map("shop_name") @db.VarChar(100)
-  slug          String         @unique @default(dbgenerated("'shop-' || substr(replace(gen_random_uuid()::text, '-'::text, ''::text), 1, 10)")) @db.VarChar(120)
-  publicEnabled Boolean        @default(true) @map("public_enabled")
-  shopLogo      String?        @map("shop_logo")
-  shopAddress   String?        @map("shop_address")
-  businessCategory String?     @map("business_category") @db.VarChar(100)
-  businessDescription String?  @map("business_description")
-  businessPhone String?        @map("business_phone") @db.VarChar(30)
-  businessEmail String?        @map("business_email") @db.VarChar(255)
-  cityTownship String?         @map("city_township") @db.VarChar(100)
-  ownerRole String?            @map("owner_role") @db.VarChar(100)
-  businessRegistrationNumber String? @map("business_registration_number") @db.VarChar(100)
-  verificationDocument String? @map("verification_document")
-  websiteUrl String?           @map("website_url") @db.VarChar(500)
-  phone         String?        @db.VarChar(30)
-  role          Role           @default(SHOP_OWNER)
-  accountStatus AccountStatus  @default(ACTIVE) @map("account_status")
-  approvalStatus ShopApprovalStatus @default(PENDING) @map("approval_status")
-  submittedAt   DateTime?      @map("submitted_at")
-  approvedAt    DateTime?      @map("approved_at")
-  suspendedAt   DateTime?      @map("suspended_at")
-  applicationVersion Int       @default(1) @map("application_version")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  products      Product[]
-  categories    Category[]
-  invoices      Invoice[]
-  customers     Customer[]
-  setting       Setting?
-  refreshTokens RefreshToken[]
-  aiInsights    AIInsight[]
-  aiChatHistory AIChatHistory[]
-  reviewsReceived ShopReview[] @relation("ShopReviewsReceived")
-  reviewsPerformed ShopReview[] @relation("ShopReviewsPerformed")
+  id                         String             @id @default(uuid()) @db.Uuid
+  email                      String             @unique @db.VarChar(255)
+  password                   String
+  name                       String             @db.VarChar(100)
+  shopName                   String             @map("shop_name") @db.VarChar(100)
+  slug                       String             @unique @default(dbgenerated("'shop-' || substr(replace(gen_random_uuid()::text, '-'::text, ''::text), 1, 10)")) @db.VarChar(120)
+  publicEnabled              Boolean            @default(true) @map("public_enabled")
+  shopLogo                   String?            @map("shop_logo")
+  shopAddress                String?            @map("shop_address")
+  businessCategory           String?            @map("business_category") @db.VarChar(100)
+  businessDescription        String?            @map("business_description")
+  businessPhone              String?            @map("business_phone") @db.VarChar(30)
+  businessEmail              String?            @map("business_email") @db.VarChar(255)
+  cityTownship               String?            @map("city_township") @db.VarChar(100)
+  ownerRole                  String?            @map("owner_role") @db.VarChar(100)
+  businessRegistrationNumber String?            @map("business_registration_number") @db.VarChar(100)
+  verificationDocument       String?            @map("verification_document")
+  websiteUrl                 String?            @map("website_url") @db.VarChar(500)
+  phone                      String?            @db.VarChar(30)
+  role                       Role               @default(SHOP_OWNER)
+  accountStatus              AccountStatus      @default(ACTIVE) @map("account_status")
+  approvalStatus             ShopApprovalStatus @default(PENDING) @map("approval_status")
+  submittedAt                DateTime?          @map("submitted_at")
+  approvedAt                 DateTime?          @map("approved_at")
+  suspendedAt                DateTime?          @map("suspended_at")
+  applicationVersion         Int                @default(1) @map("application_version")
+  createdAt                  DateTime           @default(now()) @map("created_at")
+  updatedAt                  DateTime           @updatedAt @map("updated_at")
+  products                   Product[]
+  categories                 Category[]
+  invoices                   Invoice[]
+  customers                  Customer[]
+  setting                    Setting?
+  refreshTokens              RefreshToken[]
+  aiInsights                 AIInsight[]
+  aiChatHistory              AIChatHistory[]
+  reviewsReceived            ShopReview[]       @relation("ShopReviewsReceived")
+  reviewsPerformed           ShopReview[]       @relation("ShopReviewsPerformed")
+  slugHistory                ShopSlugHistory[]
 
   @@index([role, submittedAt, approvalStatus])
   @@map("users")
 }
 
+model ShopSlugHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  slug      String   @unique @db.VarChar(120)
+  createdAt DateTime @default(now()) @map("created_at")
+  shop      User     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@map("shop_slug_history")
+}
+
 model ShopReview {
-  id             String             @id @default(uuid()) @db.Uuid
-  shopId         String             @map("shop_id") @db.Uuid
-  adminId        String?            @map("admin_id") @db.Uuid
+  id             String              @id @default(uuid()) @db.Uuid
+  shopId         String              @map("shop_id") @db.Uuid
+  adminId        String?             @map("admin_id") @db.Uuid
   action         ShopReviewAction
   previousStatus ShopApprovalStatus? @map("previous_status")
   nextStatus     ShopApprovalStatus? @map("next_status")
   feedback       String?
-  version        Int                @default(1)
-  createdAt      DateTime           @default(now()) @map("created_at")
-  shop           User               @relation("ShopReviewsReceived", fields: [shopId], references: [id], onDelete: Cascade)
-  admin          User?              @relation("ShopReviewsPerformed", fields: [adminId], references: [id], onDelete: SetNull)
+  version        Int                 @default(1)
+  createdAt      DateTime            @default(now()) @map("created_at")
+  shop           User                @relation("ShopReviewsReceived", fields: [shopId], references: [id], onDelete: Cascade)
+  admin          User?               @relation("ShopReviewsPerformed", fields: [adminId], references: [id], onDelete: SetNull)
 
   @@index([shopId, createdAt])
   @@index([adminId, createdAt])
@@ -131,20 +143,20 @@ model ShopReview {
 }
 
 model Product {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  name        String    @db.VarChar(100)
-  description String?
-  price       Decimal   @db.Decimal(14, 2)
-  costPrice   Decimal   @map("cost_price") @db.Decimal(14, 2)
-  quantity    Int       @default(0)
-  categoryId  String?   @map("category_id") @db.Uuid
-  image       String?
-  isActive    Boolean   @default(true) @map("is_active")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  name         String        @db.VarChar(100)
+  description  String?
+  price        Decimal       @db.Decimal(14, 2)
+  costPrice    Decimal       @map("cost_price") @db.Decimal(14, 2)
+  quantity     Int           @default(0)
+  categoryId   String?       @map("category_id") @db.Uuid
+  image        String?
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   invoiceItems InvoiceItem[]
 
   @@unique([userId, name])

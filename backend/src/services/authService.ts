@@ -3,6 +3,7 @@ import { Prisma, type Role } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { createAccessToken, createRefreshToken, hashToken, verifyRefreshToken } from '../utils/tokens.js';
+import { createUniqueShopSlug } from '../utils/shopSlug.js';
 
 const publicUser = {
   id: true,
@@ -40,8 +41,9 @@ export const authService = {
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) throw new AppError('An account with this email already exists', 409);
     const password = await bcrypt.hash(input.password, 12);
+    const slug = await createUniqueShopSlug(prisma, input.name);
     const user = await prisma.user.create({
-      data: { email, password, name: input.name, phone: input.phone, shopName: input.name, role: 'SHOP_OWNER', accountStatus: 'ACTIVE', approvalStatus: 'PENDING', submittedAt: null, publicEnabled: false, setting: { create: {} } },
+      data: { email, password, name: input.name, phone: input.phone, shopName: input.name, slug, role: 'SHOP_OWNER', accountStatus: 'ACTIVE', approvalStatus: 'PENDING', submittedAt: null, publicEnabled: false, setting: { create: {} } },
       select: publicUser,
     });
     return { user, ...await issueSession(user) };

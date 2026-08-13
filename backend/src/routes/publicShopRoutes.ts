@@ -10,7 +10,7 @@ const slugParams = z.object({
 }).strict();
 const statusSchema = z.object({ publicEnabled: z.boolean() }).strict();
 const storeSchema = z.object({
-  slug: z.string().trim().toLowerCase().min(3).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  slug: z.string().trim().min(3).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers, and single hyphens only'),
   shopName: z.string().trim().min(2).max(100),
   phone: z.string().trim().max(30).nullable().optional(),
   shopAddress: z.string().trim().max(500).nullable().optional(),

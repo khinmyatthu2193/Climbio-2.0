@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, PackageOpen, Phone, Search, ShoppingBag, X } from 'lucide-react';
 import { IconLabel } from '@/components/ui/IconLabel';
@@ -10,6 +10,11 @@ export function PublicShop({ slug }: { slug: string }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [selected, setSelected] = useState<PublicShopProduct | null>(null);
+
+  useEffect(() => {
+    const canonicalSlug = catalog.data?.canonicalSlug;
+    if (canonicalSlug && canonicalSlug !== slug) window.location.replace(`/shop/${canonicalSlug}`);
+  }, [catalog.data?.canonicalSlug, slug]);
 
   const products = useMemo(() => {
     const term = search.trim().toLowerCase();

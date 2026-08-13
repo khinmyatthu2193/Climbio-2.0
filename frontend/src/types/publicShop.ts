@@ -9,6 +9,7 @@ export interface PublicShopProduct {
 }
 
 export interface PublicShopResponse {
+  canonicalSlug: string;
   shop: {
     slug: string;
     shopName: string;

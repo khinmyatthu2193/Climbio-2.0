@@ -1,11 +1,15 @@
 import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
+import { isShopSlugAvailable } from '../utils/shopSlug.js';
+
+const publicStoreWhere = { publicEnabled: true, approvalStatus: 'APPROVED' as const, accountStatus: 'ACTIVE' as const };
+const publicFrontendUrl = env.FRONTEND_URL.split(',')[0]!.trim().replace(/\/$/, '');
 
 export const publicShopService = {
   async getBySlug(slug: string) {
-    const shop = await prisma.user.findFirst({
-      where: { slug, publicEnabled: true, approvalStatus: 'APPROVED', accountStatus: 'ACTIVE' },
+    let shop = await prisma.user.findFirst({
+      where: { slug, ...publicStoreWhere },
       select: {
         publicEnabled: true,
         slug: true,
@@ -29,6 +33,18 @@ export const publicShopService = {
         },
       },
     });
+    if (!shop) {
+      const historical = await prisma.shopSlugHistory.findUnique({
+        where: { slug },
+        select: { shop: { select: {
+          publicEnabled: true, slug: true, shopName: true, shopLogo: true, shopAddress: true, phone: true,
+          setting: { select: { currency: true } },
+          products: { where: { isActive: true }, select: { id: true, name: true, description: true, image: true, price: true, quantity: true, category: { select: { id: true, name: true } } }, orderBy: [{ quantity: 'desc' }, { name: 'asc' }] },
+          accountStatus: true, approvalStatus: true,
+        } } },
+      });
+      if (historical?.shop.publicEnabled && historical.shop.accountStatus === 'ACTIVE' && historical.shop.approvalStatus === 'APPROVED') shop = historical.shop;
+    }
     if (!shop || !shop.publicEnabled) throw new AppError('Shop not found', 404);
 
     const { products, setting, publicEnabled: _publicEnabled, ...shopInfo } = shop;
@@ -38,6 +54,7 @@ export const publicShopService = {
 
     return {
       shop: { ...shopInfo, currency: setting?.currency ?? 'MMK' },
+      canonicalSlug: shop.slug,
       categories,
       products,
     };
@@ -62,7 +79,7 @@ export const publicShopService = {
     const { _count, ...shopInfo } = store;
     return {
       slug: store.slug,
-      publicUrl: `${env.FRONTEND_URL.replace(/\/$/, '')}/shop/${store.slug}`,
+      publicUrl: `${publicFrontendUrl}/shop/${store.slug}`,
       publicEnabled: store.publicEnabled,
       productCount: _count.products,
       shopInfo: {
@@ -86,9 +103,17 @@ export const publicShopService = {
     phone?: string | null;
     shopAddress?: string | null;
   }) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
+    await prisma.$transaction(async (tx) => {
+      const current = await tx.user.findUnique({ where: { id: userId }, select: { slug: true } });
+      if (!current) throw new AppError('Shop not found', 404);
+      if (!(await isShopSlugAvailable(tx, input.slug, userId))) {
+        throw new AppError('This public URL is already in use. Please choose another slug.', 409);
+      }
+      if (current.slug !== input.slug) {
+        await tx.shopSlugHistory.deleteMany({ where: { shopId: userId, slug: input.slug } });
+        await tx.shopSlugHistory.upsert({ where: { slug: current.slug }, create: { shopId: userId, slug: current.slug }, update: { shopId: userId } });
+      }
+      await tx.user.update({ where: { id: userId }, data: {
         slug: input.slug,
         shopName: input.shopName,
         phone: input.phone,
@@ -99,7 +124,7 @@ export const publicShopService = {
             update: { companyName: input.shopName },
           },
         },
-      },
+      } });
     });
     return this.getMyStore(userId);
   },

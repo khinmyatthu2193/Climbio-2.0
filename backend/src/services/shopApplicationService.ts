@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { approvalNotificationService } from './approvalNotificationService.js';
 import { AppError } from '../utils/AppError.js';
+import { createUniqueShopSlug } from '../utils/shopSlug.js';
 
 const shopSelect = {
   id: true, email: true, name: true, shopName: true, phone: true, shopLogo: true, shopAddress: true,
@@ -33,10 +34,12 @@ export const shopApplicationService = {
   async create(userId: string, input: ApplicationUpdate & { shopLogo: string; verificationDocument: string }) {
     const submittedAt = new Date();
     return prisma.$transaction(async (tx) => {
+      const slug = await createUniqueShopSlug(tx, input.shopName, userId);
       const result = await tx.user.updateMany({
         where: { id: userId, role: 'SHOP_OWNER', submittedAt: null },
         data: {
           ...input,
+          slug,
           businessEmail: input.businessEmail || null,
           businessRegistrationNumber: input.businessRegistrationNumber || null,
           websiteUrl: input.websiteUrl || null,
