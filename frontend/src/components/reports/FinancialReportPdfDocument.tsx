@@ -1,15 +1,12 @@
-import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-import myanmarRegular from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-400-normal.woff';
-import myanmarBold from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-700-normal.woff';
+import { Document, Page, StyleSheet, View } from '@react-pdf/renderer';
 import type { User } from '@/types/auth';
 import type { DashboardSummary, SalesRange } from '@/types/dashboard';
 import type { Language } from '@/hooks/useLanguage';
 import { getReportTranslations } from '@/utils/reportTranslations';
-
-Font.register({ family: 'NotoSansMyanmarReport', fonts: [{ src: myanmarRegular, fontWeight: 400 }, { src: myanmarBold, fontWeight: 700 }] });
+import { PdfText } from '@/components/reports/PdfText';
 
 const styles = StyleSheet.create({
-  page: { padding: 42, paddingBottom: 58, color: '#172033', fontFamily: 'NotoSansMyanmarReport', fontSize: 10 },
+  page: { padding: 42, paddingBottom: 58, color: '#172033', fontFamily: 'Helvetica', fontSize: 10 },
   header: { borderBottomWidth: 2, borderBottomColor: '#8b5cf6', paddingBottom: 16, marginBottom: 20 },
   title: { fontWeight: 700, fontSize: 22, color: '#6d28d9', marginBottom: 5 },
   shop: { fontWeight: 700, fontSize: 12, marginBottom: 4 },
@@ -72,9 +69,9 @@ export function FinancialReportPdfDocument({ report, shop, range, createdAt, lan
     <Document title={`${t.financialReport} - ${shop.shopName}`} author={shop.shopName} subject={t.financialReport}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.title}>{t.financialReport}</Text>
-          <Text style={styles.shop}>{shop.shopName}</Text>
-          <Text style={styles.muted}>{t.reportingPeriod}: {t.ranges[range]} | {t.generated}: {generatedAt}</Text>
+          <PdfText style={styles.title} value={t.financialReport} bold />
+          <PdfText style={styles.shop} value={shop.shopName} bold />
+          <PdfText style={styles.muted} value={`${t.reportingPeriod}: ${t.ranges[range]} | ${t.generated}: ${generatedAt}`} />
         </View>
 
         <View style={styles.summary}>
@@ -85,28 +82,28 @@ export function FinancialReportPdfDocument({ report, shop, range, createdAt, lan
         </View>
 
         <View style={styles.comparison}>
-          <View><Text style={styles.muted}>{t.salesDuringPeriod}</Text><Text style={styles.comparisonValue}>{money.format(report.currentPeriodRevenue)}</Text></View>
-          <View><Text style={styles.comparisonTrend}>{trendText}</Text><Text style={styles.comparisonPrevious}>{t.comparedWithPrevious}: {money.format(report.previousPeriodRevenue)}</Text></View>
+          <View><PdfText style={styles.muted} value={t.salesDuringPeriod} /><PdfText style={styles.comparisonValue} value={money.format(report.currentPeriodRevenue)} bold /></View>
+          <View><PdfText style={styles.comparisonTrend} value={trendText} bold /><PdfText style={styles.comparisonPrevious} value={`${t.comparedWithPrevious}: ${money.format(report.previousPeriodRevenue)}`} /></View>
         </View>
 
-        <Text style={styles.sectionTitle}>{t.salesDetails}</Text>
+        <PdfText style={styles.sectionTitle} value={t.salesDetails} bold />
         <View style={styles.table} wrap>
-          <View fixed style={[styles.row, styles.tableHeader]}><Text style={styles.periodCell}>{t.period}</Text><Text style={styles.revenueCell}>{t.sales}</Text><Text style={styles.changeCell}>{t.change}</Text><Text style={styles.shareCell}>{t.share}</Text></View>
-          {report.salesOverview.map((item, index) => <View wrap={false} key={item.label} style={[styles.row, index === report.salesOverview.length - 1 ? styles.lastRow : {}]}><Text style={styles.periodCell}>{item.label}</Text><Text style={styles.revenueCell}>{money.format(item.revenue)}</Text><Text style={styles.changeCell}>{bucketChange(index)}</Text><Text style={styles.shareCell}>{report.currentPeriodRevenue > 0 ? `${((item.revenue / report.currentPeriodRevenue) * 100).toFixed(1)}%` : '0%'}</Text></View>)}
+          <View fixed style={[styles.row, styles.tableHeader]}><PdfText style={styles.periodCell} value={t.period} bold /><PdfText style={styles.revenueCell} value={t.sales} bold /><PdfText style={styles.changeCell} value={t.change} bold /><PdfText style={styles.shareCell} value={t.share} bold /></View>
+          {report.salesOverview.map((item, index) => <View wrap={false} key={item.label} style={[styles.row, index === report.salesOverview.length - 1 ? styles.lastRow : {}]}><PdfText style={styles.periodCell} value={item.label} /><PdfText style={styles.revenueCell} value={money.format(item.revenue)} /><PdfText style={styles.changeCell} value={bucketChange(index)} /><PdfText style={styles.shareCell} value={report.currentPeriodRevenue > 0 ? `${((item.revenue / report.currentPeriodRevenue) * 100).toFixed(1)}%` : '0%'} /></View>)}
         </View>
 
-        <Text minPresenceAhead={70} style={styles.sectionTitle}>{t.stockStatus}</Text>
+        <PdfText minPresenceAhead={70} style={styles.sectionTitle} value={t.stockStatus} bold />
         <View style={styles.table} wrap>
-          <View fixed style={[styles.row, styles.tableHeader]}><Text style={styles.productCell}>{t.product}</Text><Text style={styles.statusCell}>{t.status}</Text><Text style={styles.unitsCell}>{t.quantity}</Text></View>
-          {report.productStock.map((item, index) => <View wrap={false} key={item.id} style={[styles.row, index === report.productStock.length - 1 ? styles.lastRow : {}]}><Text style={styles.productCell}>{item.name}</Text><Text style={styles.statusCell}>{item.quantity === 0 ? t.outOfStock : item.quantity <= 5 ? t.lowStock : t.available}</Text><Text style={styles.unitsCell}>{item.quantity}</Text></View>)}
+          <View fixed style={[styles.row, styles.tableHeader]}><PdfText style={styles.productCell} value={t.product} bold /><PdfText style={styles.statusCell} value={t.status} bold /><PdfText style={styles.unitsCell} value={t.quantity} bold /></View>
+          {report.productStock.map((item, index) => <View wrap={false} key={item.id} style={[styles.row, index === report.productStock.length - 1 ? styles.lastRow : {}]}><PdfText style={styles.productCell} value={item.name} /><PdfText style={styles.statusCell} value={item.quantity === 0 ? t.outOfStock : item.quantity <= 5 ? t.lowStock : t.available} /><PdfText style={styles.unitsCell} value={item.quantity} /></View>)}
         </View>
 
-        <Text style={styles.footer} fixed>{t.footer}</Text>
+        <PdfText style={styles.footer} fixed value={t.footer} />
       </Page>
     </Document>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <View style={styles.summaryCard}><Text style={styles.metricLabel}>{label}</Text><Text style={styles.metricValue}>{value}</Text></View>;
+  return <View style={styles.summaryCard}><PdfText style={styles.metricLabel} value={label} /><PdfText style={styles.metricValue} value={value} bold /></View>;
 }

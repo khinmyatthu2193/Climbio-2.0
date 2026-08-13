@@ -94,12 +94,12 @@ export function DashboardPage() {
     if (!dashboard.data || !user) return;
     setIsDownloadingPdf(true);
     try {
-      const [{ pdf }, { FinancialReportPdfDocument }] = await Promise.all([
-        import('@react-pdf/renderer'),
-        import('@/components/reports/FinancialReportPdfDocument'),
+      const [{ renderBrowserShapedPdf }, { FinancialReportPrintTemplate }] = await Promise.all([
+        import('@/utils/browserPdfExport'),
+        import('@/components/reports/FinancialReportPrintTemplate'),
       ]);
       const createdAt = new Date();
-      const blob = await pdf(<FinancialReportPdfDocument report={dashboard.data} shop={user} range={salesRange} createdAt={createdAt} language={language} />).toBlob();
+      const blob = await renderBrowserShapedPdf(<FinancialReportPrintTemplate report={dashboard.data} shop={user} range={salesRange} createdAt={createdAt} language={language} />);
       download(blob, `financial-report-${createdAt.toISOString().slice(0, 10)}.pdf`);
     } finally {
       setIsDownloadingPdf(false);

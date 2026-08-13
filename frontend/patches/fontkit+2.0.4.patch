@@ -1,0 +1,65 @@
+diff --git a/node_modules/fontkit/dist/browser-module.mjs b/node_modules/fontkit/dist/browser-module.mjs
+index 4d0a389..ec0535e 100644
+--- a/node_modules/fontkit/dist/browser-module.mjs
++++ b/node_modules/fontkit/dist/browser-module.mjs
+@@ -9580,6 +9580,8 @@ const $102b6fe50f1d50b4$var$SHAPERS = {
+     lepc: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+     limb: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+     mahj: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
++    mym2: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
++    mymr: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+     // mand: UniversalShaper, // Mandaic
+     // mani: UniversalShaper, // Manichaean
+     mtei: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+diff --git a/node_modules/fontkit/dist/browser.cjs b/node_modules/fontkit/dist/browser.cjs
+index a5fa901..3f9bf4f 100644
+--- a/node_modules/fontkit/dist/browser.cjs
++++ b/node_modules/fontkit/dist/browser.cjs
+@@ -9597,6 +9597,8 @@ const $fdb4471fc82bc2c2$var$SHAPERS = {
+     lepc: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+     limb: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+     mahj: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
++    mym2: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
++    mymr: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+     // mand: UniversalShaper, // Mandaic
+     // mani: UniversalShaper, // Manichaean
+     mtei: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+diff --git a/node_modules/fontkit/dist/main.cjs b/node_modules/fontkit/dist/main.cjs
+index 851b2d2..f5418f4 100644
+--- a/node_modules/fontkit/dist/main.cjs
++++ b/node_modules/fontkit/dist/main.cjs
+@@ -9618,6 +9618,8 @@ const $fdb4471fc82bc2c2$var$SHAPERS = {
+     lepc: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+     limb: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+     mahj: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
++    mym2: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
++    mymr: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+     // mand: UniversalShaper, // Mandaic
+     // mani: UniversalShaper, // Manichaean
+     mtei: (0, $9b772791ccede8a5$export$2e2bcd8739ae039),
+diff --git a/node_modules/fontkit/dist/module.mjs b/node_modules/fontkit/dist/module.mjs
+index fde88fc..a89e10d 100644
+--- a/node_modules/fontkit/dist/module.mjs
++++ b/node_modules/fontkit/dist/module.mjs
+@@ -9601,6 +9601,8 @@ const $102b6fe50f1d50b4$var$SHAPERS = {
+     lepc: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+     limb: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+     mahj: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
++    mym2: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
++    mymr: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+     // mand: UniversalShaper, // Mandaic
+     // mani: UniversalShaper, // Manichaean
+     mtei: (0, $7ab494fe977143c6$export$2e2bcd8739ae039),
+diff --git a/node_modules/fontkit/src/opentype/shapers/index.js b/node_modules/fontkit/src/opentype/shapers/index.js
+index b22ebdd..6020e51 100644
+--- a/node_modules/fontkit/src/opentype/shapers/index.js
++++ b/node_modules/fontkit/src/opentype/shapers/index.js
+@@ -56,6 +56,8 @@ const SHAPERS = {
+   lepc: UniversalShaper, // Lepcha
+   limb: UniversalShaper, // Limbu
+   mahj: UniversalShaper, // Mahajani
++  mym2: UniversalShaper, // Myanmar v2
++  mymr: UniversalShaper, // Myanmar
+   // mand: UniversalShaper, // Mandaic
+   // mani: UniversalShaper, // Manichaean
+   mtei: UniversalShaper, // Meitei Mayek

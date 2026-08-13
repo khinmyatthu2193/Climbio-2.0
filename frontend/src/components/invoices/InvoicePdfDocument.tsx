@@ -1,17 +1,11 @@
-import { Document, Font, Image, Page, StyleSheet, Text, View, type TextProps } from '@react-pdf/renderer';
-import myanmarRegular from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-400-normal.woff';
-import myanmarBold from '@fontsource/noto-sans-myanmar/files/noto-sans-myanmar-myanmar-700-normal.woff';
+import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { User } from '@/types/auth';
 import type { Invoice } from '@/types/invoice';
 import { getPdfWatermarkPosition, watermarkSizes } from '@/utils/invoiceWatermark';
 import type { WatermarkPosition, WatermarkSize } from '@/types/auth';
+import { PdfText } from '@/components/reports/PdfText';
 
-Font.register({ family: 'NotoSansMyanmar', fonts: [{ src: myanmarRegular, fontWeight: 400 }, { src: myanmarBold, fontWeight: 700 }] });
 Font.registerEmojiSource({ format: 'png', url: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/' });
-
-function MixedText({ value, style, bold = false, fixed = false }: { value: string; style?: TextProps['style']; bold?: boolean; fixed?: boolean }) {
-  return <Text style={style} fixed={fixed}>{value.split(/([\u1000-\u109F\uAA60-\uAA7F]+)/u).map((part, index) => /[\u1000-\u109F\uAA60-\uAA7F]/u.test(part) ? <Text key={index} style={{ fontFamily: 'NotoSansMyanmar', fontWeight: bold ? 700 : 400 }}>{part}</Text> : part)}</Text>;
-}
 
 const styles = StyleSheet.create({
   page: { padding: 42, paddingBottom: 70, color: '#16372b', fontFamily: 'Helvetica', fontSize: 10 },
@@ -74,7 +68,7 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
               <View style={styles.logoFallback}><Text style={styles.logoLetter}>C</Text></View>
             )}
             <View>
-              <MixedText style={styles.shopName} value={shop.shopName || 'Climbio'} bold />
+              <PdfText style={styles.shopName} value={shop.shopName || 'Climbio'} bold />
               <Text style={styles.muted}>Powered by Climbio</Text>
               {shop.phone && <Text style={styles.muted}>{shop.phone}</Text>}
             </View>
@@ -88,8 +82,8 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
 
         <View style={[styles.customerBox, { borderLeftWidth: 3, borderLeftColor: themeColor }]}>
           <Text style={[styles.sectionLabel, { color: themeColor }]}>Bill to</Text>
-          <MixedText style={styles.customerName} value={invoice.customerName} bold />
-          <MixedText style={styles.muted} value={invoice.customerPhone || 'No phone number'} />
+          <PdfText style={styles.customerName} value={invoice.customerName} bold />
+          <PdfText style={styles.muted} value={invoice.customerPhone || 'No phone number'} />
         </View>
 
         <View style={[styles.table, { borderColor: themeColor }]}>
@@ -101,7 +95,7 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
           </View>
           {invoice.items?.map((item, index) => (
             <View key={item.id} style={[styles.row, { borderBottomColor: themeColor }, index === (invoice.items?.length ?? 0) - 1 ? styles.lastRow : {}]}>
-              <MixedText style={styles.productCell} value={item.productName} />
+              <PdfText style={styles.productCell} value={item.productName} />
               <Text style={styles.quantityCell}>{item.quantity}</Text>
               <Text style={styles.priceCell}>{money.format(Number(item.price))}</Text>
               <Text style={styles.totalCell}>{money.format(Number(item.price) * item.quantity)}</Text>
@@ -115,7 +109,7 @@ export function InvoicePdfDocument({ invoice, shop }: { invoice: Invoice; shop: 
           <View style={[styles.totalLine, styles.grandTotal, { borderTopColor: themeColor, color: themeColor }]}><Text>Total</Text><Text>{money.format(Number(invoice.total))}</Text></View>
         </View>
 
-        <MixedText style={[styles.footer, { borderTopColor: themeColor }]} fixed value={shop.setting?.invoiceFooter || `Thank you for choosing ${shop.shopName || 'Climbio'}.`} />
+        <PdfText style={[styles.footer, { borderTopColor: themeColor }]} fixed value={shop.setting?.invoiceFooter || `Thank you for choosing ${shop.shopName || 'Climbio'}.`} />
       </Page>
     </Document>
   );
