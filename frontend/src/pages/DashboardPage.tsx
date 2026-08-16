@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ReceiptText, ShoppingBag, Store, WalletCards } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpRight, Boxes, FileDown, FilePlus2, FileSpreadsheet, Package, Plus, ReceiptText, ShoppingBag, Store, Tags, Trophy, WalletCards } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -327,7 +327,65 @@ export function DashboardPage() {
           )}
         </Card>
       </section>
+
+      <section className="mt-6 grid items-start gap-6 xl:grid-cols-2" aria-label="Sales insights">
+        <Card className="min-w-0 overflow-hidden p-0">
+          <InsightHeader icon={Trophy} title="Best sellers" description={`Most units sold from paid invoices in the ${selectedSalesRange.description.toLowerCase()}.`} badge="Products" />
+          {dashboard.isLoading ? (
+            <div className="m-6 h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+          ) : dashboard.data?.bestSellers.length ? (
+            <InsightList items={dashboard.data.bestSellers} currencyFormatter={currencyFormatter} />
+          ) : (
+            <ChartEmptyState icon={Trophy} title="No best sellers yet" description="Products will be ranked here after you receive paid sales." actionLabel="Create an invoice" actionHref="/invoices/new" />
+          )}
+        </Card>
+
+        <Card className="min-w-0 overflow-hidden p-0">
+          <InsightHeader icon={Tags} title="High-demand product types" description={`Categories with the most paid units sold in the ${selectedSalesRange.description.toLowerCase()}.`} badge="Categories" />
+          {dashboard.isLoading ? (
+            <div className="m-6 h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+          ) : dashboard.data?.categoryDemand.length ? (
+            <InsightList items={dashboard.data.categoryDemand} currencyFormatter={currencyFormatter} category />
+          ) : (
+            <ChartEmptyState icon={Tags} title="No category demand yet" description="Assign products to categories, then paid sales will reveal demand by type." actionLabel="Manage products" actionHref="/products" />
+          )}
+        </Card>
+      </section>
     </main>
+  );
+}
+
+function InsightHeader({ icon: Icon, title, description, badge }: { icon: typeof Trophy; title: string; description: string; badge: string }) {
+  return (
+    <div className="flex items-start justify-between border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6">
+      <div className="flex gap-3">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300"><Icon className="size-5" /></div>
+        <div><h2 className="font-bold text-slate-950 dark:text-white">{title}</h2><p className="mt-1 max-w-md text-sm text-slate-500 dark:text-slate-400">{description}</p></div>
+      </div>
+      <span className="ml-3 shrink-0 rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">{badge}</span>
+    </div>
+  );
+}
+
+function InsightList({ items, currencyFormatter, category = false }: {
+  items: Array<{ name: string; quantitySold: number; revenue: number }>;
+  currencyFormatter: Intl.NumberFormat;
+  category?: boolean;
+}) {
+  const topQuantity = items[0]?.quantitySold ?? 1;
+  return (
+    <div className="divide-y divide-slate-100 px-5 py-2 dark:divide-slate-800 sm:px-6">
+      {items.map((item, index) => (
+        <div key={item.name} className="flex items-center gap-3 py-4">
+          <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-xs font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{index + 1}</span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline justify-between gap-3"><p className="truncate text-sm font-bold text-slate-900 dark:text-white" title={item.name}>{item.name}</p><p className="shrink-0 text-xs font-semibold text-slate-500">{item.quantitySold} {item.quantitySold === 1 ? 'unit' : 'units'}</p></div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-full rounded-full bg-violet-500" style={{ width: `${Math.max((item.quantitySold / topQuantity) * 100, 6)}%` }} /></div>
+            <p className="mt-1.5 text-xs text-slate-500">{category ? 'Category revenue' : 'Sales revenue'}: <span className="font-semibold text-slate-700 dark:text-slate-300">{currencyFormatter.format(item.revenue)}</span></p>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

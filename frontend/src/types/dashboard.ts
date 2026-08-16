@@ -12,5 +12,7 @@ export interface DashboardSummary {
   revenueTrend: 'UP' | 'DOWN' | 'FLAT' | 'NEW';
   revenueChangePercent: number | null;
   productStock: Array<{ id: string; name: string; quantity: number }>;
+  bestSellers: Array<{ id: string | null; name: string; quantitySold: number; revenue: number }>;
+  categoryDemand: Array<{ name: string; quantitySold: number; revenue: number }>;
   salesOverview: Array<{ label: string; revenue: number }>;
 }

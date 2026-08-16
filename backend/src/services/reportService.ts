@@ -52,7 +52,7 @@ export const reportService = {
     const now = new Date();
     const previousSalesStart = new Date(salesStart.getTime() - (now.getTime() - salesStart.getTime()));
 
-    const [productTotals, lowStockCount, revenue, invoiceCount, shopStatus, productStock, recentSales, previousRevenue] = await Promise.all([
+    const [productTotals, lowStockCount, revenue, invoiceCount, shopStatus, productStock, recentSales, previousRevenue, salesItems] = await Promise.all([
       prisma.product.aggregate({
         where: { userId },
         _count: { id: true },
@@ -82,6 +82,16 @@ export const reportService = {
         where: { userId, status: 'PAID', createdAt: { gte: previousSalesStart, lt: salesStart } },
         _sum: { total: true },
       }),
+      prisma.invoiceItem.findMany({
+        where: { invoice: { userId, status: 'PAID', createdAt: { gte: salesStart } } },
+        select: {
+          productId: true,
+          productName: true,
+          quantity: true,
+          price: true,
+          product: { select: { category: { select: { name: true } } } },
+        },
+      }),
     ]);
 
     const bucketUnit = SALES_RANGE_CONFIG[salesRange].unit;
@@ -98,6 +108,25 @@ export const reportService = {
     const revenueChangePercent = previousPeriodRevenue > 0
       ? ((currentPeriodRevenue - previousPeriodRevenue) / previousPeriodRevenue) * 100
       : null;
+    const bestSellersByProduct = new Map<string, { id: string | null; name: string; quantitySold: number; revenue: number }>();
+    const demandByCategory = new Map<string, { name: string; quantitySold: number; revenue: number }>();
+
+    for (const item of salesItems) {
+      const productKey = item.productId ?? `deleted:${item.productName}`;
+      const product = bestSellersByProduct.get(productKey) ?? { id: item.productId, name: item.productName, quantitySold: 0, revenue: 0 };
+      product.quantitySold += item.quantity;
+      product.revenue += item.price.toNumber() * item.quantity;
+      bestSellersByProduct.set(productKey, product);
+
+      const categoryName = item.product?.category?.name ?? 'Uncategorized';
+      const category = demandByCategory.get(categoryName) ?? { name: categoryName, quantitySold: 0, revenue: 0 };
+      category.quantitySold += item.quantity;
+      category.revenue += item.price.toNumber() * item.quantity;
+      demandByCategory.set(categoryName, category);
+    }
+
+    const sortByDemand = <T extends { name: string; quantitySold: number; revenue: number }>(left: T, right: T) =>
+      right.quantitySold - left.quantitySold || right.revenue - left.revenue || left.name.localeCompare(right.name);
 
     return {
       totalProducts: productTotals._count.id,
@@ -111,6 +140,8 @@ export const reportService = {
       revenueTrend,
       revenueChangePercent,
       productStock,
+      bestSellers: [...bestSellersByProduct.values()].sort(sortByDemand).slice(0, 5),
+      categoryDemand: [...demandByCategory.values()].sort(sortByDemand).slice(0, 5),
       salesOverview: buckets.map((bucket) => ({
         label: bucket.label,
         revenue: salesByBucket.get(bucket.key) ?? 0,
