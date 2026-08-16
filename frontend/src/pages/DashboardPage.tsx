@@ -328,8 +328,8 @@ export function DashboardPage() {
         </Card>
       </section>
 
-      <section className="mt-6 grid items-start gap-6 xl:grid-cols-2" aria-label="Sales insights">
-        <Card className="min-w-0 overflow-hidden p-0">
+      <section className="mt-6 grid items-start gap-6 xl:grid-cols-[1.15fr_0.85fr]" aria-label="Sales insights">
+        <Card className="min-w-0 self-stretch overflow-hidden p-0">
           <InsightHeader icon={Trophy} title="Best sellers" description={`Most units sold from paid invoices in the ${selectedSalesRange.description.toLowerCase()}.`} badge="Products" />
           {dashboard.isLoading ? (
             <div className="m-6 h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
@@ -340,7 +340,7 @@ export function DashboardPage() {
           )}
         </Card>
 
-        <Card className="min-w-0 overflow-hidden p-0">
+        <Card className="min-w-0 self-stretch overflow-hidden p-0">
           <InsightHeader icon={Tags} title="High-demand product types" description={`Categories with the most paid units sold in the ${selectedSalesRange.description.toLowerCase()}.`} badge="Categories" />
           {dashboard.isLoading ? (
             <div className="m-6 h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
