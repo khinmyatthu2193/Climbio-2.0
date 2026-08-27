@@ -21,7 +21,12 @@
     --primary-foreground: 0 0% 100%;
     --muted: 215 20% 65%;
   }
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar { display: none; }
   html { @apply scroll-smooth; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   html, body { font-family: "Outfit", "Noto Sans Myanmar", sans-serif; }
