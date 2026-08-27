@@ -5,6 +5,7 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
   DATABASE_URL: z.string().min(1),
+  DATABASE_CONNECTION_LIMIT: z.coerce.number().int().positive().default(5),
   FRONTEND_URL: z.string().min(1).refine(
     (value) => value.split(',').every((url) => z.string().url().safeParse(url.trim()).success),
     'Must contain one or more comma-separated frontend URLs',

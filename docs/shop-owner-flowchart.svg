@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="3000" viewBox="0 0 1600 3000" role="img" aria-labelledby="title desc">
+  <title id="title">Climbio v2 Shop Owner Flowchart</title>
+  <desc id="desc">A non-crossing shop owner flowchart for Climbio v2, covering registration, login, shop application review, approval, and approved business tools.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#334155"/>
+    </marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="126%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#475569" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .page { fill: #f8fafc; }
+      .title { font: 800 44px Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 400 22px Arial, sans-serif; fill: #64748b; }
+      .legend { font: 700 17px Arial, sans-serif; fill: #475569; }
+      .text { font: 800 21px Arial, sans-serif; fill: #111827; text-anchor: middle; }
+      .small { font: 600 16px Arial, sans-serif; fill: #475569; text-anchor: middle; }
+      .label { font: 800 16px Arial, sans-serif; fill: #6d28d9; }
+      .line { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #94a3b8; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .process { fill: #ffffff; stroke: #cbd5e1; stroke-width: 3; filter: url(#shadow); }
+      .decision { fill: #fef3c7; stroke: #f59e0b; stroke-width: 3; filter: url(#shadow); }
+      .io { fill: #ede9fe; stroke: #8b5cf6; stroke-width: 3; filter: url(#shadow); }
+      .data { fill: #dcfce7; stroke: #10b981; stroke-width: 3; filter: url(#shadow); }
+      .end { fill: #e0f2fe; stroke: #3b82f6; stroke-width: 3; filter: url(#shadow); }
+      .blocked { fill: #fee2e2; stroke: #ef4444; stroke-width: 3; filter: url(#shadow); }
+      .band { fill: #ffffff; stroke: #e2e8f0; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect class="page" width="1600" height="3000"/>
+  <text class="title" x="90" y="90">Climbio v2 Shop Owner Flowchart</text>
+  <text class="subtitle" x="90" y="128">Non-crossing flowchart for the shop-owner registration, approval, and workspace rules.</text>
+
+  <rect class="band" x="80" y="170" width="1440" height="80" rx="18"/>
+  <rect class="end" x="115" y="193" width="115" height="36" rx="18"/><text class="legend" x="250" y="217">Start / End</text>
+  <rect class="process" x="405" y="193" width="120" height="36" rx="7"/><text class="legend" x="545" y="217">Process</text>
+  <polygon class="decision" points="735,193 795,211 735,229 675,211"/><text class="legend" x="815" y="217">Decision</text>
+  <polygon class="io" points="985,193 1120,193 1098,229 963,229"/><text class="legend" x="1140" y="217">Input / Output</text>
+  <path class="data" d="M1330 193 C1330 184 1450 184 1450 193 L1450 229 C1450 238 1330 238 1330 229 Z M1330 193 C1330 202 1450 202 1450 193"/><text class="legend" x="1467" y="217">Data</text>
+
+  <!-- Main entry -->
+  <rect class="end" x="690" y="310" width="220" height="64" rx="32"/>
+  <text class="text" x="800" y="350">Start</text>
+
+  <rect class="process" x="660" y="430" width="280" height="78" rx="10"/>
+  <text class="text" x="800" y="463">Open Climbio</text>
+  <text class="small" x="800" y="489">Shop owner opens the app</text>
+
+  <polygon class="decision" points="800,570 950,660 800,750 650,660"/>
+  <text class="text" x="800" y="650">Already has</text>
+  <text class="text" x="800" y="676">an account?</text>
+
+  <!-- Signup branch -->
+  <polygon class="io" points="205,830 535,830 500,930 170,930"/>
+  <text class="text" x="352" y="867">Enter signup details</text>
+  <text class="small" x="352" y="895">Name, email, phone, password</text>
+
+  <rect class="process" x="215" y="1000" width="275" height="86" rx="10"/>
+  <text class="text" x="352" y="1035">Create account</text>
+  <text class="small" x="352" y="1063">Role: SHOP_OWNER</text>
+
+  <path class="data" d="M215 1160 C215 1136 490 1136 490 1160 L490 1235 C490 1259 215 1259 215 1235 Z M215 1160 C215 1184 490 1184 490 1160"/>
+  <text class="text" x="352" y="1195">User record</text>
+  <text class="small" x="352" y="1223">ACTIVE account, PENDING approval</text>
+
+  <!-- Login branch -->
+  <polygon class="io" points="1065,830 1395,830 1360,930 1030,930"/>
+  <text class="text" x="1212" y="867">Enter login details</text>
+  <text class="small" x="1212" y="895">Email and password</text>
+
+  <polygon class="decision" points="1212,995 1362,1085 1212,1175 1062,1085"/>
+  <text class="text" x="1212" y="1076">Credentials</text>
+  <text class="text" x="1212" y="1102">valid?</text>
+
+  <polygon class="io" points="1065,1250 1395,1250 1360,1340 1030,1340"/>
+  <text class="text" x="1212" y="1285">Show login error</text>
+  <text class="small" x="1212" y="1313">User tries again</text>
+
+  <rect class="process" x="1075" y="1410" width="275" height="86" rx="10"/>
+  <text class="text" x="1212" y="1445">Issue session</text>
+  <text class="small" x="1212" y="1473">Access token + refresh token</text>
+
+  <polygon class="decision" points="1212,1560 1372,1660 1212,1760 1052,1660"/>
+  <text class="text" x="1212" y="1648">Active and</text>
+  <text class="text" x="1212" y="1674">approved?</text>
+
+  <!-- Application area -->
+  <rect class="process" x="660" y="1300" width="280" height="90" rx="10"/>
+  <text class="text" x="800" y="1337">Application page</text>
+  <text class="small" x="800" y="1366">Business tools are blocked</text>
+
+  <polygon class="decision" points="800,1460 955,1555 800,1650 645,1555"/>
+  <text class="text" x="800" y="1545">Application</text>
+  <text class="text" x="800" y="1571">submitted?</text>
+
+  <polygon class="io" points="435,1735 765,1735 730,1840 400,1840"/>
+  <text class="text" x="582" y="1771">Submit application</text>
+  <text class="small" x="582" y="1799">Business info, shop logo,</text>
+  <text class="small" x="582" y="1823">verification document</text>
+
+  <path class="data" d="M660 1915 C660 1891 940 1891 940 1915 L940 1995 C940 2019 660 2019 660 1995 Z M660 1915 C660 1939 940 1939 940 1915"/>
+  <text class="text" x="800" y="1952">PENDING status</text>
+  <text class="small" x="800" y="1981">Public store remains disabled</text>
+
+  <polygon class="decision" points="800,1730 960,1825 800,1920 640,1825"/>
+  <text class="text" x="800" y="1813">Current</text>
+  <text class="text" x="800" y="1839">status?</text>
+
+  <!-- Admin review -->
+  <rect class="process" x="660" y="2070" width="280" height="86" rx="10"/>
+  <text class="text" x="800" y="2105">Admin review</text>
+  <text class="small" x="800" y="2133">Checks shop details and files</text>
+
+  <polygon class="decision" points="800,2225 970,2325 800,2425 630,2325"/>
+  <text class="text" x="800" y="2315">Admin</text>
+  <text class="text" x="800" y="2341">decision?</text>
+
+  <!-- Admin decision outcomes -->
+  <path class="data" d="M660 2510 C660 2486 940 2486 940 2510 L940 2590 C940 2614 660 2614 660 2590 Z M660 2510 C660 2534 940 2534 940 2510"/>
+  <text class="text" x="800" y="2547">APPROVED</text>
+  <text class="small" x="800" y="2576">Approval status + active account</text>
+
+  <path class="data" d="M170 2485 C170 2461 470 2461 470 2485 L470 2575 C470 2599 170 2599 170 2575 Z M170 2485 C170 2509 470 2509 470 2485"/>
+  <text class="text" x="320" y="2520">CHANGES</text>
+  <text class="text" x="320" y="2547">REQUESTED</text>
+
+  <polygon class="io" points="155,2650 485,2650 450,2745 120,2745"/>
+  <text class="text" x="302" y="2687">Edit application</text>
+  <text class="small" x="302" y="2715">Save and resubmit</text>
+
+  <rect class="blocked" x="1130" y="2485" width="300" height="90" rx="10"/>
+  <text class="text" x="1280" y="2520">Declined or</text>
+  <text class="text" x="1280" y="2547">Suspended</text>
+
+  <polygon class="io" points="1115,2650 1445,2650 1410,2745 1080,2745"/>
+  <text class="text" x="1262" y="2687">View status / feedback</text>
+  <text class="small" x="1262" y="2715">Contact support if needed</text>
+
+  <rect class="end" x="1152" y="2820" width="220" height="64" rx="32"/>
+  <text class="text" x="1262" y="2860">End</text>
+
+  <!-- Approved workspace -->
+  <rect class="process" x="660" y="2685" width="280" height="86" rx="10"/>
+  <text class="text" x="800" y="2720">Open workspace</text>
+  <text class="small" x="800" y="2748">Dashboard and shop modules</text>
+
+  <polygon class="decision" points="800,2825 950,2910 800,2995 650,2910"/>
+  <text class="text" x="800" y="2899">Choose</text>
+  <text class="text" x="800" y="2925">task</text>
+
+  <rect class="process" x="100" y="2825" width="220" height="60" rx="10"/>
+  <text class="small" x="210" y="2861">Dashboard metrics</text>
+  <rect class="process" x="350" y="2825" width="220" height="60" rx="10"/>
+  <text class="small" x="460" y="2861">Products</text>
+  <rect class="process" x="1030" y="2825" width="220" height="60" rx="10"/>
+  <text class="small" x="1140" y="2861">Invoices + PDF</text>
+  <rect class="process" x="1280" y="2825" width="220" height="60" rx="10"/>
+  <text class="small" x="1390" y="2861">Store, AI, Profile</text>
+
+  <!-- Connectors: entry -->
+  <path class="line" d="M800 374 L800 430"/>
+  <path class="line" d="M800 508 L800 570"/>
+  <path class="line" d="M650 660 L352 660 L352 830"/>
+  <text class="label" x="505" y="642">No</text>
+  <path class="line" d="M950 660 L1212 660 L1212 830"/>
+  <text class="label" x="1070" y="642">Yes</text>
+
+  <!-- Signup branch connectors -->
+  <path class="line" d="M352 930 L352 1000"/>
+  <path class="line" d="M352 1086 L352 1136"/>
+  <path class="line" d="M490 1200 L660 1345"/>
+
+  <!-- Login branch connectors -->
+  <path class="line" d="M1212 930 L1212 995"/>
+  <path class="line" d="M1362 1085 L1490 1085 L1490 1295 L1395 1295"/>
+  <text class="label" x="1402" y="1068">No</text>
+  <path class="line" d="M1030 1295 L1000 1295 L1000 880 L1030 880"/>
+  <path class="line" d="M1212 1175 L1212 1410"/>
+  <text class="label" x="1228" y="1230">Yes</text>
+  <path class="line" d="M1212 1496 L1212 1560"/>
+  <path class="line" d="M1052 1660 L940 1660 L940 1345"/>
+  <text class="label" x="985" y="1642">No</text>
+  <path class="line" d="M1372 1660 L1510 1660 L1510 2728 L940 2728"/>
+  <text class="label" x="1400" y="1642">Yes</text>
+
+  <!-- Application connectors -->
+  <path class="line" d="M800 1390 L800 1460"/>
+  <path class="line" d="M645 1555 L582 1555 L582 1735"/>
+  <text class="label" x="600" y="1537">No</text>
+  <path class="line" d="M582 1840 L660 1955"/>
+  <path class="line" d="M800 2019 L800 2070"/>
+  <path class="line" d="M955 1555 L1040 1555 L1040 1825 L960 1825"/>
+  <text class="label" x="970" y="1537">Yes</text>
+  <path class="line" d="M800 1920 L800 2070"/>
+  <text class="label" x="815" y="1965">PENDING</text>
+  <path class="thin" d="M640 1825 L320 1825 L320 2485"/>
+  <text class="label" x="380" y="1805">CHANGES_REQUESTED</text>
+  <path class="thin" d="M960 1825 L1280 1825 L1280 2485"/>
+  <text class="label" x="1165" y="1805">DECLINED / SUSPENDED</text>
+
+  <!-- Admin decision connectors -->
+  <path class="line" d="M800 2156 L800 2225"/>
+  <path class="line" d="M800 2425 L800 2486"/>
+  <text class="label" x="815" y="2465">Approve</text>
+  <path class="line" d="M630 2325 L320 2325 L320 2461"/>
+  <text class="label" x="405" y="2307">Request changes</text>
+  <path class="line" d="M970 2325 L1280 2325 L1280 2485"/>
+  <text class="label" x="1170" y="2307">Decline / suspend</text>
+  <path class="line" d="M320 2599 L320 2650"/>
+  <path class="line" d="M302 2745 L302 2800 L610 2800 L610 1960 L660 1960"/>
+  <text class="label" x="350" y="2785">Resubmit</text>
+  <path class="line" d="M1280 2575 L1280 2650"/>
+  <path class="line" d="M1262 2745 L1262 2820"/>
+  <path class="line" d="M800 2614 L800 2685"/>
+
+  <!-- Workspace connectors -->
+  <path class="line" d="M800 2771 L800 2825"/>
+  <path class="thin" d="M650 2910 L210 2910 L210 2885"/>
+  <path class="thin" d="M700 2945 L460 2945 L460 2885"/>
+  <path class="thin" d="M900 2945 L1140 2945 L1140 2885"/>
+  <path class="thin" d="M950 2910 L1390 2910 L1390 2885"/>
+</svg>
