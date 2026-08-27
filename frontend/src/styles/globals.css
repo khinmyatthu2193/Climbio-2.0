@@ -88,7 +88,11 @@
 }
 
 @layer components {
-  main > .min-h-screen > footer { @apply -mt-8 sm:-mt-10; }
+  main > .min-h-screen > footer { @apply -mt-8 py-8 sm:-mt-10 sm:py-10; }
+  main > .min-h-screen > footer > div:first-child { @apply gap-7 lg:gap-8; }
+  main > .min-h-screen > footer > div:first-child > div:first-child > p { @apply mt-2; }
+  main > .min-h-screen > footer > div:not(:first-child) { @apply mt-7 pt-4; }
+  main > .min-h-screen > footer h2 + div { @apply mt-3 gap-2; }
   .page-container { @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8; }
   .field-label { @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200; }
   .control { @apply min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm leading-5 text-slate-900 shadow-sm transition placeholder:leading-5 placeholder:text-slate-400 hover:border-violet-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-violet-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/20 dark:disabled:bg-slate-800; }
