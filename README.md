@@ -7,12 +7,12 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
 <table>
   <tr>
     <td width="33.33%">
-      <img src="docs/screenshots/login.png" alt="Climbio login screen" />
-      <strong>Login</strong>
+      <img src="docs/screenshots/landing_page.png" alt="Climbio landing page" />
+      <strong>Landing Page</strong>
     </td>
     <td width="33.33%">
-      <img src="docs/screenshots/home.png" alt="Climbio home screen" />
-      <strong>Home</strong>
+      <img src="docs/screenshots/login.png" alt="Climbio login screen" />
+      <strong>Login</strong>
     </td>
     <td width="33.33%">
       <img src="docs/screenshots/dashboard.png" alt="Climbio dashboard" />
@@ -21,12 +21,22 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
   </tr>
   <tr>
     <td width="33.33%">
+      <img src="docs/screenshots/overview.png" alt="Climbio sales and product analytics" />
+      <strong>Business Analytics</strong>
+    </td>
+    <td width="33.33%">
       <img src="docs/screenshots/Inventory.png" alt="Climbio inventory management" />
       <strong>Inventory Management</strong>
     </td>
     <td width="33.33%">
-      <img src="docs/screenshots/Invoice.png" alt="Climbio invoice management" />
-      <strong>Invoice Management</strong>
+      <img src="docs/screenshots/Product_list.png" alt="Climbio product catalog" />
+      <strong>Product Catalog</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="33.33%">
+      <img src="docs/screenshots/invoice1.png" alt="Climbio invoice details and order progress" />
+      <strong>Invoice and Order Progress</strong>
     </td>
     <td width="33.33%">
       <img src="docs/screenshots/Public_Store.png" alt="Climbio public store management" />
@@ -38,27 +48,47 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
       <img src="docs/screenshots/storeview_fromcustomer.png" alt="Climbio customer store view" />
       <strong>Customer Store View</strong>
     </td>
+  </tr>
+  <tr>
     <td width="33.33%">
       <img src="docs/screenshots/AI_advisor1.png" alt="Climbio AI advisor overview" />
-      <strong>AI Advisor Overview</strong>
+      <strong>AI Business Advisor</strong>
     </td>
     <td width="33.33%">
       <img src="docs/screenshots/AI_chatbot.png" alt="Climbio AI chatbot" />
       <strong>AI Business Chatbot</strong>
     </td>
+    <td width="33.33%">
+      <img src="docs/screenshots/prompt_gallary.png" alt="Climbio AI prompt gallery" />
+      <strong>AI Prompt Gallery</strong>
+    </td>
   </tr>
   <tr>
     <td width="33.33%">
-      <img src="docs/screenshots/AI_advisor2.png" alt="Climbio AI advisor recommendations" />
-      <strong>AI Recommendations</strong>
+      <img src="docs/screenshots/setting1.png" alt="Climbio invoice customization settings" />
+      <strong>Invoice Customization</strong>
     </td>
     <td width="33.33%">
-      <img src="docs/screenshots/Setting.png" alt="Climbio settings page" />
-      <strong>Shop Settings</strong>
+      <img src="docs/screenshots/user_manual.png" alt="Climbio Myanmar-language user manual" />
+      <strong>Myanmar User Manual</strong>
     </td>
     <td width="33.33%">
-      <img src="docs/screenshots/Climbio_indarkmode.png" alt="Climbio dark mode" />
+      <img src="docs/screenshots/darkmode.png" alt="Climbio dark mode" />
       <strong>Dark Mode</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="33.33%">
+      <img src="docs/screenshots/admin_dashboard.png" alt="Climbio admin dashboard" />
+      <strong>Admin Dashboard</strong>
+    </td>
+    <td width="33.33%">
+      <img src="docs/screenshots/admin_view.png" alt="Climbio shop application review" />
+      <strong>Shop Application Review</strong>
+    </td>
+    <td width="33.33%">
+      <img src="docs/screenshots/admin_insert_prompt_area.png" alt="Climbio admin prompt management" />
+      <strong>Prompt Management</strong>
     </td>
   </tr>
 </table>
