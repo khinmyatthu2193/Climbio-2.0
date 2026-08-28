@@ -42,8 +42,6 @@ Smart business suite for SMEs in Myanmar. This repository contains a React/Vite 
       <img src="docs/screenshots/Public_Store.png" alt="Climbio public store management" />
       <strong>Public Store Management</strong>
     </td>
-  </tr>
-  <tr>
     <td width="33.33%">
       <img src="docs/screenshots/storeview_fromcustomer.png" alt="Climbio customer store view" />
       <strong>Customer Store View</strong>
