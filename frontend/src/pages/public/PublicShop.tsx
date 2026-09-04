@@ -111,16 +111,18 @@ export function PublicShop({ slug }: { slug: string }) {
 
       <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
         <section className="flex flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:flex-row">
-          <label className="relative flex-1">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search products</span>
             <span className="input-icon-frame left-3 w-[18px]"><Search size={18} /></span>
             <input
               className="control bg-slate-50 pl-10"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products"
+              aria-label="Search products"
             />
           </label>
-          <select className="control bg-slate-50 sm:min-w-52" value={category} onChange={(event) => setCategory(event.target.value)}>
+          <select className="control bg-slate-50 sm:w-52 sm:flex-none" value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter products by category">
             <option value="all">All categories</option>
             {catalog.data.categories.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
           </select>
